@@ -25,20 +25,21 @@ function getStringColumn(data, columnName) {
     });
     return column;
 }
-
 function getNumberColumn(data, columnName) {
     var column = [];
     d3.map(data, function (d) {
-        column.push(+d[columnName]);
+        if(d[columnName].indexOf('<LOD')!=-1){
+            column.push(0);
+        }else{
+            column.push(+d[columnName]);
+        }
     });
     return column;
 }
-
 function validGridId(id) {
     var re = /^[A-Z]\d\d$/g;
     return id != null && id.match(re) != null;
 }
-
 function handleData(data){
     populateSelectors(data);
     setContourX();
@@ -54,6 +55,8 @@ function handleData(data){
     setScatterTrace(0);
     setScatterTrace(1);
     plotScatter();
+    //Update correlation
+    updateCorrelation();
 }
 
 /*functions to get information for the contours*/
@@ -95,7 +98,7 @@ function setContourTrace(index){
         name: currentColumnNames[index],
         xaxis: 'x'+(index + 1),
         yaxis: 'y' + (index + 1),
-        showscale: false
+        showscale: (index==0)? true : false
     };
 }
 function plotContour(){
@@ -121,11 +124,9 @@ function setScatterTrace(index){
             name: currentColumnNames[index],
     }
 }
-
 function plotScatter(){
     Plotly.newPlot('box2', scatterTraces);
 }
-
 /*Creating the the selection box*/
 function createByJson(div, jsonData, name,selectedIndex ,changeHandler, width) {
     var msdd = $("#" +div).msDropDown({byJson: {data: jsonData, name: name, width: width}}).data("dd");
@@ -166,4 +167,10 @@ function updateElement(index){
     //Update Scatter
     setScatterTrace(index);
     plotScatter();
+    //Update the correlation
+    updateCorrelation();
+}
+function updateCorrelation(){
+    var corcoef = pearsonCorcoef(elmConcentrations[0], elmConcentrations[1]);
+    $("#corcoef").text("The correlation coefficient is: " + Math.round(corcoef*1000)/1000);
 }

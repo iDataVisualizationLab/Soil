@@ -48,6 +48,9 @@
     --box2-margin-top:calc(var(--box1-height) + 2*var(--default-margin)) ;
     --box2-margin-left: var(--default-margin);
 
+    --msdropdown-height: 28px;/*28px is the default height of the msdropdown*/
+    --corcoef-margin-left: var(--default-margin);
+    --corcoef-margin-top: calc(var(--default-margin)*2 + var(--msdropdown-height));
 
 }
 
@@ -126,4 +129,9 @@
     margin-top: var(--box2-margin-top);
     margin-left: var(--box2-margin-left);
     /*border: 1px solid black;*/
+}
+
+#corcoef{
+    margin-left: var(--corcoef-margin-left);
+    margin-top: var(--corcoef-margin-top);
 }
