@@ -8,12 +8,44 @@
     <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+    <link rel="stylesheet" href="css/main.css"/>
+    <!--JS + CSS needed for ms dropdown-->
+    <link rel="stylesheet" type="text/css" href="css/msdropdown/dd.css"/>
+    <script src="js/msdropdown/jquery.dd.js"></script>
+    <!--end about ms dropdown-->
+    <!--Plotly-->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!--main data processing file-->
+    <script src="js/main.js"></script>
+
 </head>
 <script>
     // Your d3 code should go here
 </script>
 <body>
-Soil project
-
+<div id="page">
+    <div id='leftNav'>
+        <!--left navigation comes here-->
+    </div>
+    <div id="rightNav">
+        <!--right navigation comes here-->
+    </div>
+    <div id="slider">
+        <!--slider comes here-->
+    </div>
+    <div id="leftContent">
+        <!--left content comes here-->
+        <div id="option1Container"></div>
+        <div id="option2Container"></div>
+    </div>
+    <div id="rightContent">
+        <!--right content comes here-->
+        <div id="box1"></div>
+        <div id="box2"></div>
+    </div>
+</div>
+<script>
+    readData("data/Profile1.csv");
+</script>
 </body>
 </html>

@@ -1,0 +1,129 @@
+:root{
+    --page-width: 1400px;
+    --page-height: 1200px;
+    --default-margin: 20px;
+
+    --left-nav-width: 420px;
+    --left-nav-height: 30px;
+    --left-nav-margin-top: var(--default-margin);
+    --left-nav-margin-left: var(--default-margin);
+
+    --right-nav-width: 80px;
+    --right-nav-height: var(--left-nav-height);
+    --right-nav-margin-right: var(--default-margin);
+    --right-nav-margin-top: var(--default-margin);
+
+    --slider-width: calc(var(--page-width) - var(--left-nav-margin-top) - var(--right-nav-margin-right));
+    --slider-height: 270px;
+    --slider-margin-top: calc(var(--left-nav-margin-top) + var(--default-margin) + var(--left-nav-height));
+    --slider-margin-left: var(--default-margin);
+
+    --left-content-width: 420px;
+    --left-content-height: calc(var(--page-height) - (4*var(--default-margin) + var(--left-nav-height) + var(--slider-height)));
+    --left-content-margin-top: var(--default-margin);
+    --left-content-margin-left: var(--default-margin);
+
+
+    --right-content-width: calc(var(--page-width) - 3*var(--default-margin) - var(--left-content-width));
+    --right-content-height: var(--left-content-height);
+    --right-content-margin-top: var(--left-content-margin-top);
+    --right-content-margin-right: var(--default-margin);
+
+    --option1-width: calc((var(--left-content-width) - 3*var(--default-margin))/2);
+    --option1-margin-top: var(--default-margin);
+    --option1-margin-left: var(--default-margin);
+
+    --option2-width: var(--option1-width);
+    --option2-margin-top: var(--default-margin);
+    --option2-margin-right: var(--default-margin);
+
+    --box1-width: calc(var(--right-content-width) - 2*var(--default-margin));
+    --box1-height: calc((var(--right-content-height) - 3 *(var(--default-margin)))/2);
+    --box1-margin-top: var(--default-margin);
+    --box1-margin-left: var(--default-margin);
+
+
+    --box2-width: var(--box1-width);
+    --box2-height: var(--box1-height);
+    --box2-margin-top:calc(var(--box1-height) + 2*var(--default-margin)) ;
+    --box2-margin-left: var(--default-margin);
+
+
+}
+
+#page{
+    width: var(--page-width);
+    height: var(--page-height);
+    margin: 0 auto;
+    border: 1px solid black;
+}
+#leftNav{
+    width: var(--left-nav-width);
+    height: var(--left-nav-height);
+    float: left;
+    margin-left: var(--left-nav-margin-left);
+    margin-top: var(--left-nav-margin-top);
+    border: 1px solid black;
+}
+#rightNav{
+    float: right;
+    height: var(--right-nav-height);
+    width: var(--right-nav-width);
+    margin-right: var(--default-margin);
+    margin-top: var(--right-nav-margin-top);
+    border: 1px solid black;
+}
+
+#slider{
+    width: var(--slider-width);
+    height: var(--slider-height);
+    margin-top: var(--slider-margin-top);
+    margin-left: var(--slider-margin-left);
+    border: 1px solid black;
+}
+#leftContent{
+    float: left;
+    width: var(--left-content-width);
+    height: var(--right-content-height);
+    margin-top: var(--left-content-margin-top);
+    margin-left: var(--left-content-margin-left);
+    border: 1px solid black;
+}
+
+#rightContent{
+    float: right;
+    position: relative;
+    width: var(--right-content-width);
+    height: var(--right-content-height);
+    margin-top: var(--right-content-margin-top);
+    margin-right: var(--right-content-margin-right);
+    border: 1px solid black;
+}
+#option1Container{
+    width: var(--option1-width);
+    margin-top: var(--option1-margin-top);
+    margin-left: var(--option1-margin-left);
+    float: left;
+}
+#option2Container{
+    width: var(--option2-width);
+    margin-top: var(--option2-margin-top);
+    margin-right: var(--option2-margin-right);
+    float: right;
+}
+#box1{
+    float: left;
+    width: var(--box1-width);
+    height: var(--box1-height);
+    margin-top: var(--box1-margin-top);
+    margin-left: var(--box1-margin-left);
+    /*border: 1px solid black;*/
+}
+
+#box2{
+    width: var(--box2-width);
+    height: var(--box2-height);
+    margin-top: var(--box2-margin-top);
+    margin-left: var(--box2-margin-left);
+    /*border: 1px solid black;*/
+}
