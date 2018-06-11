@@ -242,7 +242,7 @@ function createForce(){
         width = graphSize[0],
         height = graphSize[1];
     var myForce = d3.forceSimulation()
-        .velocityDecay(0.6)
+        .velocityDecay(0.5)
         .alphaDecay(0)
         .force("charge", d3.forceManyBody().strength(-100).distanceMin(4*graphNodeRadius))
         .force("collision", d3.forceCollide(2*graphNodeRadius).strength(1))
@@ -302,49 +302,13 @@ function drawGraph() {
     nodes_data = getNodes();
     force.nodes(nodes_data);
 
-    setLinkData(defaultThreshold, nodes_data);
+    setLinkData(defaultThreshold);
     corScale = getCorScale(links_data);
     force.force("link", d3.forceLink(links_data).strength(Math.pow(defaultThreshold, linkStrengthPower)));
 
-    force.on("tick", tickHandler);
-
-    function tickHandler() {
-        //update circle positions each tick of the simulation
-        node
-            .attr("cx", function (d) {
-                return d.x = boundX(d.x);
-            })
-            .attr("cy", function (d) {
-                return d.y = boundY(d.y);
-            });
-
-        //update link positions
-        link
-            .attr("x1", function (d) {
-                return d.source.x;
-            })
-            .attr("y1", function (d) {
-                return d.source.y;
-            })
-            .attr("x2", function (d) {
-                return d.target.x;
-            })
-            .attr("y2", function (d) {
-                return d.target.y;
-            });
-
-        //update label positions
-        label
-            .attr("x", function (d) {
-                return d.x;
-            })
-            .attr("y", function (d) {
-                return d.y + 2;
-            });
-    }
-
     var g = svg.append("g")
         .attr("class", "everything");
+
 
 
     //Links
@@ -363,9 +327,8 @@ function drawGraph() {
         .data(nodes_data)
         .enter()
         .append("circle")
-        .attr("r", graphNodeRadius)
-        .attr("fill", "blue");
-
+        .attr("fill", "blue")
+        .attr("r", graphNodeRadius);
 
     //Lablel
     var label = g.append("g")
@@ -377,6 +340,45 @@ function drawGraph() {
             return d.text.split(" ")[0];
         }).attr("dy", graphNodeRadius);
 
+    force.on("tick", tickHandler);
+
+    function tickHandler() {
+        //update circle positions each tick of the simulation
+        if(node)
+        node
+            .attr("cx", function (d) {
+                return d.x = boundX(d.x);
+            })
+            .attr("cy", function (d) {
+                return d.y = boundY(d.y);
+            });
+
+        //update link positions
+        if(link)
+        link
+            .attr("x1", function (d) {
+                return d.source.x;
+            })
+            .attr("y1", function (d) {
+                return d.source.y;
+            })
+            .attr("x2", function (d) {
+                return d.target.x;
+            })
+            .attr("y2", function (d) {
+                return d.target.y;
+            });
+
+        //update label positions
+        if(label)
+        label
+            .attr("x", function (d) {
+                return d.x;
+            })
+            .attr("y", function (d) {
+                return d.y + 2;
+            });
+    }
     //Handling drag
     var dragHandler = d3.drag()
         .on("start", dragStart)
