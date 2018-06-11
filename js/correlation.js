@@ -9,11 +9,6 @@ function standardise(u){
     return u.map(function(v) { return (v-m)/s;});
 }
 //Compute Pearson's correlation between u and v
-function pearsonCorcoef(u,v)
-{
-    var us = standardise(u),vs = standardise(v),n=u.length;
-    return (1/(n-1))*d3.sum(us.mult(vs));
-}
 Array.prototype.mult = function (b) {
     var s = Array(this.length);
     for (var ind = 0; ind < this.length; ind++)
@@ -29,3 +24,9 @@ Array.prototype.mult = function (b) {
     }
     return s;
 };
+function pearsonCorcoef(u,v)
+{
+    var us = standardise(u),vs = standardise(v),n=u.length;
+    return (1/(n-1))*d3.sum(us.mult(vs));
+
+}

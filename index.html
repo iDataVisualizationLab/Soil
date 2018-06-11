@@ -3,19 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Soil analysis</title>
-    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="lib/d3.js"></script>
     <script src="https://d3js.org/d3-color.v1.min.js"></script>
     <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!--for the slider-->
+    <script src="https://unpkg.com/d3-simple-slider@0.2.1/build/d3-simple-slider.js"></script>
+    <!--main code-->
     <link rel="stylesheet" href="css/main.css"/>
     <!--JS + CSS needed for ms dropdown-->
     <link rel="stylesheet" type="text/css" href="css/msdropdown/dd.css"/>
     <script src="js/msdropdown/jquery.dd.js"></script>
     <!--end about ms dropdown-->
-    <!--Plotly-->
+    <!--for the correlation-->
     <script src="js/correlation.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <!--main data processing file-->
     <script src="js/main.js"></script>
 </head>
@@ -35,6 +38,8 @@
         <div id="option1Container"></div>
         <div id="option2Container"></div>
         <div id="corcoef"></div>
+        <div id="corthreshold">Correlation threshold:</div>
+        <svg id="corcoefGraph"></svg>
     </div>
     <div id="rightContent">
         <!--right content comes here-->

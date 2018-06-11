@@ -1,6 +1,6 @@
 :root{
-    --page-width: 1400px;
-    --page-height: 1200px;
+    --page-width: 1200px;
+    --page-height: 800px;
     --default-margin: 20px;
 
     --left-nav-width: 420px;
@@ -14,7 +14,7 @@
     --right-nav-margin-top: var(--default-margin);
 
     --slider-width: calc(var(--page-width) - var(--left-nav-margin-top) - var(--right-nav-margin-right));
-    --slider-height: 270px;
+    --slider-height: 0px;
     --slider-margin-top: calc(var(--left-nav-margin-top) + var(--default-margin) + var(--left-nav-height));
     --slider-margin-left: var(--default-margin);
 
@@ -52,13 +52,19 @@
     --corcoef-margin-left: var(--default-margin);
     --corcoef-margin-top: calc(var(--default-margin)*2 + var(--msdropdown-height));
 
+    --corcoef-graph-margin-left: var(--default-margin);
+    --corcoef-graph-width: calc(var(--left-content-width) - 2*var(--corcoef-graph-margin-left));
+    --corcoef-graph-height: var(--corcoef-graph-width);
+
+    --corr-threshold-margin-left: var(--default-margin);
 }
 
 #page{
     width: var(--page-width);
     height: var(--page-height);
     margin: 0 auto;
-    border: 1px solid black;
+    overflow: auto; /*This is to keep the layout from broken due to margin of the child elements*/
+    /*border: 1px solid black;*/
 }
 #leftNav{
     width: var(--left-nav-width);
@@ -66,7 +72,7 @@
     float: left;
     margin-left: var(--left-nav-margin-left);
     margin-top: var(--left-nav-margin-top);
-    border: 1px solid black;
+    /*border: 1px solid black;*/
 }
 #rightNav{
     float: right;
@@ -74,7 +80,7 @@
     width: var(--right-nav-width);
     margin-right: var(--default-margin);
     margin-top: var(--right-nav-margin-top);
-    border: 1px solid black;
+    /*border: 1px solid black;*/
 }
 
 #slider{
@@ -82,7 +88,6 @@
     height: var(--slider-height);
     margin-top: var(--slider-margin-top);
     margin-left: var(--slider-margin-left);
-    border: 1px solid black;
 }
 #leftContent{
     float: left;
@@ -90,7 +95,7 @@
     height: var(--right-content-height);
     margin-top: var(--left-content-margin-top);
     margin-left: var(--left-content-margin-left);
-    border: 1px solid black;
+    /*border: 1px solid black;*/
 }
 
 #rightContent{
@@ -100,7 +105,7 @@
     height: var(--right-content-height);
     margin-top: var(--right-content-margin-top);
     margin-right: var(--right-content-margin-right);
-    border: 1px solid black;
+    /*border: 1px solid black;*/
 }
 #option1Container{
     width: var(--option1-width);
@@ -134,4 +139,31 @@
 #corcoef{
     margin-left: var(--corcoef-margin-left);
     margin-top: var(--corcoef-margin-top);
+}
+
+#corcoefGraph{
+    margin-left: var(--corcoef-graph-margin-left);
+    width: var(--corcoef-graph-width);
+    height: var(--corcoef-graph-height);
+    /*border: 1px solid black;*/
+}
+
+#corthreshold{
+    margin-left: var(--corr-threshold-margin-left);
+}
+.links line {
+    stroke: #999;
+    stroke-opacity: 0.5;
+}
+
+.nodes circle {
+    stroke: white;
+    stroke-width: 1px;
+}
+
+#corcoefGraph text{
+    font-family: sans-serif;
+    text-anchor: middle;
+    font-size:8px;
+    alignment-baseline: hanging;
 }
