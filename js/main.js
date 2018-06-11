@@ -230,7 +230,7 @@ var node;
 var link;
 var label;
 var defaultThreshold = 0;
-var linkStrengthPower = 9;
+var linkStrengthPower = 8;
 function getGraphSize(){
     var svg = d3.select(svgId);
     var width = svg.node().getBoundingClientRect().width;
@@ -244,7 +244,7 @@ function createForce(){
     var myForce = d3.forceSimulation()
         .velocityDecay(0.6)
         .alphaDecay(0)
-        .force("charge", d3.forceManyBody().strength(-50).distanceMin(4*graphNodeRadius))
+        .force("charge", d3.forceManyBody().strength(-100).distanceMin(4*graphNodeRadius))
         .force("collision", d3.forceCollide(2*graphNodeRadius).strength(1))
         .force("x", d3.forceX(width/2))
         .force("y", d3.forceY(height/2));
