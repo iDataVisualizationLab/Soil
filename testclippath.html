@@ -12,11 +12,13 @@
 </head>
 <body>
     <svg width="500" height="500">
-        <defs>
-            <clipPath id="circleView">
-                <circle cx="30" cy="30" r="15" fill="#ffffff"/>
-            </clipPath>
-        </defs>
+        <g>
+            <defs>
+                <clipPath id="circleView">
+                    <circle cx="30" cy="30" r="15" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);" fill="#ffffff"/>
+                </clipPath>
+            </defs>
+        </g>
         <image id="img" clip-path="url(#circleView)" x="15" y="15"/>
         <image id="img1" x="45" y="15"/>
     </svg>

@@ -306,8 +306,7 @@ function drawGraph() {
     corScale = getCorScale(links_data);
     force.force("link", d3.forceLink(links_data).strength(Math.pow(defaultThreshold, linkStrengthPower)));
 
-    var g = svg.append("g")
-        .attr("class", "everything");
+    var g = svg.append("g");
 
 
 
@@ -321,15 +320,33 @@ function drawGraph() {
         .style("stroke", linkColor);
 
     //Nodes
-    var node = g.append("g")
-        .attr("class", "nodes")
-        .selectAll("circle")
+// <defs>
+//     <clipPath id="circleView">
+//         <circle cx="30" cy="30" r="15" fill="#ffffff"/>
+//         </clipPath>
+//         </defs>
+    var node = g.append("defs")
+        .selectAll("clipPath")
         .data(nodes_data)
         .enter()
+        .append("clipPath")
+        .attr("id", (d) => {return "clipPath"+d.index;})
         .append("circle")
-        .attr("fill", "blue")
+        .attr("fill", "#ffffff")
         .attr("r", graphNodeRadius);
 
+    // <image id="img" clip-path="url(#circleView)" x="15" y="15"/>
+    var plot = g.append("g")
+        .attr("class", "nodes")
+        .selectAll("image")
+        .data(nodes_data)
+        .enter()
+        .append("image")
+        .attr("id", (d)=>{return "img"+d.index;})
+        .attr("clip-path", (d)=>{return "url(#clipPath" + d.index + ")"});
+
+    //Plot to the images
+    generateNodesWithSVGData(graphNodeRadius*2, graphNodeRadius*2, nodes_data);
     //Lablel
     var label = g.append("g")
         .attr("class", "label")
@@ -344,40 +361,53 @@ function drawGraph() {
 
     function tickHandler() {
         //update circle positions each tick of the simulation
-        if(node)
-        node
-            .attr("cx", function (d) {
-                return d.x = boundX(d.x);
-            })
-            .attr("cy", function (d) {
-                return d.y = boundY(d.y);
-            });
-
+        if(node){
+            node
+                .attr("cx", function (d) {
+                    return d.x = boundX(d.x);
+                })
+                .attr("cy", function (d) {
+                    return d.y = boundY(d.y);
+                });
+        }
+        if(plot){
+            plot
+                .attr("x", (d) =>{
+                    return d.x - graphNodeRadius;
+                })
+                .attr("y", (d)=>{
+                    return d.y - graphNodeRadius;
+                })
+        }
         //update link positions
-        if(link)
-        link
-            .attr("x1", function (d) {
-                return d.source.x;
-            })
-            .attr("y1", function (d) {
-                return d.source.y;
-            })
-            .attr("x2", function (d) {
-                return d.target.x;
-            })
-            .attr("y2", function (d) {
-                return d.target.y;
-            });
+        if(link){
+            link
+                .attr("x1", function (d) {
+                    return d.source.x;
+                })
+                .attr("y1", function (d) {
+                    return d.source.y;
+                })
+                .attr("x2", function (d) {
+                    return d.target.x;
+                })
+                .attr("y2", function (d) {
+                    return d.target.y;
+                });
+        }
+
 
         //update label positions
         if(label)
-        label
-            .attr("x", function (d) {
-                return d.x;
-            })
-            .attr("y", function (d) {
-                return d.y + 2;
-            });
+        {
+            label
+                .attr("x", function (d) {
+                    return d.x;
+                })
+                .attr("y", function (d) {
+                    return d.y + 2;
+                });
+        }
     }
     //Handling drag
     var dragHandler = d3.drag()
@@ -456,17 +486,10 @@ $(document).ready(function () {
 });
 
 /*Section for the image on the graph nodes*/
-function generateNodesWithSVGData(imgWidth, imgHeight) {
+function generateNodesWithSVGData(imgWidth, imgHeight, nodes_data) {
     var xContour = getGridNumberList(data);
     var yContour = getGridLetterList(data);
-    var contourData = [
-        {
-            x: xContour,
-            y: yContour,
-            type: 'contour',
-            showscale: false
-        }
-    ];
+
     var layout = {
         displayModeBar: false,
         xaxis: {
@@ -497,22 +520,25 @@ function generateNodesWithSVGData(imgWidth, imgHeight) {
         }
     };
 
-    //for loop here
-    var nodes_data = getAllElements();
-    var result = nodes_data.map(function(d){
+    nodes_data.forEach(function(d){
         var aDiv = document.createElement("div");
         var z = getNumberColumn(data, d.value);
-        contourData[0].z = z;
+        var contourData = [
+            {
+                x: xContour,
+                y: yContour,
+                z: z,
+                type: 'contour',
+                showscale: false
+            }
+        ];
         Plotly.plot(aDiv, contourData, layout).then(
             function(gd){
-                Plotly.toImage(gd, {format: 'png', width: imgWidth, height: imgHeight}).then(function(svgData) {
-                    d.svgData = svgData;
+                Plotly.toImage(gd, {format: 'svg', width: imgWidth, height: imgHeight}).then(function(svgData) {
+                    //d.svgData = svgData;
+                    d3.select("#img" + d.index).attr("xlink:href", svgData);
                 });
             }
         );
-        return d;
     });
-
-    return result;
-
 }

@@ -156,11 +156,6 @@
     stroke-opacity: 0.5;
 }
 
-.nodes circle {
-    stroke: white;
-    stroke-width: 1px;
-}
-
 #corcoefGraph text{
     font-family: sans-serif;
     text-anchor: middle;
