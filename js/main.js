@@ -319,34 +319,16 @@ function drawGraph() {
         .attr("stroke-width", linkWidth)
         .style("stroke", linkColor);
 
-    //Nodes
-// <defs>
-//     <clipPath id="circleView">
-//         <circle cx="30" cy="30" r="15" fill="#ffffff"/>
-//         </clipPath>
-//         </defs>
-    var node = g.append("defs")
-        .selectAll("clipPath")
-        .data(nodes_data)
-        .enter()
-        .append("clipPath")
-        .attr("id", (d) => {return "clipPath"+d.index;})
-        .append("circle")
-        .attr("fill", "#ffffff")
-        .attr("r", graphNodeRadius);
-
-    // <image id="img" clip-path="url(#circleView)" x="15" y="15"/>
     var plot = g.append("g")
-        .attr("class", "nodes")
         .selectAll("image")
         .data(nodes_data)
         .enter()
         .append("image")
         .attr("id", (d)=>{return "img"+d.index;})
-        .attr("clip-path", (d)=>{return "url(#clipPath" + d.index + ")"});
+        .attr("clip-path", "circle("+graphNodeRadius+"px at center)");
 
     //Plot to the images
-    generateNodesWithSVGData(graphNodeRadius*2, graphNodeRadius*2, nodes_data);
+    generateNodesWithSVGData(graphNodeRadius*2 + 2, graphNodeRadius*2 + 2, nodes_data);
     //Lablel
     var label = g.append("g")
         .attr("class", "label")
@@ -360,16 +342,6 @@ function drawGraph() {
     force.on("tick", tickHandler);
 
     function tickHandler() {
-        //update circle positions each tick of the simulation
-        if(node){
-            node
-                .attr("cx", function (d) {
-                    return d.x = boundX(d.x);
-                })
-                .attr("cy", function (d) {
-                    return d.y = boundY(d.y);
-                });
-        }
         if(plot){
             plot
                 .attr("x", (d) =>{
@@ -415,7 +387,7 @@ function drawGraph() {
         .on("drag", dragDrag)
         .on("end", dragEnd);
 
-    dragHandler(node);
+    dragHandler(plot);
 
     function dragStart(d) {
         d.fx = d.x;
