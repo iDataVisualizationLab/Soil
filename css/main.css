@@ -64,7 +64,6 @@
     height: var(--page-height);
     margin: 0 auto;
     overflow: auto; /*This is to keep the layout from broken due to margin of the child elements*/
-    /*border: 1px solid black;*/
 }
 #leftNav{
     width: var(--left-nav-width);
@@ -72,7 +71,6 @@
     float: left;
     margin-left: var(--left-nav-margin-left);
     margin-top: var(--left-nav-margin-top);
-    /*border: 1px solid black;*/
 }
 #rightNav{
     float: right;
@@ -80,7 +78,6 @@
     width: var(--right-nav-width);
     margin-right: var(--default-margin);
     margin-top: var(--right-nav-margin-top);
-    /*border: 1px solid black;*/
 }
 
 #slider{
@@ -95,7 +92,6 @@
     height: var(--right-content-height);
     margin-top: var(--left-content-margin-top);
     margin-left: var(--left-content-margin-left);
-    /*border: 1px solid black;*/
 }
 
 #rightContent{
@@ -105,7 +101,6 @@
     height: var(--right-content-height);
     margin-top: var(--right-content-margin-top);
     margin-right: var(--right-content-margin-right);
-    /*border: 1px solid black;*/
 }
 #option1Container{
     width: var(--option1-width);
@@ -125,7 +120,6 @@
     height: var(--box1-height);
     margin-top: var(--box1-margin-top);
     margin-left: var(--box1-margin-left);
-    /*border: 1px solid black;*/
 }
 
 #box2{
@@ -133,7 +127,6 @@
     height: var(--box2-height);
     margin-top: var(--box2-margin-top);
     margin-left: var(--box2-margin-left);
-    /*border: 1px solid black;*/
 }
 
 #corcoef{
@@ -145,20 +138,18 @@
     margin-left: var(--corcoef-graph-margin-left);
     width: var(--corcoef-graph-width);
     height: var(--corcoef-graph-height);
-    /*border: 1px solid black;*/
 }
 
 #corthreshold{
     margin-left: var(--corr-threshold-margin-left);
 }
-.links line {
-    stroke: #999;
-    stroke-opacity: 0.5;
-}
-
 #corcoefGraph text{
     font-family: sans-serif;
     text-anchor: middle;
     font-size:8px;
     alignment-baseline: hanging;
+}
+.clipCircle {
+    -webkit-clip-path: circle(15px at center);
+    clip-path: circle(15px at center);
 }

@@ -229,7 +229,7 @@ var svgId = "#corcoefGraph";
 var node;
 var link;
 var label;
-var defaultThreshold = 0;
+var defaultThreshold = 0.75;
 var linkStrengthPower = 8;
 function getGraphSize(){
     var svg = d3.select(svgId);
@@ -308,30 +308,38 @@ function drawGraph() {
 
     var g = svg.append("g");
 
-
-
     //Links
     link = g.append("g")
-        .attr("class", "links")
         .selectAll("line")
         .data(links_data)
         .enter().append("line")
         .attr("stroke-width", linkWidth)
         .style("stroke", linkColor);
 
+    var node = g.append("defs")
+        .selectAll("clipPath")
+        .data(nodes_data)
+        .enter()
+        .append("clipPath")
+        .attr("id", (d) => {return "clipPath"+d.index;})
+        .append("circle")
+        .attr("fill", "#ffffff")
+        .attr("r", graphNodeRadius);
+
+    // <image id="img" clip-path="url(#circleView)" x="15" y="15"/>
     var plot = g.append("g")
+        .attr("class", "nodes")
         .selectAll("image")
         .data(nodes_data)
         .enter()
         .append("image")
         .attr("id", (d)=>{return "img"+d.index;})
-        .attr("clip-path", "circle("+graphNodeRadius+"px at center)");
+        .attr("clip-path", (d)=>{return "url(#clipPath" + d.index + ")"});
 
     //Plot to the images
     generateNodesWithSVGData(graphNodeRadius*2 + 2, graphNodeRadius*2 + 2, nodes_data);
     //Lablel
     var label = g.append("g")
-        .attr("class", "label")
         .selectAll("text")
         .data(nodes_data)
         .enter().append("text")
@@ -342,6 +350,15 @@ function drawGraph() {
     force.on("tick", tickHandler);
 
     function tickHandler() {
+        if(node){
+            node
+                .attr("cx", function (d) {
+                    return d.x = boundX(d.x);
+                })
+                .attr("cy", function (d) {
+                    return d.y = boundY(d.y);
+                });
+        }
         if(plot){
             plot
                 .attr("x", (d) =>{
