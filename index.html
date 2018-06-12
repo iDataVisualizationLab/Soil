@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <title>Soil analysis</title>
     <script src="lib/d3.js"></script>
-    <script src="https://d3js.org/d3-color.v1.min.js"></script>
-    <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
-    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <!--<script src="https://d3js.org/d3-color.v1.min.js"></script>-->
+    <!--<script src="https://d3js.org/d3-interpolate.v1.min.js"></script>-->
+    <!--<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <!--for the slider-->
@@ -19,8 +19,6 @@
     <!--end about ms dropdown-->
     <!--for the correlation-->
     <script src="js/correlation.js"></script>
-    <!--main data processing file-->
-    <script src="js/main.js"></script>
 </head>
 <body>
 <div id="page">
@@ -47,6 +45,8 @@
         <div id="box2"></div>
     </div>
 </div>
+<!--main data processing file-->
+<script src="js/main.js"></script>
 <script>
     readData("data/Profile1.csv");
 </script>
