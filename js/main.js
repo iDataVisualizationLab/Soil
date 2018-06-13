@@ -16,7 +16,7 @@ var currentColumnNames = [];
 var xContour = null;
 var yContour = null;
 var elmConcentrations = [];
-var contourTraces = [];
+var contourData = [];
 
 /*Handling data after loading*/
 function getColumn(data, columnName) {
@@ -51,13 +51,12 @@ function handleData(data) {
     setElmConcentration(0);
     setElmConcentration(1);
     //Plot contour
-    setContourTrace(0);
-    setContourTrace(1);
-    plotContour();
+    setContourData(0);
+    setContourData(1);
+    plotContour(0);
+    plotContour(1);
     //Plot scatter
     plotScatter();
-    //Update correlation
-    updateCorrelation();
     //draw the correlation graph
     drawGraph();
 }
@@ -99,35 +98,27 @@ function setElmConcentration(index) {
     elmConcentrations[index] = getNumberColumn(data, currentColumnNames[index]);
 }
 
-function setContourTrace(index) {
-    contourTraces[index] = {
+function setContourData(index) {
+    contourData[index] = [{
         x: xContour,
         y: yContour,
         z: elmConcentrations[index],
         type: 'contour',
         name: currentColumnNames[index],
-        xaxis: 'x' + (index + 1),
-        yaxis: 'y' + (index + 1),
-        showscale: (index == 0) ? true : false
-    };
+        showscale: true
+    }];
 }
 
-function plotContour() {
+function plotContour(index) {
     var contourLayout = {
-        title: "Correlation " + currentColumnNames[0] + " vs. " + currentColumnNames[1],
-        xaxis: {domain: [0, 0.45], anchor: 'y1', title: currentColumnNames[0]},
-        yaxis: {domain: [0, 1], anchor: 'x1'},
-        xaxis2: {domain: [0.55, 1], anchor: 'y2', title: currentColumnNames[1]},
-        yaxis2: {domain: [0, 1], anchor: 'x2'}
+        title: currentColumnNames[index],
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)'
     }
-    Plotly.newPlot('box1', contourTraces, contourLayout);
+    Plotly.newPlot('contour' + (index+1), contourData[index], contourLayout);
 }
 
 /*Functions to set information for the scatter plots*/
-function setScatterX() {
-    xScatter = getColumn(data, 'Grid ID');
-}
-
 
 function plotScatter() {
     //Do the sorting.
@@ -149,14 +140,21 @@ function plotScatter() {
     }];
 
     var layout = {
+        title: currentColumnNames[0].split(" ")[0] + " vs. " + currentColumnNames[1].split(" ")[0] + " correlation: " + getCurrentCorrelation(),
         xaxis: {
             title: currentColumnNames[0]
         },
         yaxis:{
             title: currentColumnNames[1]
-        }
+        },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)'
     }
-    Plotly.newPlot('box2', scatterTraces, layout);
+    Plotly.newPlot('scatterPlot', scatterTraces, layout);
+}
+function getCurrentCorrelation(){
+    var corcoef = pearsonCorcoef(elmConcentrations[0], elmConcentrations[1]);
+    return Math.round((corcoef * 1000) / 1000);
 }
 
 /*Creating the the selection box*/
@@ -204,17 +202,10 @@ function updateElement(index) {
     currentColumnNames[index] = theOptions[index].val();
     setElmConcentration(index);
     //Update Contour
-    setContourTrace(index);
-    plotContour();
+    setContourData(index);
+    plotContour(index);
     //Update Scatter
     plotScatter();
-    //Update the correlation
-    updateCorrelation();
-}
-
-function updateCorrelation() {
-    var corcoef = pearsonCorcoef(elmConcentrations[0], elmConcentrations[1]);
-    $("#corcoef").text("The correlation coefficient is: " + Math.round(corcoef * 1000) / 1000);
 }
 
 /*Section for the force directed layout of the correlation graph*/
@@ -464,6 +455,7 @@ $(document).ready(function () {
     var corThreshold = d3.sliderHorizontal()
         .min(0)
         .max(1.0)
+        .width(290)
         .tickFormat(d3.format('.4'))
         .ticks(3)
         .default(defaultThreshold)

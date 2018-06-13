@@ -1,35 +1,18 @@
 :root{
-    --page-width: 1200px;
-    --page-height: 800px;
+    --page-width: 860px;
+    --page-height: 1000px;
     --default-margin: 20px;
+    --box-width: 400px;
+    --box-height: var(--box-width);
 
-    --left-nav-width: 420px;
-    --left-nav-height: 30px;
-    --left-nav-margin-top: var(--default-margin);
-    --left-nav-margin-left: var(--default-margin);
+    --corcoef-graph-margin-left: var(--default-margin);
+    --corcoef-graph-margin-top: 155px;
 
-    --right-nav-width: 80px;
-    --right-nav-height: var(--left-nav-height);
-    --right-nav-margin-right: var(--default-margin);
-    --right-nav-margin-top: var(--default-margin);
+    --control-panel-margin-left: var(--default-margin);
+    --control-panel-margin-top: var(--default-margin);
+    --control-panel-width: calc(var(--box-width) - 2*(var(--default-margin)));
 
-    --slider-width: calc(var(--page-width) - var(--left-nav-margin-top) - var(--right-nav-margin-right));
-    --slider-height: 0px;
-    --slider-margin-top: calc(var(--left-nav-margin-top) + var(--default-margin) + var(--left-nav-height));
-    --slider-margin-left: var(--default-margin);
-
-    --left-content-width: 420px;
-    --left-content-height: calc(var(--page-height) - (4*var(--default-margin) + var(--left-nav-height) + var(--slider-height)));
-    --left-content-margin-top: var(--default-margin);
-    --left-content-margin-left: var(--default-margin);
-
-
-    --right-content-width: calc(var(--page-width) - 3*var(--default-margin) - var(--left-content-width));
-    --right-content-height: var(--left-content-height);
-    --right-content-margin-top: var(--left-content-margin-top);
-    --right-content-margin-right: var(--default-margin);
-
-    --option1-width: calc((var(--left-content-width) - 3*var(--default-margin))/2);
+    --option1-width: 150px;
     --option1-margin-top: var(--default-margin);
     --option1-margin-left: var(--default-margin);
 
@@ -37,26 +20,24 @@
     --option2-margin-top: var(--default-margin);
     --option2-margin-right: var(--default-margin);
 
-    --box1-width: calc(var(--right-content-width) - 2*var(--default-margin));
-    --box1-height: calc((var(--right-content-height) - 3 *(var(--default-margin)))/2);
-    --box1-margin-top: var(--default-margin);
-    --box1-margin-left: var(--default-margin);
-
-
-    --box2-width: var(--box1-width);
-    --box2-height: var(--box1-height);
-    --box2-margin-top:calc(var(--box1-height) + 2*var(--default-margin)) ;
-    --box2-margin-left: var(--default-margin);
-
     --msdropdown-height: 28px;/*28px is the default height of the msdropdown*/
     --corcoef-margin-left: var(--default-margin);
     --corcoef-margin-top: calc(var(--default-margin)*2 + var(--msdropdown-height));
 
-    --corcoef-graph-margin-left: var(--default-margin);
-    --corcoef-graph-width: calc(var(--left-content-width) - 2*var(--corcoef-graph-margin-left));
-    --corcoef-graph-height: var(--corcoef-graph-width);
-
     --corr-threshold-margin-left: var(--default-margin);
+    --corr-threshold-width: calc(var(--control-panel-width) - 2*(var(--default-margin)));
+
+
+    --scatter-plot-margin-left: 440px;
+    --scatter-plot-margin-top: 155px;
+
+    --contour1-margin-left: var(--default-margin);
+    --contour1-margin-top: calc(var(--corcoef-graph-margin-top) + var(--box-width) + var(--default-margin));
+
+    --contour2-margin-left: 440px;
+    --contour2-margin-top: var(--contour1-margin-top);
+
+
 }
 
 #page{
@@ -65,68 +46,42 @@
     margin: 0 auto;
     overflow: auto; /*This is to keep the layout from broken due to margin of the child elements*/
 }
-#leftNav{
-    width: var(--left-nav-width);
-    height: var(--left-nav-height);
-    float: left;
-    margin-left: var(--left-nav-margin-left);
-    margin-top: var(--left-nav-margin-top);
-}
-#rightNav{
-    float: right;
-    height: var(--right-nav-height);
-    width: var(--right-nav-width);
-    margin-right: var(--default-margin);
-    margin-top: var(--right-nav-margin-top);
+.roundedBorder{
+    border: 1px solid rgba(0,0,0, 1);
+    background-color: rgba(255,255,255, 1);
+    border-radius: 6px;
+    box-shadow: 10px 10px 10px #444;
+    width: var(--box-width);
+    height: var(--box-height);
 }
 
-#slider{
-    width: var(--slider-width);
-    height: var(--slider-height);
-    margin-top: var(--slider-margin-top);
-    margin-left: var(--slider-margin-left);
-}
-#leftContent{
-    float: left;
-    width: var(--left-content-width);
-    height: var(--right-content-height);
-    margin-top: var(--left-content-margin-top);
-    margin-left: var(--left-content-margin-left);
+#controlPanel{
+    position: absolute;
+    z-index: 0;
+    border: 1px solid rgba(0,0,0, 1);
+    background-color: rgba(255,255,255, 1);
+    border-radius: 6px;
+
+    width: var(--control-panel-width);
+    height: var(--box-height);
+
+    margin-left: calc(2*var(--default-margin));
+    margin-top: var(--control-panel-margin-top);
 }
 
-#rightContent{
-    float: right;
-    position: relative;
-    width: var(--right-content-width);
-    height: var(--right-content-height);
-    margin-top: var(--right-content-margin-top);
-    margin-right: var(--right-content-margin-right);
-}
 #option1Container{
+    z-index: 10;
     width: var(--option1-width);
     margin-top: var(--option1-margin-top);
     margin-left: var(--option1-margin-left);
     float: left;
 }
 #option2Container{
+    z-index: 10;
     width: var(--option2-width);
     margin-top: var(--option2-margin-top);
     margin-right: var(--option2-margin-right);
     float: right;
-}
-#box1{
-    float: left;
-    width: var(--box1-width);
-    height: var(--box1-height);
-    margin-top: var(--box1-margin-top);
-    margin-left: var(--box1-margin-left);
-}
-
-#box2{
-    width: var(--box2-width);
-    height: var(--box2-height);
-    margin-top: var(--box2-margin-top);
-    margin-left: var(--box2-margin-left);
 }
 
 #corcoef{
@@ -134,22 +89,41 @@
     margin-top: var(--corcoef-margin-top);
 }
 
-#corcoefGraph{
-    margin-left: var(--corcoef-graph-margin-left);
-    width: var(--corcoef-graph-width);
-    height: var(--corcoef-graph-height);
-}
-
 #corthreshold{
     margin-left: var(--corr-threshold-margin-left);
+    width: var(--corr-threshold-width);
 }
+
+#corcoefGraphDiv{
+    position: absolute;
+    float: left;
+    margin-left: var(--corcoef-graph-margin-left);
+    margin-top: var(--corcoef-graph-margin-top);
+}
+
 #corcoefGraph text{
     font-family: sans-serif;
     text-anchor: middle;
-    font-size:8px;
+    font-size: 8px;
     alignment-baseline: hanging;
 }
-.clipCircle {
-    -webkit-clip-path: circle(15px at center);
-    clip-path: circle(15px at center);
+
+#scatterPlot{
+    position: absolute;
+    margin-left: var(--scatter-plot-margin-left);
+    margin-top: var(--scatter-plot-margin-top);
 }
+
+#contour1{
+    position: absolute;
+    margin-left: var(--contour1-margin-left);
+    margin-top: var(--contour1-margin-top);
+}
+#contour2{
+    position: absolute;
+    margin-left: var(--contour2-margin-left);
+    margin-top: var(--contour2-margin-top);
+}
+
+
+

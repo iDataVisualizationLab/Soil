@@ -22,28 +22,19 @@
 </head>
 <body>
 <div id="page">
-    <div id='leftNav'>
-        <!--left navigation comes here-->
-    </div>
-    <div id="rightNav">
-        <!--right navigation comes here-->
-    </div>
-    <div id="slider">
-        <!--slider comes here-->
-    </div>
-    <div id="leftContent">
+    <div id="controlPanel">
         <!--left content comes here-->
         <div id="option1Container"></div>
         <div id="option2Container"></div>
         <div id="corcoef"></div>
         <div id="corthreshold"></div>
-        <svg id="corcoefGraph"></svg>
     </div>
-    <div id="rightContent">
-        <!--right content comes here-->
-        <div id="box1"></div>
-        <div id="box2"></div>
+    <div id="corcoefGraphDiv" class="roundedBorder">
+        <svg id="corcoefGraph" style="width: 100%; height: 100%;"></svg>
     </div>
+    <div id="scatterPlot" class="roundedBorder"></div>
+    <div id="contour1" class="roundedBorder"></div>
+    <div id="contour2" class="roundedBorder"></div>
 </div>
 <!--main data processing file-->
 <script src="js/main.js"></script>
