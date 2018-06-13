@@ -50,7 +50,7 @@
     border: 1px solid rgba(0,0,0, 1);
     background-color: rgba(255,255,255, 1);
     border-radius: 6px;
-    box-shadow: 10px 10px 10px #444;
+    box-shadow: 5px 5px 5px #444;
     width: var(--box-width);
     height: var(--box-height);
 }
