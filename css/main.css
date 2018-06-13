@@ -6,7 +6,7 @@
     --box-height: var(--box-width);
 
     --corcoef-graph-margin-left: var(--default-margin);
-    --corcoef-graph-margin-top: 155px;
+    --corcoef-graph-margin-top: 150px;
 
     --control-panel-margin-left: var(--default-margin);
     --control-panel-margin-top: var(--default-margin);
@@ -29,7 +29,7 @@
 
 
     --scatter-plot-margin-left: 440px;
-    --scatter-plot-margin-top: 155px;
+    --scatter-plot-margin-top: var(--corcoef-graph-margin-top);
 
     --contour1-margin-left: var(--default-margin);
     --contour1-margin-top: calc(var(--corcoef-graph-margin-top) + var(--box-width) + var(--default-margin));
@@ -57,14 +57,11 @@
 
 #controlPanel{
     position: absolute;
-    z-index: 0;
     border: 1px solid rgba(0,0,0, 1);
+    border-bottom: none;
     background-color: rgba(255,255,255, 1);
     border-radius: 6px;
-
     width: var(--control-panel-width);
-    height: var(--box-height);
-
     margin-left: calc(2*var(--default-margin));
     margin-top: var(--control-panel-margin-top);
 }

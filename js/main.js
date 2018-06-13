@@ -455,12 +455,13 @@ $(document).ready(function () {
     var corThreshold = d3.sliderHorizontal()
         .min(0)
         .max(1.0)
-        .width(290)
+        .width("310")
         .tickFormat(d3.format('.4'))
         .ticks(3)
         .default(defaultThreshold)
         .on('onchange', onThreshold);
     var g = d3.select("div#corthreshold").append("svg")
+        .attr("style", "width: 100%")
         .append("g")
         .attr("transform", "translate(7,7)");
     g.call(corThreshold);
