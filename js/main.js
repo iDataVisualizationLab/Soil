@@ -61,7 +61,7 @@ function handleData(data) {
     drawGraph();
 }
 
-/*functions to get information for the contours*/
+//<editor-fold desc="functions to get information for the contours">
 function extractGridLetter(gridId) {
     return gridId.substr(0, 1);
 }
@@ -118,8 +118,6 @@ function plotContour(index) {
     Plotly.newPlot('contour' + (index+1), contourData[index], contourLayout);
 }
 
-/*Functions to set information for the scatter plots*/
-
 function plotScatter() {
     //Do the sorting.
     var scatterData = data.map(function(d){
@@ -154,9 +152,9 @@ function plotScatter() {
 }
 function getCurrentCorrelation(){
     var corcoef = pearsonCorcoef(elmConcentrations[0], elmConcentrations[1]);
-    return Math.round((corcoef * 1000) / 1000);
+    return Math.round(corcoef * 1000)/1000;
 }
-
+//</editor-fold>
 /*Creating the the selection box*/
 function createByJson(div, jsonData, name, selectedIndex, changeHandler, width) {
     var msdd = $("#" + div).msDropDown({byJson: {data: jsonData, name: name, width: width}}).data("dd");
@@ -209,7 +207,7 @@ function updateElement(index) {
 }
 
 /*Section for the force directed layout of the correlation graph*/
-var graphNodeRadius = 15;
+var graphNodeRadius = 12;
 var force;
 var maxLinkWidth = 2;
 var minLinkWidth = 0.5;
@@ -219,9 +217,9 @@ var links_data=[];
 var svgId = "#corcoefGraph";
 var node;
 var link;
-var label;
 var defaultThreshold = 0.75;
 var linkStrengthPower = 8;
+var selectionCounter = 0;
 function getGraphSize(){
     var svg = d3.select(svgId);
     var width = svg.node().getBoundingClientRect().width;
@@ -325,7 +323,13 @@ function drawGraph() {
         .enter()
         .append("image")
         .attr("id", (d)=>{return "img"+d.index;})
-        .attr("clip-path", (d)=>{return "url(#clipPath" + d.index + ")"});
+        .attr("clip-path", (d)=>{return "url(#clipPath" + d.index + ")"})
+        .on("click", (d)=>{
+            selectionCounter = selectionCounter % 2;
+            $("#option" + (selectionCounter+1) + "Container").msDropDown().data("dd").setIndexByValue(d.value);
+            updateElement(selectionCounter);
+            selectionCounter += 1;
+        });
 
     //Plot to the images
     generateNodesWithSVGData(graphNodeRadius*2 + 2, graphNodeRadius*2 + 2, nodes_data);
@@ -449,7 +453,8 @@ function onThreshold(threshold){
     force.force("link", d3.forceLink(links_data).strength(Math.pow(threshold, linkStrengthPower)));
     force.restart();
 }
-/*Section for the slider*/
+
+//<editor-fold desc="Section for the slider">*/
 $(document).ready(function () {
 
     var corThreshold = d3.sliderHorizontal()
@@ -466,7 +471,8 @@ $(document).ready(function () {
         .attr("transform", "translate(7,7)");
     g.call(corThreshold);
 });
-
+//</editor-fold>
+//<editor-fold desc = "Section for the image generator">
 /*Section for the image on the graph nodes*/
 function generateNodesWithSVGData(imgWidth, imgHeight, nodes_data) {
     var xContour = getGridNumberList(data);
@@ -524,3 +530,4 @@ function generateNodesWithSVGData(imgWidth, imgHeight, nodes_data) {
         );
     });
 }
+//</editor-fold>

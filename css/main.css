@@ -122,5 +122,8 @@
     margin-top: var(--contour2-margin-top);
 }
 
+svg image:hover{
+    opacity: 0.7;
+}
 
 
