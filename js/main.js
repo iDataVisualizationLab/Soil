@@ -115,7 +115,18 @@ function plotContour(index) {
     var contourLayout = {
         title: currentColumnNames[index],
         paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(0,0,0,0)'
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        margin:{
+            l: 30,
+            r: 80,
+            t: 80,
+            b: 30,
+            pad: 0,
+            autoexpand: false
+        },
+        font:{
+            family:"Georgia,Times,serif"
+        }
     }
     Plotly.newPlot('contour' + (index+1), contourData[index], contourLayout);
 }
@@ -148,7 +159,10 @@ function plotScatter() {
             title: currentColumnNames[1]
         },
         paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(0,0,0,0)'
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font:{
+            family:"Georgia,Times,serif"
+        }
     }
     Plotly.newPlot('scatterPlot', scatterTraces, layout);
 }
