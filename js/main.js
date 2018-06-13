@@ -1,5 +1,5 @@
 var data = null;
-
+$("#page").css("visibility","hidden");
 function readData(fileName) {
     d3.csv(fileName, function (error, rawData) {
         if (error) throw error;
@@ -59,6 +59,8 @@ function handleData(data) {
     plotScatter();
     //draw the correlation graph
     drawGraph();
+    $(".loader").hide();
+    $("#page").css("visibility","visible");
 }
 
 //<editor-fold desc="functions to get information for the contours">
