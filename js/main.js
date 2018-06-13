@@ -59,8 +59,8 @@ function handleData(data) {
     plotScatter();
     //draw the correlation graph
     drawGraph();
-    $(".loader").hide();
-    $("#page").css("visibility","visible");
+    d3.select(".loader").style("opacity", 1.0).transition().duration(1000).style("opacity", 1e-6).remove();
+    d3.select("#page").style("visibility", "visible").style("opacity", 0).transition().duration(5000).style("opacity", 1.0);
 }
 
 //<editor-fold desc="functions to get information for the contours">
