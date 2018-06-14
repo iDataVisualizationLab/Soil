@@ -143,12 +143,22 @@ function plotScatter() {
         return a[currentColumnNames[0]] - b[currentColumnNames[0]];
     });
 
+    var xData = getColumn(scatterData, currentColumnNames[0]);
+    var yData = getColumn(scatterData, currentColumnNames[1]);
+    var model = linearRegiression(xData, yData);
+    var yPredictedData = predict(xData, model);
     var scatterTraces = [{
-        x: getColumn(scatterData, currentColumnNames[0]),
-        y: getColumn(scatterData, currentColumnNames[1]),
+        x: xData,
+        y: yData,
         type: 'scatter',
         mode: 'markers'
-    }];
+    }, {
+       x: xData,
+       y: yPredictedData,
+       type: 'scatter',
+       mode: 'lines'
+    }
+    ];
 
     var layout = {
         title: currentColumnNames[0].split(" ")[0] + " vs. " + currentColumnNames[1].split(" ")[0] + " correlation: " + getCurrentCorrelation(),
@@ -484,7 +494,7 @@ $(document).ready(function () {
     var g = d3.select("div#corthreshold").append("svg")
         .attr("style", "width: 100%")
         .append("g")
-        .attr("transform", "translate(7,7)");
+        .attr("transform", "translate(7,17)");
     g.call(corThreshold);
 });
 //</editor-fold>

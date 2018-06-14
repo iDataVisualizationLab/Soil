@@ -13,11 +13,11 @@
     --control-panel-width: calc(var(--box-width) - 2*(var(--default-margin)));
 
     --option1-width: 150px;
-    --option1-margin-top: var(--default-margin);
+    --option1-margin-top: 10px;
     --option1-margin-left: var(--default-margin);
 
     --option2-width: var(--option1-width);
-    --option2-margin-top: var(--default-margin);
+    --option2-margin-top: var(--option1-margin-top);
     --option2-margin-right: var(--default-margin);
 
     --msdropdown-height: 28px;/*28px is the default height of the msdropdown*/
@@ -64,6 +64,7 @@
 /*</editor-fold>*/
 
 #page{
+    position: relative;
     width: var(--page-width);
     height: var(--page-height);
     margin: 0 auto;
@@ -95,6 +96,7 @@
     margin-top: var(--option1-margin-top);
     margin-left: var(--option1-margin-left);
     float: left;
+    overflow: hidden;
 }
 #option2Container{
     z-index: 10;
@@ -102,16 +104,14 @@
     margin-top: var(--option2-margin-top);
     margin-right: var(--option2-margin-right);
     float: right;
+    overflow: hidden;
 }
 
-#corcoef{
-    margin-left: var(--corcoef-margin-left);
-    margin-top: var(--corcoef-margin-top);
-}
 
 #corthreshold{
     margin-left: var(--corr-threshold-margin-left);
     width: var(--corr-threshold-width);
+    overflow: hidden;
 }
 
 #corcoefGraphDiv{
