@@ -1,5 +1,27 @@
 var data = null;
-$("#page").css("visibility", "hidden");
+let profiles = ["Profile1.csv", "Profile2.csv", "Profile3.csv"];
+let defaultProfileIndex = 0;
+let svgId = "#corcoefGraph";
+function loadProfiles(){
+
+    var data = profiles.map(d=>{
+        return {
+            value: d,
+            text: d
+        }
+    });
+    theProfile = createByJson("profileContainerDiv", data, "optionprofile", defaultProfileIndex, changeProfile);
+    changeProfile({target: {value: profiles[defaultProfileIndex]}});
+}
+loadProfiles();
+
+function changeProfile(event){
+    //Clean the graph layout
+    d3.select(".loader").style("display", "block").style("opacity", 1.0);
+    d3.select("#page").style("visibility", "hidden");
+    d3.select(svgId).selectAll("*").remove();
+    readData("data/"+event.target.value);
+}
 
 function readData(fileName) {
     d3.csv(fileName, function (error, rawData) {
@@ -20,7 +42,7 @@ var xContour = null;
 var yContour = null;
 var elmConcentrations = [];
 var contourData = [];
-
+var theProfile;
 /*Handling data after loading*/
 function getColumn(data, columnName) {
     var column = [];
@@ -67,8 +89,8 @@ function handleData(data) {
     //draw the correlation graph
     drawGraph();
     //Handling the loader spinner
-    d3.select(".loader").style("opacity", 1.0).transition().duration(1000).style("opacity", 1e-6).remove();
-    d3.select("#page").style("visibility", "visible").style("opacity", 0).transition().duration(5000).style("opacity", 1.0);
+    d3.select(".loader").style("opacity", 1.0).transition().duration(1000).style("opacity", 1e-6).style("display", "none");
+    d3.select("#page").style("visibility", "visible").style("opacity", 1e-6).transition().duration(5000).style("opacity", 1.0);
 }
 
 //<editor-fold desc="functions to get information for the contours">
@@ -252,7 +274,7 @@ function updateElement(index) {
 
 /*Section for the force directed layout of the correlation graph*/
 let graphNodeRadius = 12;
-let mouseOverExpand = 4;
+let mouseOverExpand = 6;
 let selectionStrokeWidth = 3;
 var force;
 let maxLinkWidth = 2;
@@ -260,21 +282,12 @@ let minLinkWidth = 0.5;
 var corScale;
 var nodes_data = [];
 var links_data = [];
-let svgId = "#corcoefGraph";
 var node;
 var link;
 let defaultThreshold = 0.75;
 let linkStrengthPower = 8;
 var selectionCounter = 0;
 var selectionCircle;
-
-function valueToIndex(nodes_data, value) {
-    for (var i = 0; i < nodes_data.length; i++) {
-        if (nodes_data[i].value === value) {
-            return i;
-        }
-    }
-}
 
 function getGraphSize() {
     var svg = d3.select(svgId);
@@ -340,7 +353,6 @@ function getCorScale(links_data) {
 }
 
 function drawGraph() {
-
     var svg = d3.select(svgId);
     var graphSize = getGraphSize();
     var width = graphSize[0];
@@ -559,7 +571,7 @@ function onThreshold(threshold) {
 }
 
 //<editor-fold desc="Section for the slider">*/
-var sliderHeight = 35;
+var sliderHeight = 30;
 var sliderWidth = 140;
 var sliderMarginRight = 20;
 

@@ -21,11 +21,14 @@
     <!--for the correlation-->
     <script src="js/correlation.js"></script>
     <script src="js/linearregression.js"></script>
+    <script src="js/listfilesfromfolder.js" type="application/javascript"></script>
 </head>
 <body>
+<div id="profileDiv">
+    <div id="profileContainerDiv"></div>
+</div>
 <div class="loader"></div>
 <div id="page">
-
     <div id="corcoefGraphDiv" class="roundedBorder">
         <svg id="corcoefGraph"></svg>
     </div>
@@ -41,8 +44,5 @@
 </div>
 <!--main data processing file-->
 <script src="js/main.js"></script>
-<script>
-    readData("data/Profile1.csv");
-</script>
 </body>
 </html>
