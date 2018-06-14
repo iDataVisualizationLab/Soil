@@ -96,7 +96,6 @@
     margin-top: var(--option1-margin-top);
     margin-left: var(--option1-margin-left);
     float: left;
-    overflow: hidden;
 }
 #option2Container{
     z-index: 10;
@@ -104,14 +103,12 @@
     margin-top: var(--option2-margin-top);
     margin-right: var(--option2-margin-right);
     float: right;
-    overflow: hidden;
 }
 
 
 #corthreshold{
     margin-left: var(--corr-threshold-margin-left);
     width: var(--corr-threshold-width);
-    overflow: hidden;
 }
 
 #corcoefGraphDiv{
@@ -146,6 +143,7 @@
 }
 
 svg image:hover{
+    cursor: pointer;
     opacity: 0.7;
 }
 

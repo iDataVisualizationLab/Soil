@@ -158,7 +158,7 @@ function plotScatter() {
        y: yPredictedData,
        type: 'scatter',
        mode: 'lines',
-        name: 'predicted'
+        name: 'regression'
     }
     ];
 
