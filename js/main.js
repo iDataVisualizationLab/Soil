@@ -413,7 +413,7 @@ function drawGraph() {
         .attr("id", (d) => "circle" + d.index)
         .attr("r", graphNodeRadius)
         .attr("stroke-width", selectionStrokeWidth)
-        .attr("stroke", "black")
+        .attr("stroke", "rgb(200, 0, 200)")
         .attr("fill", "none")
         .attr("visibility", (d) => (d.value === currentColumnNames[0] || (d.value === currentColumnNames[1])) ? "visible" : "hidden");
 
