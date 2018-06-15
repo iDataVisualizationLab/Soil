@@ -209,6 +209,14 @@ function plotScatter() {
         plot_bgcolor: 'rgba(0,0,0,0)',
         font: {
             family: "Georgia,Times,serif"
+        },
+        margin: {
+            l: 80,
+            r: 80,
+            t: 70,
+            b: 80,
+            pad: 0,
+            autoexpand: false
         }
     }
     Plotly.newPlot('scatterPlot', scatterTraces, layout);
@@ -285,10 +293,10 @@ var links_data = [];
 var node;
 var link;
 let defaultThreshold = 0.75;
-let linkStrengthPower = 8;
+let linkStrengthPower = 9;
 var selectionCounter = 0;
 var selectionCircle;
-
+let defaultMargin = 20;
 function getGraphSize() {
     var svg = d3.select(svgId);
     var width = svg.node().getBoundingClientRect().width;
@@ -303,7 +311,7 @@ function createForce() {
     var myForce = d3.forceSimulation()
         .velocityDecay(0.5)
         .alphaDecay(0)
-        .force("charge", d3.forceManyBody().strength(-100).distanceMin(4 * graphNodeRadius))
+        .force("charge", d3.forceManyBody().strength(-80).distanceMin(4 * graphNodeRadius))
         .force("collision", d3.forceCollide(2 * graphNodeRadius).strength(1))
         .force("x", d3.forceX(width / 2))
         .force("y", d3.forceY(height / 2));
@@ -425,7 +433,7 @@ function drawGraph() {
         .attr("id", (d) => "circle" + d.index)
         .attr("r", graphNodeRadius)
         .attr("stroke-width", selectionStrokeWidth)
-        .attr("stroke", "rgb(200, 0, 200)")
+        .attr("stroke", "black")
         .attr("fill", "none")
         .attr("visibility", (d) => (d.value === currentColumnNames[0] || (d.value === currentColumnNames[1])) ? "visible" : "hidden");
 
@@ -571,7 +579,7 @@ function onThreshold(threshold) {
 }
 
 //<editor-fold desc="Section for the slider">*/
-var sliderHeight = 30;
+var sliderHeight = 24;
 var sliderWidth = 140;
 var sliderMarginRight = 20;
 
@@ -587,8 +595,8 @@ function drawThresholdSlider(svg) {
     let graphSize = getGraphSize();
     let graphWidth = graphSize[0];
     let graphHeight = graphSize[1];
-    let sliderX = graphWidth - sliderWidth - sliderMarginRight;//120 = 100 for the width and 20 for the margin.
-    let sliderY = graphHeight - sliderHeight;//40 is the height of the slider
+    let sliderX = graphWidth - sliderWidth - sliderMarginRight;
+    let sliderY = graphHeight - sliderHeight;
     var g = svg.append("g")
         .attr("transform", "translate(" + sliderX + "," + sliderY + ")");
 

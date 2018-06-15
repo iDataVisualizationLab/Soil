@@ -1,7 +1,7 @@
 :root{
-    --page-width: 860px;
+    --page-width: 980px;
     --default-margin: 20px;
-    --box-width: 400px;
+    --box-width: 460px;
     --box-height: var(--box-width);
 
     --corcoef-graph-margin-left: var(--default-margin);
@@ -84,10 +84,12 @@
     margin-top: var(--corcoef-graph-margin-top);
 }
 #corcoefGraph{
-    position: absolute;
-    top: 0px;
-    width: 100%;
-    height: 100%;
+    width: var(--box-width);
+    height: calc(var(--box-width) - 3*var(--default-margin));;
+}
+#corcoefGraphTitle{
+    text-align: center;
+    margin-top: var(--default-margin);
 }
 .elementText{
     font-family: sans-serif;
@@ -111,6 +113,14 @@
     position: absolute;
     margin-left: var(--contour2-margin-left);
     margin-top: var(--contour2-margin-top);
+}
+#contour1{
+    width: var(--box-width);
+    height: calc(var(--box-width) - 2*var(--default-margin))
+}
+#contour2{
+    width: var(--box-width);
+    height: calc(var(--box-width) - 2*var(--default-margin))
 }
 
 svg image:hover{
