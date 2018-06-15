@@ -293,7 +293,7 @@ var links_data = [];
 var node;
 var link;
 let defaultThreshold = 0.75;
-let linkStrengthPower = 9;
+let linkStrengthPower = 10;
 var selectionCounter = 0;
 var selectionCircle;
 let defaultMargin = 20;
@@ -394,10 +394,9 @@ function drawGraph() {
             return "clipPath" + d.index;
         })
         .append("circle")
-        .attr("fill", "#ffffff")
+        .attr("fill", "black")
         .attr("r", graphNodeRadius);
 
-    // <image id="img" clip-path="url(#circleView)" x="15" y="15"/>
     var plot = g.append("g")
         .selectAll("image")
         .data(nodes_data)
@@ -406,9 +405,7 @@ function drawGraph() {
         .attr("id", (d) => {
             return "img" + d.index;
         })
-        .attr("clip-path", (d) => {
-            return "url(#clipPath" + d.index + ")"
-        })
+        .attr("clip-path", (d) => "url(#clipPath" + d.index + ")")
         .on("click", (d) => {
             selectionCounter = selectionCounter % 2;
             $("#option" + (selectionCounter + 1) + "Container").msDropDown().data("dd").setIndexByValue(d.value);
