@@ -35,7 +35,7 @@ function readData(fileName) {
 }
 
 var allElements = [];
-var defaultElementIndexes = [0, 1];
+var defaultElementIndexes = [4, 1];
 var theOptions = [];
 var currentColumnNames = [];
 var xContour = null;
