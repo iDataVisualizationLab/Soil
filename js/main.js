@@ -2,9 +2,10 @@ var data = null;
 let profiles = ["Profile1.csv", "Profile2.csv", "Profile3.csv"];
 let defaultProfileIndex = 0;
 let svgId = "#corcoefGraph";
-function loadProfiles(){
 
-    var data = profiles.map(d=>{
+function loadProfiles() {
+
+    var data = profiles.map(d => {
         return {
             value: d,
             text: d
@@ -13,14 +14,15 @@ function loadProfiles(){
     theProfile = createByJson("profileContainerDiv", data, "optionprofile", defaultProfileIndex, changeProfile);
     changeProfile({target: {value: profiles[defaultProfileIndex]}});
 }
+
 loadProfiles();
 
-function changeProfile(event){
+function changeProfile(event) {
     //Clean the graph layout
     d3.select(".loader").style("display", "block").style("opacity", 1.0);
     d3.select("#page").style("visibility", "hidden");
     d3.select(svgId).selectAll("*").remove();
-    readData("data/"+event.target.value);
+    readData("data/" + event.target.value);
 }
 
 function readData(fileName) {
@@ -43,6 +45,8 @@ var yContour = null;
 var elmConcentrations = [];
 var contourData = [];
 var theProfile;
+var opacitySliders = [];
+
 /*Handling data after loading*/
 function getColumn(data, columnName) {
     var column = [];
@@ -137,7 +141,7 @@ function setContourData(index) {
         z: elmConcentrations[index],
         type: 'contour',
         name: currentColumnNames[index],
-        showscale: true
+        showscale: false
     }];
 }
 
@@ -146,18 +150,33 @@ function plotContour(index) {
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
         margin: {
-            l: 30,
-            r: 80,
-            t: 30,
+            l: 20,
+            r: 35,
+            t: 60,
             b: 30,
             pad: 0,
             autoexpand: false
+        },
+        xaxis: {
+            showticklabels: true,
+            showgrid: false,
+            zeroline: false,
+            showline: false,
+            showticklabels: false
+        },
+        yaxis: {
+            showgrid: false,
+            zeroline: false,
+            showline: false,
+            showticklabels: false
         },
         font: {
             family: "Georgia,Times,serif"
         }
     }
     Plotly.newPlot('contour' + (index + 1), contourData[index], contourLayout);
+    //Now draw the threshold slider
+    opacitySliders[index] = drawThresholdSlider(d3.select("#plotOpacity" + (index + 1)).select("svg"), "Plot opacity", onOpacityThreshold);
 }
 
 function plotScatter() {
@@ -191,7 +210,7 @@ function plotScatter() {
         type: 'scatter',
         mode: 'lines',
         name: 'regression',
-        line:{
+        line: {
             color: "rgb(200, 0, 200)"
         }
     }
@@ -297,8 +316,11 @@ let linkStrengthPower = 10;
 var selectionCounter = 0;
 var selectionCircle;
 let defaultMargin = 20;
-function getGraphSize() {
-    var svg = d3.select(svgId);
+
+function getGraphSize(svg) {
+    if (!svg) {
+        svg = d3.select(svgId);
+    }
     var width = svg.node().getBoundingClientRect().width;
     var height = svg.node().getBoundingClientRect().height;
     return [width, height];
@@ -561,6 +583,7 @@ function linkWidth(d) {
     return corScale(d.value);
 }
 
+//<editor-fold desc="Section for the slider">*/
 function onThreshold(threshold) {
     links_data = setLinkData(threshold);
     link = link.data(links_data);
@@ -575,12 +598,25 @@ function onThreshold(threshold) {
     force.restart();
 }
 
-//<editor-fold desc="Section for the slider">*/
+function onOpacityThreshold(threshold) {
+    //synchronize the two sliders
+    opacitySliders[0].value(threshold);
+    opacitySliders[1].value(threshold);
+    d3.selectAll(".contour").selectAll(".cartesianlayer").style("opacity", threshold);
+
+}
+
 var sliderHeight = 24;
 var sliderWidth = 140;
 var sliderMarginRight = 20;
 
-function drawThresholdSlider(svg) {
+function drawThresholdSlider(svg, label, thresholdHandler) {
+    if (!thresholdHandler) {
+        thresholdHandler = onThreshold;
+    }
+    if (!label) {
+        label = "Correlation threshold";
+    }
     let corThreshold = d3.sliderHorizontal()
         .min(0)
         .max(1.0)
@@ -588,8 +624,8 @@ function drawThresholdSlider(svg) {
         .tickFormat(d3.format('.4'))
         .ticks(3)
         .default(defaultThreshold)
-        .on('onchange', onThreshold);
-    let graphSize = getGraphSize();
+        .on('onchange', thresholdHandler);
+    let graphSize = getGraphSize(svg);
     let graphWidth = graphSize[0];
     let graphHeight = graphSize[1];
     let sliderX = graphWidth - sliderWidth - sliderMarginRight;
@@ -600,9 +636,10 @@ function drawThresholdSlider(svg) {
     g.append("text")
         .attr("text-anchor", "start")
         .text("alignment-baseline", "ideographic")
-        .attr("dy", "-.71em")
-        .text("Correlation threshold");
+        .attr("dy", "-.4em")
+        .text(label);
     g.call(corThreshold);
+    return corThreshold;
 }
 
 //</editor-fold>
