@@ -32,6 +32,24 @@ function readData(fileName) {
             //Valid ID
             return validGridId(d["Grid ID"]);
         });
+        //Add data for the three formulas
+        data.map(row => {
+            //Calculate Ruxton weathering index
+            let si = (row["Si Concentration"] === "<LOD") ? 0 : +row["Si Concentration"];
+            let al = (row["Al Concentration"] === "<LOD") ? 0 : +row["Al Concentration"];
+            let Rwi = si / al;
+            row["Rwi Concentration"] = Rwi+"";
+            //Desilication index
+            let fe = (row["Fe Concentration"] === "<LOD") ? 0 : +row["Fe Concentration"];
+            let ti = (row["Ti Concentration"] === "<LOD") ? 0 : +row["Ti Concentration"];
+            let Di = si/(al+fe+ti);
+            row["Di Concentration"] = Di+"";
+            // Elemental ratio of elements resistant to weathering
+            let zr = (row["Zr Concentration"] === "<LOD") ? 0 : +row["Zr Concentration"];
+            let Rtw = ti/zr;
+            row["Rtw Concentration"] = Rtw+"";
+            return row;
+        });
         handleData(data);
     });
 }
@@ -74,6 +92,7 @@ function validGridId(id) {
 }
 
 function handleData(data) {
+
     allElements = getAllElements();
     //Set the two default current elements
     currentColumnNames[0] = allElements[defaultElementIndexes[0]].value;
