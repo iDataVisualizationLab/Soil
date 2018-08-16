@@ -68,15 +68,43 @@
     height: var(--box-height);
 }
 
-#option1Container{
-    width: var(--option1-width);
-    margin: 0 auto;
-}
-#option2Container{
-    width: var(--option2-width);
-    margin: 0 auto;
+.contourRoundedBorder{
+    border: 1px solid rgba(0,0,0, 1);
+    background-image: url("../data/images/profile12.png");
+    border-radius: 6px;
+    box-shadow: 5px 5px 5px #444;
+    width: var(--box-width);
+    height: 597px;
 }
 
+
+#option1Container{
+    position: absolute;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    width: var(--option1-width);
+}
+#option2Container{
+    position: absolute;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    width: var(--option2-width);
+}
+
+#plotOpacity1{
+    position: absolute;
+    margin-right: 10px;
+    margin-top: -10px;
+    width: 460px;
+    height: 50px;
+}
+#plotOpacity2{
+    position: absolute;
+    margin-right: 10px;
+    margin-top: -10px;
+    width: 460px;
+    height: 50px;
+}
 #corcoefGraphDiv{
     position: absolute;
     float: left;
@@ -137,4 +165,8 @@ svg image:hover{
     clip-path: circle(15px at center);
     -webkit-clip-path: circle(15px at center);
     -moz-clip-path: circle(15px at center)
+}
+
+.cartesianlayer{
+    opacity: 0.75;
 }
