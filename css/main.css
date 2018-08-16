@@ -1,43 +1,26 @@
 :root{
-    --page-width: 860px;
-    --page-height: 1000px;
+    --page-width: 980px;
     --default-margin: 20px;
-    --box-width: 400px;
+    --box-width: 460px;
     --box-height: var(--box-width);
 
     --corcoef-graph-margin-left: var(--default-margin);
-    --corcoef-graph-margin-top: 150px;
-
-    --control-panel-margin-left: var(--default-margin);
-    --control-panel-margin-top: var(--default-margin);
-    --control-panel-width: calc(var(--box-width) - 2*(var(--default-margin)));
+    --corcoef-graph-margin-top: var(--default-margin);
 
     --option1-width: 150px;
-    --option1-margin-top: 10px;
-    --option1-margin-left: var(--default-margin);
 
     --option2-width: var(--option1-width);
-    --option2-margin-top: var(--option1-margin-top);
-    --option2-margin-right: var(--default-margin);
 
     --msdropdown-height: 28px;/*28px is the default height of the msdropdown*/
-    --corcoef-margin-left: var(--default-margin);
-    --corcoef-margin-top: calc(var(--default-margin)*2 + var(--msdropdown-height));
 
-    --corr-threshold-margin-left: var(--default-margin);
-    --corr-threshold-width: calc(var(--control-panel-width) - 2*(var(--default-margin)));
-
-
-    --scatter-plot-margin-left: 440px;
+    --scatter-plot-margin-left: calc(var(--default-margin) + var(--box-width) + var(--default-margin));
     --scatter-plot-margin-top: var(--corcoef-graph-margin-top);
 
     --contour1-margin-left: var(--default-margin);
     --contour1-margin-top: calc(var(--corcoef-graph-margin-top) + var(--box-width) + var(--default-margin));
 
-    --contour2-margin-left: 440px;
+    --contour2-margin-left: var(--scatter-plot-margin-left);
     --contour2-margin-top: var(--contour1-margin-top);
-
-
 }
 /*<editor-fold desc="Section for the loader">*/
  .loader {
@@ -49,6 +32,7 @@
      -webkit-animation: spin 2s linear infinite; /* Safari */
      animation: spin 2s linear infinite;
      margin: 0 auto;
+     display: none;
  }
 
 /* Safari */
@@ -66,9 +50,14 @@
 #page{
     position: relative;
     width: var(--page-width);
-    height: var(--page-height);
     margin: 0 auto;
-    overflow: auto; /*This is to keep the layout from broken due to margin of the child elements*/
+    overflow: cover;
+}
+#profileDiv{
+    position: relative;
+    width: var(--page-width);
+    margin: 0 auto;
+    overflow: cover;
 }
 .roundedBorder{
     border: 1px solid rgba(0,0,0, 1);
@@ -79,36 +68,13 @@
     height: var(--box-height);
 }
 
-#controlPanel{
-    position: absolute;
-    border: 1px solid rgba(0,0,0, 1);
-    border-bottom: none;
-    background-color: rgba(255,255,255, 1);
-    border-radius: 6px;
-    width: var(--control-panel-width);
-    margin-left: calc(2*var(--default-margin));
-    margin-top: var(--control-panel-margin-top);
-}
-
 #option1Container{
-    z-index: 10;
     width: var(--option1-width);
-    margin-top: var(--option1-margin-top);
-    margin-left: var(--option1-margin-left);
-    float: left;
+    margin: 0 auto;
 }
 #option2Container{
-    z-index: 10;
     width: var(--option2-width);
-    margin-top: var(--option2-margin-top);
-    margin-right: var(--option2-margin-right);
-    float: right;
-}
-
-
-#corthreshold{
-    margin-left: var(--corr-threshold-margin-left);
-    width: var(--corr-threshold-width);
+    margin: 0 auto;
 }
 
 #corcoefGraphDiv{
@@ -117,8 +83,15 @@
     margin-left: var(--corcoef-graph-margin-left);
     margin-top: var(--corcoef-graph-margin-top);
 }
-
-#corcoefGraph text{
+#corcoefGraph{
+    width: var(--box-width);
+    height: calc(var(--box-width) - 3*var(--default-margin));;
+}
+#corcoefGraphTitle{
+    text-align: center;
+    margin-top: var(--default-margin);
+}
+.elementText{
     font-family: sans-serif;
     text-anchor: middle;
     font-size: 8px;
@@ -131,20 +104,37 @@
     margin-top: var(--scatter-plot-margin-top);
 }
 
-#contour1{
+#contour1Div{
     position: absolute;
     margin-left: var(--contour1-margin-left);
     margin-top: var(--contour1-margin-top);
 }
-#contour2{
+#contour2Div{
     position: absolute;
     margin-left: var(--contour2-margin-left);
     margin-top: var(--contour2-margin-top);
 }
+#contour1{
+    width: var(--box-width);
+    height: calc(var(--box-width) - 2*var(--default-margin))
+}
+#contour2{
+    width: var(--box-width);
+    height: calc(var(--box-width) - 2*var(--default-margin))
+}
 
 svg image:hover{
     cursor: pointer;
-    opacity: 0.7;
 }
 
+#profileContainerDiv{
+    margin-top: var(--default-margin);
+    margin-left: var(--default-margin);
+    width: 200px;
+}
 
+.myclip{
+    clip-path: circle(15px at center);
+    -webkit-clip-path: circle(15px at center);
+    -moz-clip-path: circle(15px at center)
+}

@@ -1,5 +1,28 @@
 var data = null;
-$("#page").css("visibility","hidden");
+let profiles = ["Profile1.csv", "Profile2.csv", "Profile3.csv"];
+let defaultProfileIndex = 0;
+let svgId = "#corcoefGraph";
+function loadProfiles(){
+
+    var data = profiles.map(d=>{
+        return {
+            value: d,
+            text: d
+        }
+    });
+    theProfile = createByJson("profileContainerDiv", data, "optionprofile", defaultProfileIndex, changeProfile);
+    changeProfile({target: {value: profiles[defaultProfileIndex]}});
+}
+loadProfiles();
+
+function changeProfile(event){
+    //Clean the graph layout
+    d3.select(".loader").style("display", "block").style("opacity", 1.0);
+    d3.select("#page").style("visibility", "hidden");
+    d3.select(svgId).selectAll("*").remove();
+    readData("data/"+event.target.value);
+}
+
 function readData(fileName) {
     d3.csv(fileName, function (error, rawData) {
         if (error) throw error;
@@ -11,13 +34,15 @@ function readData(fileName) {
     });
 }
 
+var allElements = [];
+var defaultElementIndexes = [4, 1];
 var theOptions = [];
 var currentColumnNames = [];
 var xContour = null;
 var yContour = null;
 var elmConcentrations = [];
 var contourData = [];
-
+var theProfile;
 /*Handling data after loading*/
 function getColumn(data, columnName) {
     var column = [];
@@ -45,7 +70,10 @@ function validGridId(id) {
 }
 
 function handleData(data) {
-    populateSelectors(data);
+    allElements = getAllElements();
+    //Set the two default current elements
+    currentColumnNames[0] = allElements[defaultElementIndexes[0]].value;
+    currentColumnNames[1] = allElements[defaultElementIndexes[1]].value;
     setContourX();
     setContourY();
     setElmConcentration(0);
@@ -55,12 +83,14 @@ function handleData(data) {
     setContourData(1);
     plotContour(0);
     plotContour(1);
+    populateSelectors(data);
     //Plot scatter
     plotScatter();
     //draw the correlation graph
     drawGraph();
-    d3.select(".loader").style("opacity", 1.0).transition().duration(1000).style("opacity", 1e-6).remove();
-    d3.select("#page").style("visibility", "visible").style("opacity", 0).transition().duration(5000).style("opacity", 1.0);
+    //Handling the loader spinner
+    d3.select(".loader").style("opacity", 1.0).transition().duration(1000).style("opacity", 1e-6).style("display", "none");
+    d3.select("#page").style("visibility", "visible").style("opacity", 1e-6).transition().duration(5000).style("opacity", 1.0);
 }
 
 //<editor-fold desc="functions to get information for the contours">
@@ -113,33 +143,32 @@ function setContourData(index) {
 
 function plotContour(index) {
     var contourLayout = {
-        title: currentColumnNames[index],
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
-        margin:{
+        margin: {
             l: 30,
             r: 80,
-            t: 80,
+            t: 30,
             b: 30,
             pad: 0,
             autoexpand: false
         },
-        font:{
-            family:"Georgia,Times,serif"
+        font: {
+            family: "Georgia,Times,serif"
         }
     }
-    Plotly.newPlot('contour' + (index+1), contourData[index], contourLayout);
+    Plotly.newPlot('contour' + (index + 1), contourData[index], contourLayout);
 }
 
 function plotScatter() {
     //Do the sorting.
-    var scatterData = data.map(function(d){
+    var scatterData = data.map(function (d) {
         var result = {};
-        result[currentColumnNames[0]] = (d[currentColumnNames[0]].indexOf('<LOD') != -1) ? 0: +d[currentColumnNames[0]];
-        result[currentColumnNames[1]] = (d[currentColumnNames[1]].indexOf('<LOD') != -1) ? 0: +d[currentColumnNames[1]];
+        result[currentColumnNames[0]] = (d[currentColumnNames[0]].indexOf('<LOD') != -1) ? 0 : +d[currentColumnNames[0]];
+        result[currentColumnNames[1]] = (d[currentColumnNames[1]].indexOf('<LOD') != -1) ? 0 : +d[currentColumnNames[1]];
         return result;
     });
-    scatterData.sort(function(a, b){
+    scatterData.sort(function (a, b) {
         return a[currentColumnNames[0]] - b[currentColumnNames[0]];
     });
 
@@ -152,13 +181,19 @@ function plotScatter() {
         y: yData,
         type: 'scatter',
         mode: 'markers',
-        name: 'data'
+        name: 'data',
+        marker: {
+            color: "black"
+        }
     }, {
-       x: xData,
-       y: yPredictedData,
-       type: 'scatter',
-       mode: 'lines',
-        name: 'regression'
+        x: xData,
+        y: yPredictedData,
+        type: 'scatter',
+        mode: 'lines',
+        name: 'regression',
+        line:{
+            color: "rgb(200, 0, 200)"
+        }
     }
     ];
 
@@ -167,21 +202,31 @@ function plotScatter() {
         xaxis: {
             title: currentColumnNames[0]
         },
-        yaxis:{
+        yaxis: {
             title: currentColumnNames[1]
         },
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
-        font:{
-            family:"Georgia,Times,serif"
+        font: {
+            family: "Georgia,Times,serif"
+        },
+        margin: {
+            l: 80,
+            r: 80,
+            t: 70,
+            b: 80,
+            pad: 0,
+            autoexpand: false
         }
     }
     Plotly.newPlot('scatterPlot', scatterTraces, layout);
 }
-function getCurrentCorrelation(){
+
+function getCurrentCorrelation() {
     var corcoef = pearsonCorcoef(elmConcentrations[0], elmConcentrations[1]);
-    return Math.round(corcoef * 1000)/1000;
+    return Math.round(corcoef * 1000) / 1000;
 }
+
 //</editor-fold>
 /*Creating the the selection box*/
 function createByJson(div, jsonData, name, selectedIndex, changeHandler, width) {
@@ -202,17 +247,16 @@ function getAllElements() {
     for (var i = 0; i < elements.length; i++) {
         jsonData.push({value: elements[i], text: elements[i]});
     }
-    jsonData.sort((a, b) => {return a.text.localeCompare(b.text);});
+    jsonData.sort((a, b) => {
+        return a.text.localeCompare(b.text);
+    });
     return jsonData;
 }
 
 function populateSelectors() {
     //headers
-    var jsonData = getAllElements();
-    theOptions[0] = createByJson("option1Container", jsonData, "option1", 0, updateElement1);
-    theOptions[1] = createByJson("option2Container", jsonData, "option2", 1, updateElement2);
-    currentColumnNames[0] = theOptions[0].val();
-    currentColumnNames[1] = theOptions[1].val();
+    theOptions[0] = createByJson("option1Container", allElements, "option1", defaultElementIndexes[0], updateElement1);
+    theOptions[1] = createByJson("option2Container", allElements, "option2", defaultElementIndexes[1], updateElement2);
 }
 
 /*Updating data when the option changes*/
@@ -232,45 +276,51 @@ function updateElement(index) {
     plotContour(index);
     //Update Scatter
     plotScatter();
+    //Reset the selection circles of the correlation graph.
+    resetSelectionCircles();
 }
 
 /*Section for the force directed layout of the correlation graph*/
-var graphNodeRadius = 12;
+let graphNodeRadius = 12;
+let mouseOverExpand = 6;
+let selectionStrokeWidth = 3;
 var force;
-var maxLinkWidth = 2;
-var minLinkWidth = 0.5;
+let maxLinkWidth = 2;
+let minLinkWidth = 0.5;
 var corScale;
-var nodes_data=[];
-var links_data=[];
-var svgId = "#corcoefGraph";
+var nodes_data = [];
+var links_data = [];
 var node;
 var link;
-var defaultThreshold = 0.75;
-var linkStrengthPower = 8;
+let defaultThreshold = 0.75;
+let linkStrengthPower = 10;
 var selectionCounter = 0;
-function getGraphSize(){
+var selectionCircle;
+let defaultMargin = 20;
+function getGraphSize() {
     var svg = d3.select(svgId);
     var width = svg.node().getBoundingClientRect().width;
     var height = svg.node().getBoundingClientRect().height;
     return [width, height];
 }
-function createForce(){
+
+function createForce() {
     var graphSize = getGraphSize(),
         width = graphSize[0],
         height = graphSize[1];
     var myForce = d3.forceSimulation()
         .velocityDecay(0.5)
         .alphaDecay(0)
-        .force("charge", d3.forceManyBody().strength(-100).distanceMin(4*graphNodeRadius))
-        .force("collision", d3.forceCollide(2*graphNodeRadius).strength(1))
-        .force("x", d3.forceX(width/2))
-        .force("y", d3.forceY(height/2));
+        .force("charge", d3.forceManyBody().strength(-80).distanceMin(4 * graphNodeRadius))
+        .force("collision", d3.forceCollide(2 * graphNodeRadius).strength(1))
+        .force("x", d3.forceX(width / 2))
+        .force("y", d3.forceY(height / 2));
 
     force = myForce;
     return myForce;
 }
 
-function getNodes(){
+function getNodes() {
     nodes_data = getAllElements();
     return nodes_data;
 }
@@ -285,17 +335,19 @@ function setLinkData(threshold) {
             var corcoef = pearsonCorcoef(u, v);
             var type = (corcoef >= 0) ? "positive" : "negative"
             var corcoefabs = Math.abs(Math.round(corcoef * 1000) / 1000);
-            if(corcoefabs>=threshold){
+            if (corcoefabs >= threshold) {
                 links.push({source: nodes_data[i], target: nodes_data[j], type: type, value: corcoefabs});
             }
         }
     }
     links_data = [];
-    links.forEach(e => {links_data.push(e)});
+    links.forEach(e => {
+        links_data.push(e)
+    });
     return links;
 }
 
-function getCorScale(links_data){
+function getCorScale(links_data) {
 
     var maxCor = d3.max(links_data, function (d) {
         return d.value;
@@ -338,42 +390,69 @@ function drawGraph() {
         .data(nodes_data)
         .enter()
         .append("clipPath")
-        .attr("id", (d) => {return "clipPath"+d.index;})
+        .attr("id", (d) => {
+            return "clipPath" + d.index;
+        })
         .append("circle")
-        .attr("fill", "#ffffff")
+        .attr("fill", "black")
         .attr("r", graphNodeRadius);
 
-    // <image id="img" clip-path="url(#circleView)" x="15" y="15"/>
     var plot = g.append("g")
-        .attr("class", "nodes")
         .selectAll("image")
         .data(nodes_data)
         .enter()
         .append("image")
-        .attr("id", (d)=>{return "img"+d.index;})
-        .attr("clip-path", (d)=>{return "url(#clipPath" + d.index + ")"})
-        .on("click", (d)=>{
+        .attr("id", (d) => {
+            return "img" + d.index;
+        })
+        .attr("clip-path", (d) => "url(#clipPath" + d.index + ")")
+        .on("click", (d) => {
             selectionCounter = selectionCounter % 2;
-            $("#option" + (selectionCounter+1) + "Container").msDropDown().data("dd").setIndexByValue(d.value);
+            $("#option" + (selectionCounter + 1) + "Container").msDropDown().data("dd").setIndexByValue(d.value);
             updateElement(selectionCounter);
             selectionCounter += 1;
+
+        }).on("mouseover", (d) => {
+            d3.select("#clipPath" + d.index + " circle").attr("r", graphNodeRadius + mouseOverExpand);
+            d3.select("#circle" + d.index).attr("r", graphNodeRadius + mouseOverExpand);
+            d3.select("#label" + d.index).attr("dy", graphNodeRadius + mouseOverExpand);
+        }).on("mouseout", (d) => {
+            d3.select("#clipPath" + d.index + " circle").attr("r", graphNodeRadius);
+            d3.select("#circle" + d.index).attr("r", graphNodeRadius);
+            d3.select("#label" + d.index).attr("dy", graphNodeRadius);
         });
 
+    selectionCircle = g.append("g")
+        .selectAll("circle")
+        .data(nodes_data)
+        .enter()
+        .append("circle")
+        .attr("id", (d) => "circle" + d.index)
+        .attr("r", graphNodeRadius)
+        .attr("stroke-width", selectionStrokeWidth)
+        .attr("stroke", "black")
+        .attr("fill", "none")
+        .attr("visibility", (d) => (d.value === currentColumnNames[0] || (d.value === currentColumnNames[1])) ? "visible" : "hidden");
+
+
     //Plot to the images
-    generateNodesWithSVGData(graphNodeRadius*2 + 2, graphNodeRadius*2 + 2, nodes_data);
+    generateNodesWithSVGData((graphNodeRadius + mouseOverExpand) * 2, (graphNodeRadius + mouseOverExpand) * 2, nodes_data);
     //Lablel
     var label = g.append("g")
         .selectAll("text")
         .data(nodes_data)
         .enter().append("text")
+        .attr("class", "elementText")
         .text((d) => {
             return d.text.split(" ")[0];
-        }).attr("dy", graphNodeRadius);
+        })
+        .attr("id", (d) => "label" + d.index)
+        .attr("dy", graphNodeRadius);
 
     force.on("tick", tickHandler);
 
     function tickHandler() {
-        if(node){
+        if (node) {
             node
                 .attr("cx", function (d) {
                     return d.x = boundX(d.x);
@@ -382,17 +461,21 @@ function drawGraph() {
                     return d.y = boundY(d.y);
                 });
         }
-        if(plot){
+        if (plot) {
             plot
-                .attr("x", (d) =>{
-                    return d.x - graphNodeRadius;
+                .attr("x", (d) => {
+                    return d.x - graphNodeRadius - mouseOverExpand;
                 })
-                .attr("y", (d)=>{
-                    return d.y - graphNodeRadius;
+                .attr("y", (d) => {
+                    return d.y - graphNodeRadius - mouseOverExpand;
                 })
         }
+        if (selectionCircle) {
+            selectionCircle.attr("cx", (d) => d.x);
+            selectionCircle.attr("cy", (d) => d.y);
+        }
         //update link positions
-        if(link){
+        if (link) {
             link
                 .attr("x1", function (d) {
                     return d.source.x;
@@ -410,8 +493,7 @@ function drawGraph() {
 
 
         //update label positions
-        if(label)
-        {
+        if (label) {
             label
                 .attr("x", function (d) {
                     return d.x;
@@ -421,6 +503,7 @@ function drawGraph() {
                 });
         }
     }
+
     //Handling drag
     var dragHandler = d3.drag()
         .on("start", dragStart)
@@ -453,13 +536,23 @@ function drawGraph() {
     function zoomActions() {
         g.attr("transform", d3.event.transform);
     }
-    function boundX(x){
-        return (x > width - graphNodeRadius*2) ? width-graphNodeRadius*2: (x<graphNodeRadius*2? graphNodeRadius*2 : x);
+
+    function boundX(x) {
+        return (x > width - graphNodeRadius * 2) ? width - graphNodeRadius * 2 : (x < graphNodeRadius * 2 ? graphNodeRadius * 2 : x);
     }
-    function boundY(y){
-        return (y > height - graphNodeRadius*2) ? height-graphNodeRadius*2: (y<graphNodeRadius*2? graphNodeRadius*2: y);
+
+    function boundY(y) {
+        return (y > height - graphNodeRadius * 2) ? height - graphNodeRadius * 2 : (y < graphNodeRadius * 2 ? graphNodeRadius * 2 : y);
     }
+
+    //Now draw the threshold slider
+    drawThresholdSlider(svg);
 }
+
+function resetSelectionCircles() {
+    selectionCircle.attr("visibility", (d) => (d.value === currentColumnNames[0] || (d.value === currentColumnNames[1])) ? "visible" : "hidden");
+}
+
 function linkColor(d) {
     return d.type == 'positive' ? 'green' : 'red';
 }
@@ -468,7 +561,7 @@ function linkWidth(d) {
     return corScale(d.value);
 }
 
-function onThreshold(threshold){
+function onThreshold(threshold) {
     links_data = setLinkData(threshold);
     link = link.data(links_data);
     link.exit().remove();
@@ -483,22 +576,35 @@ function onThreshold(threshold){
 }
 
 //<editor-fold desc="Section for the slider">*/
-$(document).ready(function () {
+var sliderHeight = 24;
+var sliderWidth = 140;
+var sliderMarginRight = 20;
 
-    var corThreshold = d3.sliderHorizontal()
+function drawThresholdSlider(svg) {
+    let corThreshold = d3.sliderHorizontal()
         .min(0)
         .max(1.0)
-        .width("310")
+        .width(sliderWidth)
         .tickFormat(d3.format('.4'))
         .ticks(3)
         .default(defaultThreshold)
         .on('onchange', onThreshold);
-    var g = d3.select("div#corthreshold").append("svg")
-        .attr("style", "width: 100%")
-        .append("g")
-        .attr("transform", "translate(7,17)");
+    let graphSize = getGraphSize();
+    let graphWidth = graphSize[0];
+    let graphHeight = graphSize[1];
+    let sliderX = graphWidth - sliderWidth - sliderMarginRight;
+    let sliderY = graphHeight - sliderHeight;
+    var g = svg.append("g")
+        .attr("transform", "translate(" + sliderX + "," + sliderY + ")");
+
+    g.append("text")
+        .attr("text-anchor", "start")
+        .text("alignment-baseline", "ideographic")
+        .attr("dy", "-.71em")
+        .text("Correlation threshold");
     g.call(corThreshold);
-});
+}
+
 //</editor-fold>
 //<editor-fold desc = "Section for the image generator">
 /*Section for the image on the graph nodes*/
@@ -514,8 +620,8 @@ function generateNodesWithSVGData(imgWidth, imgHeight, nodes_data) {
             zeroline: false,
             showline: false,
             autotick: true,
-            ticks:'',
-            showticklabels:false
+            ticks: '',
+            showticklabels: false
         },
         yaxis: {
             autorange: true,
@@ -523,10 +629,10 @@ function generateNodesWithSVGData(imgWidth, imgHeight, nodes_data) {
             zeroline: false,
             showline: false,
             autotick: true,
-            ticks:'',
-            showticklabels:false
+            ticks: '',
+            showticklabels: false
         },
-        margin:{
+        margin: {
             l: 0,
             r: 0,
             t: 0,
@@ -536,7 +642,7 @@ function generateNodesWithSVGData(imgWidth, imgHeight, nodes_data) {
         }
     };
 
-    nodes_data.forEach(function(d){
+    nodes_data.forEach(function (d) {
         var aDiv = document.createElement("div");
         var z = getNumberColumn(data, d.value);
         var contourData = [
@@ -549,8 +655,8 @@ function generateNodesWithSVGData(imgWidth, imgHeight, nodes_data) {
             }
         ];
         Plotly.plot(aDiv, contourData, layout).then(
-            function(gd){
-                Plotly.toImage(gd, {format: 'svg', width: imgWidth, height: imgHeight}).then(function(svgData) {
+            function (gd) {
+                Plotly.toImage(gd, {format: 'svg', width: imgWidth, height: imgHeight}).then(function (svgData) {
                     //d.svgData = svgData;
                     d3.select("#img" + d.index).attr("xlink:href", svgData);
                 });
@@ -558,4 +664,5 @@ function generateNodesWithSVGData(imgWidth, imgHeight, nodes_data) {
         );
     });
 }
+
 //</editor-fold>
