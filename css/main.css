@@ -16,11 +16,18 @@
     --scatter-plot-margin-left: calc(var(--default-margin) + var(--box-width) + var(--default-margin));
     --scatter-plot-margin-top: var(--corcoef-graph-margin-top);
 
+    --contour-height: 597px;
     --contour1-margin-left: var(--default-margin);
     --contour1-margin-top: calc(var(--corcoef-graph-margin-top) + var(--box-width) + var(--default-margin));
 
     --contour2-margin-left: var(--scatter-plot-margin-left);
     --contour2-margin-top: var(--contour1-margin-top);
+
+    --boxPlot1-margin-left: var(--contour1-margin-left);
+    --boxPlot1-margin-top: calc(var(--contour1-margin-top) + var(--contour-height) + var(--default-margin));
+
+    --boxPlot2-margin-left: var(--contour2-margin-left);
+    --boxPlot2-margin-top: var(--boxPlot1-margin-top);
 }
 /*<editor-fold desc="Section for the loader">*/
  .loader {
@@ -74,7 +81,8 @@
     border-radius: 6px;
     box-shadow: 5px 5px 5px #444;
     width: var(--box-width);
-    height: 597px;
+    height: var(--contour-height);
+    margin-bottom: var(--default-margin);
 }
 
 
@@ -151,6 +159,24 @@
     height: calc(var(--box-width) - 2*var(--default-margin))
 }
 
+#boxPlot1Div{
+    position: absolute;
+    margin-left: var(--boxPlot1-margin-left);
+    margin-top: var(--boxPlot1-margin-top);
+}
+#boxPlot2Div{
+    position: absolute;
+    margin-left: var(--boxPlot2-margin-left);
+    margin-top: var(--boxPlot2-margin-top);
+}
+#boxPlot1{
+    width: var(--box-width);
+    height: calc(var(--box-width) - 2*var(--default-margin))
+}
+#boxPlot2{
+    width: var(--box-width);
+    height: calc(var(--box-width) - 2*var(--default-margin))
+}
 svg image:hover{
     cursor: pointer;
 }

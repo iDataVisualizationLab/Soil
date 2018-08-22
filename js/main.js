@@ -33,21 +33,39 @@ function readData(fileName) {
             return validGridId(d["Grid ID"]);
         });
         //Add data for the three formulas
+        let alAW = 26.9815385,
+            oAW = 15.999,
+            siAW = 28.085,
+            feAW = 55.845,
+            tiAW = 47.867,
+            Al2O3AW = alAW * 2 + oAW * 3,
+            alRatio = alAW * 2 / Al2O3AW,
+            siO2AW = siAW + 2 * oAW,
+            siRatio = siAW / siO2AW,
+            Fe2O3AW = feAW * 2 + oAW * 3,
+            feRatio = feAW * 2 / Fe2O3AW,
+            tiO2AW = tiAW + 2 * oAW,
+            tiRatio = tiAW / tiO2AW;
+
         data.map(row => {
             //Calculate Ruxton weathering index
-            let si = (row["Si Concentration"] === "<LOD") ? 0 : +row["Si Concentration"];
-            let al = (row["Al Concentration"] === "<LOD") ? 0 : +row["Al Concentration"];
-            let Rwi = si / al;
-            row["Rwi Concentration"] = Rwi+"";
+            let si = (row["Si Concentration"] === "<LOD") ? 0 : +row["Si Concentration"],
+                al = (row["Al Concentration"] === "<LOD") ? 0 : +row["Al Concentration"],
+                al2o3 = al / alRatio,
+                sio2 = si / siRatio;
+            let Rwi = sio2 / al2o3;
+            row["Rwi Concentration"] = Rwi + "";
             //Desilication index
-            let fe = (row["Fe Concentration"] === "<LOD") ? 0 : +row["Fe Concentration"];
-            let ti = (row["Ti Concentration"] === "<LOD") ? 0 : +row["Ti Concentration"];
-            let Di = si/(al+fe+ti);
-            row["Di Concentration"] = Di+"";
+            let fe = (row["Fe Concentration"] === "<LOD") ? 0 : +row["Fe Concentration"],
+                ti = (row["Ti Concentration"] === "<LOD") ? 0 : +row["Ti Concentration"],
+                fe2o3 = fe/feRatio,
+                tio2 = ti/tiRatio;
+            let Di = sio2 / (al2o3 + fe2o3 + tio2);
+            row["Di Concentration"] = Di + "";
             // Elemental ratio of elements resistant to weathering
             let zr = (row["Zr Concentration"] === "<LOD") ? 0 : +row["Zr Concentration"];
-            let Rtw = ti/zr;
-            row["Rtw Concentration"] = Rtw+"";
+            let Rtw = ti / zr;
+            row["Rtw Concentration"] = Rtw + "";
             return row;
         });
         handleData(data);
@@ -62,6 +80,7 @@ var xContour = null;
 var yContour = null;
 var elmConcentrations = [];
 var contourData = [];
+var boxPlotData = [];
 var theProfile;
 var opacitySliders = [];
 
@@ -79,7 +98,10 @@ function getNumberColumn(data, columnName) {
     d3.map(data, function (d) {
         if (d[columnName].indexOf('<LOD') != -1) {
             column.push(0);
-        } else {
+        } else if(!d[columnName]){
+            column.push(null);
+        }
+        else {
             column.push(+d[columnName]);
         }
     });
@@ -89,6 +111,23 @@ function getNumberColumn(data, columnName) {
 function validGridId(id) {
     var re = /^[A-Z]\d\d$/g;
     return id != null && id.match(re) != null;
+}
+
+function plotTypeChange() {
+    if ($("#contourPlotType").is(":checked")) {
+        plotType = 'contour';
+    } else {
+        plotType = 'heatmap';
+    }
+    plotGridMaps();
+}
+
+function plotGridMaps() {
+    //Plot contour
+    setContourData(0);
+    setContourData(1);
+    plotContour(0);
+    plotContour(1);
 }
 
 function handleData(data) {
@@ -101,16 +140,14 @@ function handleData(data) {
     setContourY();
     setElmConcentration(0);
     setElmConcentration(1);
-    //Plot contour
-    setContourData(0);
-    setContourData(1);
-    plotContour(0);
-    plotContour(1);
+    plotGridMaps();
     populateSelectors(data);
     //Plot scatter
     plotScatter();
     //draw the correlation graph
     drawGraph();
+    //Plot the box plots
+    plotBoxPlots();
     //Handling the loader spinner
     d3.select(".loader").style("opacity", 1.0).transition().duration(1000).style("opacity", 1e-6).style("display", "none");
     d3.select("#page").style("visibility", "visible").style("opacity", 1e-6).transition().duration(5000).style("opacity", 1.0);
@@ -153,49 +190,158 @@ function setElmConcentration(index) {
     elmConcentrations[index] = getNumberColumn(data, currentColumnNames[index]);
 }
 
+let plotType = 'contour'
+
 function setContourData(index) {
     contourData[index] = [{
         x: xContour,
         y: yContour,
         z: elmConcentrations[index],
-        type: 'contour',
+        type: plotType,
         name: currentColumnNames[index],
-        showscale: false
+        showscale: true,
+        colorscale: 'Jet',
+        line: {
+            smoothing: 0.5,
+            color: 'rgba(0, 0, 0,0)'
+        },
+        colorbar: {
+            tickfont: {
+                color: 'white'
+            }
+        },
+        connectgaps: true,
+
+
     }];
 }
+
+let plotMargins = {
+    l: 20,
+    r: 80,
+    t: 50,
+    b: 30,
+    pad: 0,
+    autoexpand: false
+};
 
 function plotContour(index) {
     var contourLayout = {
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
-        margin: {
-            l: 20,
-            r: 35,
-            t: 60,
-            b: 30,
-            pad: 0,
-            autoexpand: false
-        },
+        margin: plotMargins,
         xaxis: {
+            gridcolor: '#bdbdbd',
+            linecolor: '#636363',
             showticklabels: true,
-            showgrid: false,
-            zeroline: false,
-            showline: false,
-            showticklabels: false
+            autotick: false,
+            tickfont: {
+                family: "Impact",
+                size: 12,
+                color: "black"
+            }
         },
         yaxis: {
-            showgrid: false,
-            zeroline: false,
-            showline: false,
-            showticklabels: false
+            gridcolor: '#bdbdbd',
+            linecolor: '#636363',
+            showticklabels: true,
+            autotick: false,
+            tickfont: {
+                family: "Impact",
+                size: 12,
+                color: "white"
+            }
         },
         font: {
             family: "Georgia,Times,serif"
-        }
+        },
+        shapes: d3.range(1, 11, 1)
+            .map(makeLineVert)
+            .concat(d3.range(0, 13, 1)
+                .map(makeLineHoriz)
+            ),//For displayinbg the gridlines
     }
     Plotly.newPlot('contour' + (index + 1), contourData[index], contourLayout);
-    //Now draw the threshold slider
+    //Now draw the threshold slider if it is not drawn
+    d3.select("#plotOpacity" + (index + 1)).select("svg").selectAll("*").remove();
     opacitySliders[index] = drawThresholdSlider(d3.select("#plotOpacity" + (index + 1)).select("svg"), "Plot opacity", onOpacityThreshold);
+
+    function makeLineVert(x) {
+        return {
+            type: 'line',
+            xref: 'x',
+            yref: 'paper',
+            x0: x,
+            y0: 0,
+            x1: x,
+            y1: 1,
+            line: {
+                color: '#636363',
+                width: 1
+            }
+        };
+    }
+
+    function makeLineHoriz(y) {
+        return {
+            type: 'line',
+            xref: 'paper',
+            yref: 'y',
+            x0: 0,
+            y0: y,
+            x1: 1,
+            y1: y,
+            line: {
+                color: '#636363',
+                width: 1
+            }
+        };
+    }
+}
+
+function setBoxPlotData(index) {
+    boxPlotData[index] = [{
+        x: elmConcentrations[index],
+        y: yContour,
+        type: 'box',
+        name: currentColumnNames[index],
+        boxmean: false,
+        orientation: 'h'
+    }];
+}
+
+function plotBoxPlot(index) {
+    var layout = {
+        paper_bgcolor: 'rgba(255,266,255,.75)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        title: currentColumnNames[index],
+        margin: plotMargins,
+        xaxis: {
+            tickfont: {
+                family: "Impact",
+                size: 12,
+                color: "black"
+            }
+        },
+        yaxis: {
+
+            tickfont: {
+                family: "Impact",
+                size: 12,
+                color: "black"
+            }
+        },
+        boxmode: 'group'
+    };
+
+    Plotly.newPlot('boxPlot' + (index + 1), boxPlotData[index], layout);
+}
+
+function plotBoxPlots() {
+    setBoxPlotData(0);
+    plotBoxPlot(0);
+    setBoxPlotData(1);
+    plotBoxPlot(1);
 }
 
 function plotScatter() {
@@ -314,6 +460,9 @@ function updateElement(index) {
     plotContour(index);
     //Update Scatter
     plotScatter();
+    //Update the box plot
+    setBoxPlotData(index);
+    plotBoxPlot(index);
     //Reset the selection circles of the correlation graph.
     resetSelectionCircles();
 }
@@ -401,6 +550,7 @@ function getCorScale(links_data) {
     return corScale;
 }
 
+//<editor-fold desc="Draw the force directed graph">
 function drawGraph() {
     var svg = d3.select(svgId);
     var graphSize = getGraphSize();
@@ -601,6 +751,8 @@ function linkColor(d) {
 function linkWidth(d) {
     return corScale(d.value);
 }
+
+//</editor-fold>
 
 //<editor-fold desc="Section for the slider">*/
 function onThreshold(threshold) {

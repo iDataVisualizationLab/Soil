@@ -25,6 +25,12 @@
 <body>
 <div id="profileDiv">
     <div id="profileContainerDiv"></div>
+    <div style="margin-left: 20px">
+        <input id="contourPlotType" type="radio" name="plotType" value="Contour" checked onchange="plotTypeChange()" />
+        <label for="contourPlotType">Contour</label>
+        <input id="heatmapPlotType" type="radio" name="plotType" value="Heatmap" onchange="plotTypeChange()" />
+        <label for="heatmapPlotType">Heatmap</label>
+    </div>
 </div>
 <div class="loader"></div>
 <div id="page">
@@ -46,6 +52,12 @@
         <div id="plotOpacity2">
             <svg width="100%" height="100%"></svg>
         </div>
+    </div>
+    <div id="boxPlot1Div" class="contourRoundedBorder">
+        <div id="boxPlot1" class="boxPlot" style="height: 550px; width: 460px;"></div>
+    </div>
+    <div id="boxPlot2Div" class="contourRoundedBorder">
+        <div id="boxPlot2" class="boxPlot" style="height: 550px; width: 460px;"></div>
     </div>
 </div>
 <!--main data processing file-->
