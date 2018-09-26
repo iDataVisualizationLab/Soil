@@ -407,7 +407,7 @@ function plotScatter() {
 }
 
 function getCurrentCorrelation() {
-    var corcoef = pearsonCorcoef(elmConcentrations[0], elmConcentrations[1]);
+    var corcoef = ss.sampleCorrelation(elmConcentrations[0], elmConcentrations[1]);
     return Math.round(corcoef * 1000) / 1000;
 }
 
@@ -522,7 +522,7 @@ function setLinkData(threshold) {
         var u = getNumberColumn(data, nodes_data[i].value)
         for (var j = i + 1; j < nodes_data.length; j++) {
             var v = getNumberColumn(data, nodes_data[j].value);
-            var corcoef = pearsonCorcoef(u, v);
+            var corcoef = ss.sampleCorrelation(u, v);
             var type = (corcoef >= 0) ? "positive" : "negative"
             var corcoefabs = Math.abs(Math.round(corcoef * 1000) / 1000);
             if (corcoefabs >= threshold) {
