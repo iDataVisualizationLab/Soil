@@ -53,19 +53,19 @@ function readData(fileName) {
                 al = (row["Al Concentration"] === "<LOD") ? 0 : +row["Al Concentration"],
                 al2o3 = al / alRatio,
                 sio2 = si / siRatio;
-            let Rwi = sio2 / al2o3;
-            row["Rwi Concentration"] = Rwi + "";
+            let RI = sio2 / al2o3;
+            row["RI Concentration"] = RI + "";
             //Desilication index
             let fe = (row["Fe Concentration"] === "<LOD") ? 0 : +row["Fe Concentration"],
                 ti = (row["Ti Concentration"] === "<LOD") ? 0 : +row["Ti Concentration"],
                 fe2o3 = fe/feRatio,
                 tio2 = ti/tiRatio;
-            let Di = sio2 / (al2o3 + fe2o3 + tio2);
-            row["Di Concentration"] = Di + "";
+            let DI = sio2 / (al2o3 + fe2o3 + tio2);
+            row["DI Concentration"] = DI + "";
             // Elemental ratio of elements resistant to weathering
             let zr = (row["Zr Concentration"] === "<LOD") ? 0 : +row["Zr Concentration"];
-            let Rtw = ti / zr;
-            row["Rtw Concentration"] = Rtw + "";
+            let SR = ti / zr;
+            row["SR Concentration"] = SR + "";
             return row;
         });
         handleData(data);
