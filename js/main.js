@@ -230,31 +230,40 @@ let colorScales = {
     'Zr Concentration': {values:[134, 220, 260, 280, 300, 370], colors: colors5},
 }
 function smoothenData(contourData){
+
     //Covnert the data into object for faster accessing.
     let letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"];
-    let letterLength = letters.length;
     let digits = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"];
-    let digitLength = digits.length;
-    let dataObj = {}
-    for (let i = 0; i < contourData.z.length; i++) {
-        dataObj[contourData.y[i]+'-'+contourData.x[i]] = contourData.z[i];
-    }
-    for (let i = 0; i < contourData.z.length; i++) {
-        let letterIndex = letters.indexOf(contourData.y[i]) - 1;
-        let digitIndex = digits.indexOf(contourData.x[i]) - 1;
-        let valuesToAverage = [];
-        for (let j = 0; j < 3; j++) {
-            let li = letterIndex + j;
-            if(li>=0 && li < letterLength){
-                for (let k = 0; k < 3 ; k++) {
-                    let di = digitIndex + k;
-                    if(di >= 0 && di < digitLength){
-                        valuesToAverage.push(dataObj[letters[li]+'-'+digits[di]]);
-                    }
-                }
-            }
+
+    let t = [];
+    let x = [];
+    let y = [];
+    //Remove outliers
+    let q95 = ss.quantile(contourData.z, 0.95);
+    let q05 = ss.quantile(contourData.z, 0.05);
+    for (let i = 0; i < contourData.z.length ; i++) {
+        if(contourData.z[i] <= q95 && contourData.z[i] >= q05){
+            t.push(contourData.z[i]);
+            x.push(digits.indexOf(contourData.x[i]));
+            y.push(letters.indexOf(contourData.y[i]));
         }
-        contourData.z[i] = d3.mean(valuesToAverage);
+    }
+    // var model = "exponential";
+    let model = "spherical";
+    // let model = "gaussian";
+    let sigma2 = 0, alpha = 10000;
+    let variogram = kriging.train(t, x, y, model, sigma2, alpha);
+    //Now interpolate data (step) at a point
+    contourData.z = [];
+    contourData.x = [];
+    contourData.y = [];
+    let step = 0.2;
+    for (let i = 0; i < digits.length; i=i+step) {
+        for (let j = 0; j < letters.length; j = j+step) {
+            contourData.x.push(i);
+            contourData.y.push(j);
+            contourData.z.push(kriging.predict(i, j, variogram))
+        }
     }
 }
 function setContourData(index) {
@@ -288,8 +297,9 @@ function setContourData(index) {
         },
         connectgaps: true,
     }];
-    //smoothenData(contourData[index][0]);
+    smoothenData(contourData[index][0]);
 }
+
 
 let plotMargins = {
     l: 20,
