@@ -130,9 +130,16 @@ function validGridId(id) {
 }
 
 function plotTypeChange() {
-    if ($("#contourPlotType").is(":checked")) {
+    if ($("#contourPlotTypeS").is(":checked")) {
+        plotTypeSelection = 'contours';
         plotType = 'contour';
-    } else {
+    }
+    if ($("#contourPlotTypeR").is(":checked")) {
+        plotTypeSelection = 'contourr';
+        plotType = 'heatmap';
+    }
+    if ($("#heatmapPlotType").is(":checked")) {
+        plotTypeSelection = 'heatmap';
         plotType = 'heatmap';
     }
     plotGridMaps();
@@ -206,7 +213,8 @@ function setElmConcentration(index) {
     elmConcentrations[index] = getNumberColumn(data, currentColumnNames[index]);
 }
 
-let plotType = 'contour'
+let plotType = 'heatmap';
+let plotTypeSelection = 'contourr';
 let colors5 =  ["#4A8FC2", "#A6C09D", "#FAFA7C", "#EC9248", "#D63128"];
 let colorScales = {
     'Al Concentration': {values: [1.6*10000, 2.7*10000, 3.9*10000, 5.1*10000, 6.3*10000, 7.9*10000], colors: colors5},
@@ -253,7 +261,7 @@ function smoothenData(contourData){
     contourData.z = [];
     contourData.x = [];
     contourData.y = [];
-    let step = 0.2;
+    let step = 0.05;
     for (let i = 0; i < digits.length; i=i+step) {
         for (let j = 0; j < letters.length; j = j+step) {
             contourData.x.push(i);
@@ -263,6 +271,7 @@ function smoothenData(contourData){
     }
 }
 function setContourData(index) {
+
     let columnName = currentColumnNames[index]
     let colorScale = 'Portland';
     if(colorScales[columnName]){
@@ -293,7 +302,9 @@ function setContourData(index) {
         },
         connectgaps: true,
     }];
-    smoothenData(contourData[index][0]);
+    if(plotTypeSelection!='heatmap'){
+        smoothenData(contourData[index][0]);
+    }
 }
 
 

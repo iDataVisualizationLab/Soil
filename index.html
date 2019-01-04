@@ -28,8 +28,10 @@
 <div id="profileDiv">
     <div id="profileContainerDiv"></div>
     <div style="margin-left: 20px">
-        <input id="contourPlotType" type="radio" name="plotType" value="Contour" checked onchange="plotTypeChange()" />
-        <label for="contourPlotType">Contour</label>
+        <input id="contourPlotTypeS" type="radio" name="plotType" value="ContourS" onchange="plotTypeChange()" />
+        <label for="contourPlotTypeS">Contour Smooth</label>
+        <input id="contourPlotTypeR" type="radio" name="plotType" value="ContourR" checked onchange="plotTypeChange()" />
+        <label for="contourPlotTypeR">Contour Rough</label>
         <input id="heatmapPlotType" type="radio" name="plotType" value="Heatmap" onchange="plotTypeChange()" />
         <label for="heatmapPlotType">Heatmap</label>
     </div>
