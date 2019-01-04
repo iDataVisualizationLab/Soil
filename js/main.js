@@ -209,7 +209,7 @@ let plotType = 'contour'
 let colors5 =  ["#4A8FC2", "#A6C09D", "#FAFA7C", "#EC9248", "#D63128"];
 let colorScales = {
     'Al Concentration': {values: [1.6*10000, 2.7*10000, 3.9*10000, 5.1*10000, 6.3*10000, 7.9*10000], colors: colors5},
-    'Ca Concentration': {values: [0*10000, 0.8*10000, 2.5*10000, 4.5*10000, 10*10000, 23*10000], colors: colors5},
+    'Ca Concentration': {values: [-1*10000, 0.8*10000, 2.5*10000, 4.5*10000, 10*10000, 23*10000], colors: colors5},
     'Cr Concentration': {values: [29, 38, 42, 46, 50, 62], colors: colors5},
     'Cu Concentration': {values: [11, 17, 20, 22, 24, 26], colors: colors5},
     'Fe Concentration': {values: [0.8*10000, 1.2*10000, 1.6*10000, 2.0*10000, 2.4*10000, 3.0*10000], colors: colors5},
@@ -251,7 +251,7 @@ function smoothenData(contourData){
     // var model = "exponential";
     let model = "spherical";
     // let model = "gaussian";
-    let sigma2 = 0, alpha = 10000;
+    let sigma2 = 0, alpha = 100;
     let variogram = kriging.train(t, x, y, model, sigma2, alpha);
     //Now interpolate data (step) at a point
     contourData.z = [];
