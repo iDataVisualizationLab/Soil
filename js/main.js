@@ -32,6 +32,10 @@ function readData(fileName) {
             //Valid ID
             return validGridId(d["Grid ID"]);
         });
+        let valueRanges = {
+            'Cu Concentration': [11, 26],
+            'Cr Concentration': [29, 62]
+        }
         //Add data for the three formulas
         let alAW = 26.9815385,
             oAW = 15.999,
@@ -66,6 +70,17 @@ function readData(fileName) {
             let zr = (row["Zr Concentration"] === "<LOD") ? 0 : +row["Zr Concentration"];
             let SR = ti / zr;
             row["SR Concentration"] = SR + "";
+            //Set min max values
+            let keys = d3.keys(valueRanges);
+            keys.forEach(key =>{
+                let value = +row[key];
+                if(value < valueRanges[key][0]){
+                    value = valueRanges[key][0];
+                } else if(value > valueRanges[key][1]){
+                    value = valueRanges[key][1];
+                }
+                row[key] = value + '';
+            });
             return row;
         });
         handleData(data);
@@ -191,8 +206,62 @@ function setElmConcentration(index) {
 }
 
 let plotType = 'contour'
-
+let colors5 =  ["#4A8FC2", "#A6C09D", "#FAFA7C", "#EC9248", "#D63128"];
+let colorScales = {
+    'Cr Concentration': {values: [29, 38, 42, 46, 50, 62], colors: colors5},
+    'Cu Concentration': {values: [11, 17, 20, 22, 24, 26], colors: colors5},
+    'Mn Concentration': {values:[130, 240, 320, 370, 420, 636], colors: colors5},
+    'Nb Concentration': {values:[6.4, 10.0, 13.3, 15.8, 18, 20.3], colors: colors5},
+    'Ni Concentration': {values:[15, 16, 22, 26, 30, 35], colors: colors5},
+    'Pb Concentration': {values:[7.7, 12, 15, 17, 19, 21.3], colors: colors5},
+    'Rb Concentration': {values:[26, 45, 65, 77, 86, 95], colors: colors5},
+    'S Concentration': {values:[125, 150, 170, 210, 250, 291], colors: colors5},
+    'Sr Concentration': {values:[65, 85, 105, 125, 150, 331], colors: colors5},
+    'Th Concentration': {values:[9.7, 11.2, 12.6, 13.6, 15.2, 16.9], colors: colors5},
+    'V Concentration': {values:[48, 56, 64, 68, 72, 77], colors: colors5},
+    'Y Concentration': {values:[8.7, 14, 18, 22, 26, 30], colors: colors5},
+    'Zn Concentration': {values:[24, 40, 54, 62, 67, 74], colors: colors5},
+    'Zr Concentration': {values:[134, 220, 260, 280, 300, 370], colors: colors5},
+}
+function smoothenData(contourData){
+    //Covnert the data into object for faster accessing.
+    let letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"];
+    let letterLength = letters.length;
+    let digits = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"];
+    let digitLength = digits.length;
+    let dataObj = {}
+    for (let i = 0; i < contourData.z.length; i++) {
+        dataObj[contourData.y[i]+'-'+contourData.x[i]] = contourData.z[i];
+    }
+    for (let i = 0; i < contourData.z.length; i++) {
+        let letterIndex = letters.indexOf(contourData.y[i]) - 1;
+        let digitIndex = digits.indexOf(contourData.x[i]) - 1;
+        let valuesToAverage = [];
+        for (let j = 0; j < 3; j++) {
+            let li = letterIndex + j;
+            if(li>=0 && li < letterLength){
+                for (let k = 0; k < 3 ; k++) {
+                    let di = digitIndex + k;
+                    if(di >= 0 && di < digitLength){
+                        valuesToAverage.push(dataObj[letters[li]+'-'+digits[di]]);
+                    }
+                }
+            }
+        }
+        contourData.z[i] = d3.mean(valuesToAverage);
+    }
+}
 function setContourData(index) {
+    let columnName = currentColumnNames[index]
+    let colorScale = 'Portland';
+    if(colorScales[columnName]){
+        colorScale = [];
+        let valueScale = d3.scaleLinear().domain(d3.extent(colorScales[columnName].values)).range([0, 1]);
+        for (let i = 0; i < colorScales[columnName].values.length-1; i++) {
+            colorScale.push([valueScale(colorScales[columnName].values[i]), colorScales[columnName].colors[i]]);
+            colorScale.push([valueScale(colorScales[columnName].values[i+1]), colorScales[columnName].colors[i]])
+        }
+    }
     contourData[index] = [{
         x: xContour,
         y: yContour,
@@ -200,7 +269,7 @@ function setContourData(index) {
         type: plotType,
         name: currentColumnNames[index],
         showscale: true,
-        colorscale: 'Jet',
+        colorscale: colorScale,
         line: {
             smoothing: 0.5,
             color: 'rgba(0, 0, 0,0)'
@@ -208,12 +277,12 @@ function setContourData(index) {
         colorbar: {
             tickfont: {
                 color: 'white'
-            }
+            },
+            ticks: colorScales[columnName]
         },
         connectgaps: true,
-
-
     }];
+    smoothenData(contourData[index][0]);
 }
 
 let plotMargins = {
