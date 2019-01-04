@@ -2,7 +2,8 @@ var data = null;
 let profiles = ["Profile1.csv", "Profile2.csv", "Profile3.csv"];
 let defaultProfileIndex = 0;
 let svgId = "#corcoefGraph";
-
+let letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"];
+let digits = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"];
 function loadProfiles() {
 
     var data = profiles.map(d => {
@@ -230,11 +231,6 @@ let colorScales = {
     'Zr Concentration': {values:[134, 220, 260, 280, 300, 370], colors: colors5},
 }
 function smoothenData(contourData){
-
-    //Covnert the data into object for faster accessing.
-    let letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"];
-    let digits = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"];
-
     let t = [];
     let x = [];
     let y = [];
@@ -318,8 +314,10 @@ function plotContour(index) {
         xaxis: {
             gridcolor: '#bdbdbd',
             linecolor: '#636363',
-            showticklabels: true,
-            autotick: false,
+            // showticklabels: true,
+            // autotick: false,
+            tickvals: [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5],
+            ticktext: digits,
             tickfont: {
                 family: "Impact",
                 size: 12,
@@ -329,8 +327,10 @@ function plotContour(index) {
         yaxis: {
             gridcolor: '#bdbdbd',
             linecolor: '#636363',
-            showticklabels: true,
-            autotick: false,
+            // showticklabels: true,
+            // autotick: false,
+            tickvals: [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5],
+            ticktext: letters,
             tickfont: {
                 family: "Impact",
                 size: 12,
