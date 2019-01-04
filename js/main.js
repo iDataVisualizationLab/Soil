@@ -208,16 +208,22 @@ function setElmConcentration(index) {
 let plotType = 'contour'
 let colors5 =  ["#4A8FC2", "#A6C09D", "#FAFA7C", "#EC9248", "#D63128"];
 let colorScales = {
+    'Al Concentration': {values: [1.6*10000, 2.7*10000, 3.9*10000, 5.1*10000, 6.3*10000, 7.9*10000], colors: colors5},
+    'Ca Concentration': {values: [0*10000, 0.8*10000, 2.5*10000, 4.5*10000, 10*10000, 23*10000], colors: colors5},
     'Cr Concentration': {values: [29, 38, 42, 46, 50, 62], colors: colors5},
     'Cu Concentration': {values: [11, 17, 20, 22, 24, 26], colors: colors5},
+    'Fe Concentration': {values: [0.8*10000, 1.2*10000, 1.6*10000, 2.0*10000, 2.4*10000, 3.0*10000], colors: colors5},
+    'K Concentration': {values: [0.4*10000, 0.8*10000, 1.1*10000, 1.3*10000, 1.5*10000, 1.7*10000], colors: colors5},
     'Mn Concentration': {values:[130, 240, 320, 370, 420, 636], colors: colors5},
     'Nb Concentration': {values:[6.4, 10.0, 13.3, 15.8, 18, 20.3], colors: colors5},
     'Ni Concentration': {values:[15, 16, 22, 26, 30, 35], colors: colors5},
     'Pb Concentration': {values:[7.7, 12, 15, 17, 19, 21.3], colors: colors5},
     'Rb Concentration': {values:[26, 45, 65, 77, 86, 95], colors: colors5},
     'S Concentration': {values:[125, 150, 170, 210, 250, 291], colors: colors5},
+    ' Concentration': {values: [8*10000, 12*10000, 16*10000, 20*10000, 24*10000, 28*10000], colors: colors5},
     'Sr Concentration': {values:[65, 85, 105, 125, 150, 331], colors: colors5},
     'Th Concentration': {values:[9.7, 11.2, 12.6, 13.6, 15.2, 16.9], colors: colors5},
+    'Ti Concentration': {values: [0.13*10000, 0.20*10000,0.28 *10000, 0.32*10000, 0.36*10000, 0.40*10000], colors: colors5},
     'V Concentration': {values:[48, 56, 64, 68, 72, 77], colors: colors5},
     'Y Concentration': {values:[8.7, 14, 18, 22, 26, 30], colors: colors5},
     'Zn Concentration': {values:[24, 40, 54, 62, 67, 74], colors: colors5},
@@ -282,7 +288,7 @@ function setContourData(index) {
         },
         connectgaps: true,
     }];
-    smoothenData(contourData[index][0]);
+    //smoothenData(contourData[index][0]);
 }
 
 let plotMargins = {
