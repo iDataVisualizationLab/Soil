@@ -145,6 +145,10 @@ function plotTypeChange() {
     plotGridMaps();
 }
 
+function colorScaleChange(){
+    colorScaleIndex = document.getElementById("colorScaleSelect").selectedIndex;
+    plotGridMaps();
+}
 function plotGridMaps() {
     //Plot contour
     setContourData(0);
@@ -216,7 +220,7 @@ function setElmConcentration(index) {
 let plotType = 'heatmap';
 let plotTypeSelection = 'contourr';
 let colors5 =  ["#4A8FC2", "#A6C09D", "#FAFA7C", "#EC9248", "#D63128"];
-let colorScales = {
+let colorScales5 = {
     'Al Concentration': {values: [1.6*10000, 2.7*10000, 3.9*10000, 5.1*10000, 6.3*10000, 7.9*10000], colors: colors5},
     'Ca Concentration': {values: [-1*10000, 0.8*10000, 2.5*10000, 4.5*10000, 10*10000, 23*10000], colors: colors5},
     'Cr Concentration': {values: [29, 38, 42, 46, 50, 62], colors: colors5},
@@ -229,15 +233,65 @@ let colorScales = {
     'Pb Concentration': {values:[7.7, 12, 15, 17, 19, 21.3], colors: colors5},
     'Rb Concentration': {values:[26, 45, 65, 77, 86, 95], colors: colors5},
     'S Concentration': {values:[125, 150, 170, 210, 250, 291], colors: colors5},
-    ' Concentration': {values: [8*10000, 12*10000, 16*10000, 20*10000, 24*10000, 28*10000], colors: colors5},
+    'Si Concentration': {values: [8*10000, 12*10000, 16*10000, 20*10000, 24*10000, 28*10000], colors: colors5},
     'Sr Concentration': {values:[65, 85, 105, 125, 150, 331], colors: colors5},
     'Th Concentration': {values:[9.7, 11.2, 12.6, 13.6, 15.2, 16.9], colors: colors5},
     'Ti Concentration': {values: [0.13*10000, 0.20*10000,0.28 *10000, 0.32*10000, 0.36*10000, 0.40*10000], colors: colors5},
     'V Concentration': {values:[48, 56, 64, 68, 72, 77], colors: colors5},
     'Y Concentration': {values:[8.7, 14, 18, 22, 26, 30], colors: colors5},
     'Zn Concentration': {values:[24, 40, 54, 62, 67, 74], colors: colors5},
-    'Zr Concentration': {values:[134, 220, 260, 280, 300, 370], colors: colors5},
+    'Zr Concentration': {values:[134, 220, 260, 280, 300, 370], colors: colors5}
 }
+let colors10 =  ["#4A8FC2", "#76A5B1", "#9DBCA2", "#C3D392", "#E8EC83", "#F8E571", "#F2B659", "#EB8C47", "#EB8C47", "#D63128"];
+let colorScales10 = {
+    'Al Concentration': {values: [1.6*10000, 2.1*10000, 2.7*10000, 3.3*10000, 3.9*10000, 4.5*10000, 5.1*10000, 5.7*10000, 6.3*10000, 6.9*10000, 7.9*10000], colors: colors10},
+    'Ca Concentration':  {values: [-1*10000, 0.4*10000, 0.8*10000, 1.5*10000, 2.5*10000, 3.5*10000, 4.5*10000, 6.0*10000, 10*10000, 15*10000, 23*10000], colors: colors10},
+    'Cr Concentration': {values: [29, 35, 38, 40, 42, 44, 46, 48, 50, 54, 62], colors: colors10},
+    'Cu Concentration': {values: [11, 14, 17, 19, 20, 21, 22, 23, 24, 25, 26], colors: colors10},
+    'Fe Concentration':  {values: [0.8*10000, 1.0*10000, 1.2*10000, 1.4*10000, 1.6*10000, 1.8*10000, 2.0*10000, 2.2*10000, 2.4*10000, 2.6*10000, 2.8*10000], colors: colors10},
+    'K Concentration':  {values: [0.4*10000, 0.6*10000, 0.8*10000, 0.9*10000, 1.1*10000, 1.2*10000, 1.3*10000, 1.4*10000, 1.5*10000, 1.6*10000, 1.7*10000], colors: colors10},
+    'Mn Concentration': {values: [130, 200, 240, 280, 320, 350, 370, 390, 420, 500, 636], colors: colors10},
+    'Nb Concentration': {values: [6.4, 8.0, 10.0, 12.0, 13.3, 14.6, 15.8, 17.0, 18.0, 19.0, 20.3], colors: colors10},
+    'Ni Concentration': {values: [15, 16, 18, 20, 22, 24, 26, 28, 30, 32, 35], colors: colors10},
+    'Pb Concentration': {values: [7.7, 10, 12, 14, 15, 16, 17, 18, 19, 20, 21.3], colors: colors10},
+    'Rb Concentration': {values: [26, 35,45, 55, 65, 71, 77, 82, 86, 90, 95], colors: colors10},
+    'S Concentration': {values: [125, 140, 150, 160, 170, 190, 210, 230, 250, 270, 291], colors: colors10},
+    'Si Concentration':  {values: [8*10000, 10*10000, 12*10000, 14*10000, 16*10000, 18*10000, 20*10000, 22*10000, 24*10000, 26*10000, 28*10000], colors: colors10},
+    'Sr Concentration': {values: [65, 75, 85, 95, 105, 115, 125, 135, 150, 250, 331], colors: colors10},
+    'Th Concentration': {values: [9.7, 10.4, 11.2, 12, 12.6, 13.0, 13.6, 14.4, 15.2, 16, 16.9], colors: colors10},
+    'Ti Concentration':  {values: [0.13*10000, 0.16*10000, 0.20*10000, 0.24*10000, 0.28*10000, 0.30*10000, 0.32*10000, 0.34*10000, 0.36*10000, 0.38*10000, 0.40*10000], colors: colors10},
+    'V Concentration': {values: [48, 52, 56, 60, 64, 66, 68, 70, 72, 74, 77], colors: colors10},
+    'Y Concentration': {values: [8.7, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30], colors: colors10},
+    'Zn Concentration': {values: [24, 30, 40, 50, 54, 58, 62, 65, 67, 70, 74], colors: colors10},
+    'Zr Concentration': {values: [134, 180, 220, 250, 260, 270, 280, 290, 300, 330, 370], colors: colors10},
+}
+
+let colors20 =  ['#4A8FC2', '#609ABB', '#71A2B3', '#87AFAC', '#98B9A5', '#AAC29B', '#BBCF93', '#CEDB8C', '#E2E888', '#F4F581', '#F8F076', '#F7DA6A', '#F4C461', '#F0AE57', '#EC994C', '#E98544', '#E5713C', '#E05C33', '#DC472D', '#D53327'];
+let colorScales20 = {
+    'Al Concentration': {values: [1.6*10000, 1.9*10000, 2.1*10000, 2.4*10000, 2.7*10000, 3.0*10000, 3.3*10000, 3.6*10000, 3.9*10000, 4.2*10000, 4.5*10000, 4.8*10000, 5.1*10000, 5.4*10000, 5.7*10000, 6.0*10000, 6.3*10000, 6.6*10000, 6.9*10000, 7.2*10000, 7.9*10000], colors: colors20},
+    'Ca Concentration':  {values: [-1*1000, 0.2*10000, .4*10000, .6*10000, .8*10000, 1.0*10000, 1.5*10000, 2.0*10000, 2.5*10000, 3.0*10000, 3.5*10000, 4.0*10000, 4.5*10000, 5.0*10000, 6*10000, 8*10000, 10*10000, 12*10000, 15*10000, 20*10000, 23*10000], colors: colors20},
+    'Cr Concentration': {values: [29, 33, 35, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 52, 54, 56, 62], colors: colors20},
+    'Cu Concentration': {values: [11, 12, 14, 16, 17, 18, 19, 19.5, 20, 20.5, 21,21.5, 22, 22.5, 23, 23.5, 24, 24.5, 25, 25.5, 26], colors: colors20},
+    'Fe Concentration':  {values: [0.8*10000, 0.9*10000, 1*10000, 1.1*10000, 1.2*10000, 1.3*10000, 1.4*10000, 1.5*10000, 1.6*10000, 1.7*10000, 1.8*10000, 1.9*10000, 2*10000, 2.1*10000, 2.2*10000, 2.3*10000, 2.4*10000, 2.5*10000, 2.6*10000, 2.7*10000, 3*10000], colors: colors20},
+    'K Concentration':  {values: [0.4*10000, 0.5*10000, 0.6*10000, 0.7*10000, 0.8*10000, 0.9*10000, 1*10000, 1.05*10000, 1.1*10000, 1.15*10000, 1.2*10000, 1.25*10000, 1.3*10000, 1.35*10000, 1.4*10000, 1.45*10000, 1.5*10000, 1.55*10000, 1.6*10000, 1.65*10000, 1.73*10000], colors: colors20},
+    'Mn Concentration': {values: [130, 160, 200, 220, 240, 260, 280, 300, 320, 340, 350, 360, 370, 380, 390, 400, 420, 450, 500, 550, 636], colors: colors20},
+    'Nb Concentration': {values: [6.4, 7, 8, 9, 10, 11, 12, 13, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20.3], colors: colors20},
+    'Ni Concentration': {values: [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 35], colors: colors20},
+    'Pb Concentration': {values: [7.7, 9, 10, 11, 12, 13, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 20.5, 21.3], colors: colors20},
+    'Rb Concentration': {values: [26, 30, 35, 40, 45, 50, 55, 60, 65, 68, 71, 74, 77, 80, 82, 84, 86, 88, 90, 92, 95], colors: colors20},
+    'S Concentration': {values: [125, 130, 140, 145, 150, 155, 160, 165, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 291], colors: colors20},
+    'Si Concentration':  {values: [8.5*10000, 9*10000, 10*10000, 11*10000, 12*10000, 13*10000, 14*10000, 15*10000, 16*10000, 17*10000, 18*10000, 19*10000, 20*10000, 21*10000, 22*10000, 23*10000, 24*10000, 25*10000, 26*10000, 27*10000, 28*10000], colors: colors20},
+    'Sr Concentration': {values: [65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 150, 200, 250, 300, 331], colors: colors20},
+    'Th Concentration': {values: [4, 10, 10.4, 10.8, 11.2, 11.6, 12, 12.4, 12.6, 12.8, 13, 13.2, 13.6, 14, 14.4, 14.8, 15.2, 15.6, 16, 16.4, 16.9], colors: colors20},
+    'Ti Concentration':  {values: [0.12*10000, 0.14*10000, 0.16*10000, 0.18*10000, 0.2*10000, 0.22*10000, 0.24*10000, 0.26*10000, 0.28*10000, 0.29*10000, 0.3*10000, 0.31*10000, 0.32*10000, 0.33*10000, 0.34*10000, 0.35*10000, 0.36*10000, 0.37*10000, 0.38*10000, 0.39*10000, 0.4*10000], colors: colors20},
+    'V Concentration': {values: [48, 50, 52, 54, 56, 58, 60, 62, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 77], colors: colors20},
+    'Y Concentration': {values: [8.7, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30], colors: colors20},
+    'Zn Concentration': {values: [24, 25, 30, 35, 40, 45, 50, 52, 54, 56, 58, 60, 62, 64, 65, 66, 67, 68, 70, 72, 74], colors: colors20},
+    'Zr Concentration': {values: [134, 160, 180, 200, 220, 240, 250, 255, 260, 265, 270, 275, 280, 285, 290, 295, 300, 310, 330, 350, 370], colors: colors20},
+}
+
+let colorScales = [colorScales5, colorScales10, colorScales20];
+let colorScaleIndex = 0;
 function smoothenData(contourData){
     let t = [];
     let x = [];
@@ -274,12 +328,13 @@ function setContourData(index) {
 
     let columnName = currentColumnNames[index]
     let colorScale = 'Portland';
-    if(colorScales[columnName]){
+    let selectedColorScales = colorScales[colorScaleIndex];
+    if(selectedColorScales[columnName]){
         colorScale = [];
-        let valueScale = d3.scaleLinear().domain(d3.extent(colorScales[columnName].values)).range([0, 1]);
-        for (let i = 0; i < colorScales[columnName].values.length-1; i++) {
-            colorScale.push([valueScale(colorScales[columnName].values[i]), colorScales[columnName].colors[i]]);
-            colorScale.push([valueScale(colorScales[columnName].values[i+1]), colorScales[columnName].colors[i]])
+        let valueScale = d3.scaleLinear().domain(d3.extent(selectedColorScales[columnName].values)).range([0, 1]);
+        for (let i = 0; i < selectedColorScales[columnName].values.length-1; i++) {
+            colorScale.push([valueScale(selectedColorScales[columnName].values[i]), selectedColorScales[columnName].colors[i]]);
+            colorScale.push([valueScale(selectedColorScales[columnName].values[i+1]), selectedColorScales[columnName].colors[i]])
         }
     }
     contourData[index] = [{
