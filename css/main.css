@@ -28,6 +28,12 @@
 
     --boxPlot2-margin-left: var(--contour2-margin-left);
     --boxPlot2-margin-top: var(--boxPlot1-margin-top);
+
+    --curvePlot1-margin-left: var(--contour1-margin-left);
+    --curvePlot1-margin-top: calc(var(--boxPlot1-margin-top) + var(--contour-height) + var(--default-margin));
+
+    --curvePlot2-margin-left: var(--contour2-margin-left);
+    --curvePlot2-margin-top: var(--curvePlot1-margin-top);
 }
 /*<editor-fold desc="Section for the loader">*/
  .loader {
@@ -177,6 +183,26 @@
     width: var(--box-width);
     height: calc(var(--box-width) - 2*var(--default-margin))
 }
+
+#curvePlot1Div{
+    position: absolute;
+    margin-left: var(--curvePlot1-margin-left);
+    margin-top: var(--curvePlot1-margin-top);
+}
+#curvePlot2Div{
+    position: absolute;
+    margin-left: var(--curvePlot2-margin-left);
+    margin-top: var(--curvePlot2-margin-top);
+}
+#curvePlot1{
+    width: var(--box-width);
+    height: calc(var(--box-width) - 2*var(--default-margin))
+}
+#curvePlot2{
+    width: var(--box-width);
+    height: calc(var(--box-width) - 2*var(--default-margin))
+}
+
 svg image:hover{
     cursor: pointer;
 }

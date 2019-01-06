@@ -1,9 +1,199 @@
-var data = null;
-let profiles = ["Profile1.csv", "Profile2.csv", "Profile3.csv"];
+let data = null;
+let avgData = null;
+let profiles = ["Profile1", "Profile2", "Profile3"];
 let defaultProfileIndex = 0;
 let svgId = "#corcoefGraph";
 let letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"];
 let digits = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"];
+let allElements = [];
+let defaultElementIndexes = [4, 1];
+let theOptions = [];
+let currentColumnNames = [];
+let xContour = null;
+let yContour = null;
+let elmConcentrations = [];
+let contourData = [];
+let boxPlotData = [];
+let curvePlotData = [];
+let theProfile = null;
+let opacitySliders = [];
+let adjustedRSquaredScores = [0, 0];
+
+loadProfiles();
+
+let plotType = 'heatmap';
+let plotTypeSelection = 'contourr';
+let colors5 = ["#4A8FC2", "#A6C09D", "#FAFA7C", "#EC9248", "#D63128"];
+let colorScales5 = {
+    'Al Concentration': {
+        values: [1.6 * 10000, 2.7 * 10000, 3.9 * 10000, 5.1 * 10000, 6.3 * 10000, 7.9 * 10000],
+        colors: colors5
+    },
+    'Ca Concentration': {
+        values: [-1 * 10000, 0.8 * 10000, 2.5 * 10000, 4.5 * 10000, 10 * 10000, 23 * 10000],
+        colors: colors5
+    },
+    'Cr Concentration': {values: [29, 38, 42, 46, 50, 62], colors: colors5},
+    'Cu Concentration': {values: [11, 17, 20, 22, 24, 26], colors: colors5},
+    'Fe Concentration': {
+        values: [0.8 * 10000, 1.2 * 10000, 1.6 * 10000, 2.0 * 10000, 2.4 * 10000, 3.0 * 10000],
+        colors: colors5
+    },
+    'K Concentration': {
+        values: [0.4 * 10000, 0.8 * 10000, 1.1 * 10000, 1.3 * 10000, 1.5 * 10000, 1.7 * 10000],
+        colors: colors5
+    },
+    'Mn Concentration': {values: [130, 240, 320, 370, 420, 636], colors: colors5},
+    'Nb Concentration': {values: [6.4, 10.0, 13.3, 15.8, 18, 20.3], colors: colors5},
+    'Ni Concentration': {values: [15, 16, 22, 26, 30, 35], colors: colors5},
+    'Pb Concentration': {values: [7.7, 12, 15, 17, 19, 21.3], colors: colors5},
+    'Rb Concentration': {values: [26, 45, 65, 77, 86, 95], colors: colors5},
+    'S Concentration': {values: [125, 150, 170, 210, 250, 291], colors: colors5},
+    'Si Concentration': {
+        values: [8 * 10000, 12 * 10000, 16 * 10000, 20 * 10000, 24 * 10000, 28 * 10000],
+        colors: colors5
+    },
+    'Sr Concentration': {values: [65, 85, 105, 125, 150, 331], colors: colors5},
+    'Th Concentration': {values: [9.7, 11.2, 12.6, 13.6, 15.2, 16.9], colors: colors5},
+    'Ti Concentration': {
+        values: [0.13 * 10000, 0.20 * 10000, 0.28 * 10000, 0.32 * 10000, 0.36 * 10000, 0.40 * 10000],
+        colors: colors5
+    },
+    'V Concentration': {values: [48, 56, 64, 68, 72, 77], colors: colors5},
+    'Y Concentration': {values: [8.7, 14, 18, 22, 26, 30], colors: colors5},
+    'Zn Concentration': {values: [24, 40, 54, 62, 67, 74], colors: colors5},
+    'Zr Concentration': {values: [134, 220, 260, 280, 300, 370], colors: colors5}
+}
+let colors10 = ["#4A8FC2", "#76A5B1", "#9DBCA2", "#C3D392", "#E8EC83", "#F8E571", "#F2B659", "#EB8C47", "#EB8C47", "#D63128"];
+let colorScales10 = {
+    'Al Concentration': {
+        values: [1.6 * 10000, 2.1 * 10000, 2.7 * 10000, 3.3 * 10000, 3.9 * 10000, 4.5 * 10000, 5.1 * 10000, 5.7 * 10000, 6.3 * 10000, 6.9 * 10000, 7.9 * 10000],
+        colors: colors10
+    },
+    'Ca Concentration': {
+        values: [-1 * 10000, 0.4 * 10000, 0.8 * 10000, 1.5 * 10000, 2.5 * 10000, 3.5 * 10000, 4.5 * 10000, 6.0 * 10000, 10 * 10000, 15 * 10000, 23 * 10000],
+        colors: colors10
+    },
+    'Cr Concentration': {values: [29, 35, 38, 40, 42, 44, 46, 48, 50, 54, 62], colors: colors10},
+    'Cu Concentration': {values: [11, 14, 17, 19, 20, 21, 22, 23, 24, 25, 26], colors: colors10},
+    'Fe Concentration': {
+        values: [0.8 * 10000, 1.0 * 10000, 1.2 * 10000, 1.4 * 10000, 1.6 * 10000, 1.8 * 10000, 2.0 * 10000, 2.2 * 10000, 2.4 * 10000, 2.6 * 10000, 2.8 * 10000],
+        colors: colors10
+    },
+    'K Concentration': {
+        values: [0.4 * 10000, 0.6 * 10000, 0.8 * 10000, 0.9 * 10000, 1.1 * 10000, 1.2 * 10000, 1.3 * 10000, 1.4 * 10000, 1.5 * 10000, 1.6 * 10000, 1.7 * 10000],
+        colors: colors10
+    },
+    'Mn Concentration': {values: [130, 200, 240, 280, 320, 350, 370, 390, 420, 500, 636], colors: colors10},
+    'Nb Concentration': {values: [6.4, 8.0, 10.0, 12.0, 13.3, 14.6, 15.8, 17.0, 18.0, 19.0, 20.3], colors: colors10},
+    'Ni Concentration': {values: [15, 16, 18, 20, 22, 24, 26, 28, 30, 32, 35], colors: colors10},
+    'Pb Concentration': {values: [7.7, 10, 12, 14, 15, 16, 17, 18, 19, 20, 21.3], colors: colors10},
+    'Rb Concentration': {values: [26, 35, 45, 55, 65, 71, 77, 82, 86, 90, 95], colors: colors10},
+    'S Concentration': {values: [125, 140, 150, 160, 170, 190, 210, 230, 250, 270, 291], colors: colors10},
+    'Si Concentration': {
+        values: [8 * 10000, 10 * 10000, 12 * 10000, 14 * 10000, 16 * 10000, 18 * 10000, 20 * 10000, 22 * 10000, 24 * 10000, 26 * 10000, 28 * 10000],
+        colors: colors10
+    },
+    'Sr Concentration': {values: [65, 75, 85, 95, 105, 115, 125, 135, 150, 250, 331], colors: colors10},
+    'Th Concentration': {values: [9.7, 10.4, 11.2, 12, 12.6, 13.0, 13.6, 14.4, 15.2, 16, 16.9], colors: colors10},
+    'Ti Concentration': {
+        values: [0.13 * 10000, 0.16 * 10000, 0.20 * 10000, 0.24 * 10000, 0.28 * 10000, 0.30 * 10000, 0.32 * 10000, 0.34 * 10000, 0.36 * 10000, 0.38 * 10000, 0.40 * 10000],
+        colors: colors10
+    },
+    'V Concentration': {values: [48, 52, 56, 60, 64, 66, 68, 70, 72, 74, 77], colors: colors10},
+    'Y Concentration': {values: [8.7, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30], colors: colors10},
+    'Zn Concentration': {values: [24, 30, 40, 50, 54, 58, 62, 65, 67, 70, 74], colors: colors10},
+    'Zr Concentration': {values: [134, 180, 220, 250, 260, 270, 280, 290, 300, 330, 370], colors: colors10},
+}
+
+let colors20 = ['#4A8FC2', '#609ABB', '#71A2B3', '#87AFAC', '#98B9A5', '#AAC29B', '#BBCF93', '#CEDB8C', '#E2E888', '#F4F581', '#F8F076', '#F7DA6A', '#F4C461', '#F0AE57', '#EC994C', '#E98544', '#E5713C', '#E05C33', '#DC472D', '#D53327'];
+let colorScales20 = {
+    'Al Concentration': {
+        values: [1.6 * 10000, 1.9 * 10000, 2.1 * 10000, 2.4 * 10000, 2.7 * 10000, 3.0 * 10000, 3.3 * 10000, 3.6 * 10000, 3.9 * 10000, 4.2 * 10000, 4.5 * 10000, 4.8 * 10000, 5.1 * 10000, 5.4 * 10000, 5.7 * 10000, 6.0 * 10000, 6.3 * 10000, 6.6 * 10000, 6.9 * 10000, 7.2 * 10000, 7.9 * 10000],
+        colors: colors20
+    },
+    'Ca Concentration': {
+        values: [-1 * 1000, 0.2 * 10000, .4 * 10000, .6 * 10000, .8 * 10000, 1.0 * 10000, 1.5 * 10000, 2.0 * 10000, 2.5 * 10000, 3.0 * 10000, 3.5 * 10000, 4.0 * 10000, 4.5 * 10000, 5.0 * 10000, 6 * 10000, 8 * 10000, 10 * 10000, 12 * 10000, 15 * 10000, 20 * 10000, 23 * 10000],
+        colors: colors20
+    },
+    'Cr Concentration': {
+        values: [29, 33, 35, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 52, 54, 56, 62],
+        colors: colors20
+    },
+    'Cu Concentration': {
+        values: [11, 12, 14, 16, 17, 18, 19, 19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23, 23.5, 24, 24.5, 25, 25.5, 26],
+        colors: colors20
+    },
+    'Fe Concentration': {
+        values: [0.8 * 10000, 0.9 * 10000, 1 * 10000, 1.1 * 10000, 1.2 * 10000, 1.3 * 10000, 1.4 * 10000, 1.5 * 10000, 1.6 * 10000, 1.7 * 10000, 1.8 * 10000, 1.9 * 10000, 2 * 10000, 2.1 * 10000, 2.2 * 10000, 2.3 * 10000, 2.4 * 10000, 2.5 * 10000, 2.6 * 10000, 2.7 * 10000, 3 * 10000],
+        colors: colors20
+    },
+    'K Concentration': {
+        values: [0.4 * 10000, 0.5 * 10000, 0.6 * 10000, 0.7 * 10000, 0.8 * 10000, 0.9 * 10000, 1 * 10000, 1.05 * 10000, 1.1 * 10000, 1.15 * 10000, 1.2 * 10000, 1.25 * 10000, 1.3 * 10000, 1.35 * 10000, 1.4 * 10000, 1.45 * 10000, 1.5 * 10000, 1.55 * 10000, 1.6 * 10000, 1.65 * 10000, 1.73 * 10000],
+        colors: colors20
+    },
+    'Mn Concentration': {
+        values: [130, 160, 200, 220, 240, 260, 280, 300, 320, 340, 350, 360, 370, 380, 390, 400, 420, 450, 500, 550, 636],
+        colors: colors20
+    },
+    'Nb Concentration': {
+        values: [6.4, 7, 8, 9, 10, 11, 12, 13, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20.3],
+        colors: colors20
+    },
+    'Ni Concentration': {
+        values: [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 35],
+        colors: colors20
+    },
+    'Pb Concentration': {
+        values: [7.7, 9, 10, 11, 12, 13, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 20.5, 21.3],
+        colors: colors20
+    },
+    'Rb Concentration': {
+        values: [26, 30, 35, 40, 45, 50, 55, 60, 65, 68, 71, 74, 77, 80, 82, 84, 86, 88, 90, 92, 95],
+        colors: colors20
+    },
+    'S Concentration': {
+        values: [125, 130, 140, 145, 150, 155, 160, 165, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 291],
+        colors: colors20
+    },
+    'Si Concentration': {
+        values: [8.5 * 10000, 9 * 10000, 10 * 10000, 11 * 10000, 12 * 10000, 13 * 10000, 14 * 10000, 15 * 10000, 16 * 10000, 17 * 10000, 18 * 10000, 19 * 10000, 20 * 10000, 21 * 10000, 22 * 10000, 23 * 10000, 24 * 10000, 25 * 10000, 26 * 10000, 27 * 10000, 28 * 10000],
+        colors: colors20
+    },
+    'Sr Concentration': {
+        values: [65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 150, 200, 250, 300, 331],
+        colors: colors20
+    },
+    'Th Concentration': {
+        values: [4, 10, 10.4, 10.8, 11.2, 11.6, 12, 12.4, 12.6, 12.8, 13, 13.2, 13.6, 14, 14.4, 14.8, 15.2, 15.6, 16, 16.4, 16.9],
+        colors: colors20
+    },
+    'Ti Concentration': {
+        values: [0.12 * 10000, 0.14 * 10000, 0.16 * 10000, 0.18 * 10000, 0.2 * 10000, 0.22 * 10000, 0.24 * 10000, 0.26 * 10000, 0.28 * 10000, 0.29 * 10000, 0.3 * 10000, 0.31 * 10000, 0.32 * 10000, 0.33 * 10000, 0.34 * 10000, 0.35 * 10000, 0.36 * 10000, 0.37 * 10000, 0.38 * 10000, 0.39 * 10000, 0.4 * 10000],
+        colors: colors20
+    },
+    'V Concentration': {
+        values: [48, 50, 52, 54, 56, 58, 60, 62, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 77],
+        colors: colors20
+    },
+    'Y Concentration': {
+        values: [8.7, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+        colors: colors20
+    },
+    'Zn Concentration': {
+        values: [24, 25, 30, 35, 40, 45, 50, 52, 54, 56, 58, 60, 62, 64, 65, 66, 67, 68, 70, 72, 74],
+        colors: colors20
+    },
+    'Zr Concentration': {
+        values: [134, 160, 180, 200, 220, 240, 250, 255, 260, 265, 270, 275, 280, 285, 290, 295, 300, 310, 330, 350, 370],
+        colors: colors20
+    },
+}
+
+let colorScales = [colorScales5, colorScales10, colorScales20];
+let colorScaleIndex = 0;
+
+
 function loadProfiles() {
 
     var data = profiles.map(d => {
@@ -16,8 +206,6 @@ function loadProfiles() {
     changeProfile({target: {value: profiles[defaultProfileIndex]}});
 }
 
-loadProfiles();
-
 function changeProfile(event) {
     //Clean the graph layout
     d3.select(".loader").style("display", "block").style("opacity", 1.0);
@@ -27,82 +215,63 @@ function changeProfile(event) {
 }
 
 function readData(fileName) {
-    d3.csv(fileName, function (error, rawData) {
+    d3.csv(fileName + "Avg.csv", function (error, rawAvgData) {
+        avgData = rawAvgData;
         if (error) throw error;
-        data = rawData.filter(function (d) {
-            //Valid ID
-            return validGridId(d["Grid ID"]);
-        });
-        let valueRanges = {
-            'Cu Concentration': [11, 26],
-            'Cr Concentration': [29, 62]
-        }
-        //Add data for the three formulas
-        let alAW = 26.9815385,
-            oAW = 15.999,
-            siAW = 28.085,
-            feAW = 55.845,
-            tiAW = 47.867,
-            Al2O3AW = alAW * 2 + oAW * 3,
-            alRatio = alAW * 2 / Al2O3AW,
-            siO2AW = siAW + 2 * oAW,
-            siRatio = siAW / siO2AW,
-            Fe2O3AW = feAW * 2 + oAW * 3,
-            feRatio = feAW * 2 / Fe2O3AW,
-            tiO2AW = tiAW + 2 * oAW,
-            tiRatio = tiAW / tiO2AW;
-
-        data.map(row => {
-            //Calculate Ruxton weathering index
-            let si = (row["Si Concentration"] === "<LOD") ? 0 : +row["Si Concentration"],
-                al = (row["Al Concentration"] === "<LOD") ? 0 : +row["Al Concentration"],
-                al2o3 = al / alRatio,
-                sio2 = si / siRatio;
-            let RI = sio2 / al2o3;
-            row["RI Concentration"] = RI + "";
-            //Desilication index
-            let fe = (row["Fe Concentration"] === "<LOD") ? 0 : +row["Fe Concentration"],
-                ti = (row["Ti Concentration"] === "<LOD") ? 0 : +row["Ti Concentration"],
-                fe2o3 = fe/feRatio,
-                tio2 = ti/tiRatio;
-            let DI = sio2 / (al2o3 + fe2o3 + tio2);
-            row["DI Concentration"] = DI + "";
-            // Elemental ratio of elements resistant to weathering
-            let zr = (row["Zr Concentration"] === "<LOD") ? 0 : +row["Zr Concentration"];
-            let SR = ti / zr;
-            row["SR Concentration"] = SR + "";
-            //Set min max values
-            let keys = d3.keys(valueRanges);
-            keys.forEach(key =>{
-                let value = +row[key];
-                if(value < valueRanges[key][0]){
-                    value = valueRanges[key][0];
-                } else if(value > valueRanges[key][1]){
-                    value = valueRanges[key][1];
-                }
-                row[key] = value + '';
+        d3.csv(fileName + ".csv", function (error, rawData) {
+            if (error) throw error;
+            data = rawData.filter(function (d) {
+                //Valid ID
+                return validGridId(d["Grid ID"]);
             });
-            return row;
-        });
-        handleData(data);
-    });
-}
+            //Add data for the three formulas
+            let alAW = 26.9815385,
+                oAW = 15.999,
+                siAW = 28.085,
+                feAW = 55.845,
+                tiAW = 47.867,
+                Al2O3AW = alAW * 2 + oAW * 3,
+                alRatio = alAW * 2 / Al2O3AW,
+                siO2AW = siAW + 2 * oAW,
+                siRatio = siAW / siO2AW,
+                Fe2O3AW = feAW * 2 + oAW * 3,
+                feRatio = feAW * 2 / Fe2O3AW,
+                tiO2AW = tiAW + 2 * oAW,
+                tiRatio = tiAW / tiO2AW;
 
-var allElements = [];
-var defaultElementIndexes = [4, 1];
-var theOptions = [];
-var currentColumnNames = [];
-var xContour = null;
-var yContour = null;
-var elmConcentrations = [];
-var contourData = [];
-var boxPlotData = [];
-var theProfile;
-var opacitySliders = [];
+            data.map(row => {
+                //Calculate Ruxton weathering index
+                let si = (row["Si Concentration"] === "<LOD") ? 0 : +row["Si Concentration"],
+                    al = (row["Al Concentration"] === "<LOD") ? 0 : +row["Al Concentration"],
+                    al2o3 = al / alRatio,
+                    sio2 = si / siRatio;
+                let RI = sio2 / al2o3;
+                row["RI Concentration"] = RI + "";
+                //Desilication index
+                let fe = (row["Fe Concentration"] === "<LOD") ? 0 : +row["Fe Concentration"],
+                    ti = (row["Ti Concentration"] === "<LOD") ? 0 : +row["Ti Concentration"],
+                    fe2o3 = fe / feRatio,
+                    tio2 = ti / tiRatio;
+                let DI = sio2 / (al2o3 + fe2o3 + tio2);
+                row["DI Concentration"] = DI + "";
+                // Elemental ratio of elements resistant to weathering
+                let zr = (row["Zr Concentration"] === "<LOD") ? 0 : +row["Zr Concentration"];
+                let SR = ti / zr;
+                row["SR Concentration"] = SR + "";
+                return row;
+            });
+            handleData(data);
+        });
+    });
+
+}
 
 /*Handling data after loading*/
 function getColumn(data, columnName) {
-    var column = [];
+    if (data.length <= 0 || data[0][columnName] === undefined) {
+        return null;
+    }
+    let column = [];
     d3.map(data, function (d) {
         column.push(d[columnName]);
     });
@@ -110,11 +279,14 @@ function getColumn(data, columnName) {
 }
 
 function getNumberColumn(data, columnName) {
-    var column = [];
+    if (data.length <= 0 || data[0][columnName] === undefined) {
+        return null;
+    }
+    let column = [];
     d3.map(data, function (d) {
         if (d[columnName].indexOf('<LOD') != -1) {
             column.push(0);
-        } else if(!d[columnName]){
+        } else if (!d[columnName]) {
             column.push(null);
         }
         else {
@@ -125,7 +297,7 @@ function getNumberColumn(data, columnName) {
 }
 
 function validGridId(id) {
-    var re = /^[A-Z]\d\d$/g;
+    let re = /^[A-Z]\d\d$/g;
     return id != null && id.match(re) != null;
 }
 
@@ -145,10 +317,11 @@ function plotTypeChange() {
     plotGridMaps();
 }
 
-function colorScaleChange(){
+function colorScaleChange() {
     colorScaleIndex = document.getElementById("colorScaleSelect").selectedIndex;
     plotGridMaps();
 }
+
 function plotGridMaps() {
     //Plot contour
     setContourData(0);
@@ -158,7 +331,6 @@ function plotGridMaps() {
 }
 
 function handleData(data) {
-
     allElements = getAllElements();
     //Set the two default current elements
     currentColumnNames[0] = allElements[defaultElementIndexes[0]].value;
@@ -175,6 +347,8 @@ function handleData(data) {
     drawGraph();
     //Plot the box plots
     plotBoxPlots();
+    //Plot the cureve plots
+    plotCurvePlots();
     //Handling the loader spinner
     d3.select(".loader").style("opacity", 1.0).transition().duration(1000).style("opacity", 1e-6).style("display", "none");
     d3.select("#page").style("visibility", "visible").style("opacity", 1e-6).transition().duration(5000).style("opacity", 1.0);
@@ -190,7 +364,7 @@ function extractGridNumber(gridId) {
 }
 
 function getGridLetterList(data) {
-    var letterList = [];
+    let letterList = [];
     d3.map(data, function (d) {
         letterList.push(extractGridLetter(d["Grid ID"]));
     });
@@ -198,7 +372,7 @@ function getGridLetterList(data) {
 }
 
 function getGridNumberList(data) {
-    var numberList = [];
+    let numberList = [];
     d3.map(data, function (d) {
         numberList.push(extractGridNumber(d["Grid ID"]));
     });
@@ -217,90 +391,15 @@ function setElmConcentration(index) {
     elmConcentrations[index] = getNumberColumn(data, currentColumnNames[index]);
 }
 
-let plotType = 'heatmap';
-let plotTypeSelection = 'contourr';
-let colors5 =  ["#4A8FC2", "#A6C09D", "#FAFA7C", "#EC9248", "#D63128"];
-let colorScales5 = {
-    'Al Concentration': {values: [1.6*10000, 2.7*10000, 3.9*10000, 5.1*10000, 6.3*10000, 7.9*10000], colors: colors5},
-    'Ca Concentration': {values: [-1*10000, 0.8*10000, 2.5*10000, 4.5*10000, 10*10000, 23*10000], colors: colors5},
-    'Cr Concentration': {values: [29, 38, 42, 46, 50, 62], colors: colors5},
-    'Cu Concentration': {values: [11, 17, 20, 22, 24, 26], colors: colors5},
-    'Fe Concentration': {values: [0.8*10000, 1.2*10000, 1.6*10000, 2.0*10000, 2.4*10000, 3.0*10000], colors: colors5},
-    'K Concentration': {values: [0.4*10000, 0.8*10000, 1.1*10000, 1.3*10000, 1.5*10000, 1.7*10000], colors: colors5},
-    'Mn Concentration': {values:[130, 240, 320, 370, 420, 636], colors: colors5},
-    'Nb Concentration': {values:[6.4, 10.0, 13.3, 15.8, 18, 20.3], colors: colors5},
-    'Ni Concentration': {values:[15, 16, 22, 26, 30, 35], colors: colors5},
-    'Pb Concentration': {values:[7.7, 12, 15, 17, 19, 21.3], colors: colors5},
-    'Rb Concentration': {values:[26, 45, 65, 77, 86, 95], colors: colors5},
-    'S Concentration': {values:[125, 150, 170, 210, 250, 291], colors: colors5},
-    'Si Concentration': {values: [8*10000, 12*10000, 16*10000, 20*10000, 24*10000, 28*10000], colors: colors5},
-    'Sr Concentration': {values:[65, 85, 105, 125, 150, 331], colors: colors5},
-    'Th Concentration': {values:[9.7, 11.2, 12.6, 13.6, 15.2, 16.9], colors: colors5},
-    'Ti Concentration': {values: [0.13*10000, 0.20*10000,0.28 *10000, 0.32*10000, 0.36*10000, 0.40*10000], colors: colors5},
-    'V Concentration': {values:[48, 56, 64, 68, 72, 77], colors: colors5},
-    'Y Concentration': {values:[8.7, 14, 18, 22, 26, 30], colors: colors5},
-    'Zn Concentration': {values:[24, 40, 54, 62, 67, 74], colors: colors5},
-    'Zr Concentration': {values:[134, 220, 260, 280, 300, 370], colors: colors5}
-}
-let colors10 =  ["#4A8FC2", "#76A5B1", "#9DBCA2", "#C3D392", "#E8EC83", "#F8E571", "#F2B659", "#EB8C47", "#EB8C47", "#D63128"];
-let colorScales10 = {
-    'Al Concentration': {values: [1.6*10000, 2.1*10000, 2.7*10000, 3.3*10000, 3.9*10000, 4.5*10000, 5.1*10000, 5.7*10000, 6.3*10000, 6.9*10000, 7.9*10000], colors: colors10},
-    'Ca Concentration':  {values: [-1*10000, 0.4*10000, 0.8*10000, 1.5*10000, 2.5*10000, 3.5*10000, 4.5*10000, 6.0*10000, 10*10000, 15*10000, 23*10000], colors: colors10},
-    'Cr Concentration': {values: [29, 35, 38, 40, 42, 44, 46, 48, 50, 54, 62], colors: colors10},
-    'Cu Concentration': {values: [11, 14, 17, 19, 20, 21, 22, 23, 24, 25, 26], colors: colors10},
-    'Fe Concentration':  {values: [0.8*10000, 1.0*10000, 1.2*10000, 1.4*10000, 1.6*10000, 1.8*10000, 2.0*10000, 2.2*10000, 2.4*10000, 2.6*10000, 2.8*10000], colors: colors10},
-    'K Concentration':  {values: [0.4*10000, 0.6*10000, 0.8*10000, 0.9*10000, 1.1*10000, 1.2*10000, 1.3*10000, 1.4*10000, 1.5*10000, 1.6*10000, 1.7*10000], colors: colors10},
-    'Mn Concentration': {values: [130, 200, 240, 280, 320, 350, 370, 390, 420, 500, 636], colors: colors10},
-    'Nb Concentration': {values: [6.4, 8.0, 10.0, 12.0, 13.3, 14.6, 15.8, 17.0, 18.0, 19.0, 20.3], colors: colors10},
-    'Ni Concentration': {values: [15, 16, 18, 20, 22, 24, 26, 28, 30, 32, 35], colors: colors10},
-    'Pb Concentration': {values: [7.7, 10, 12, 14, 15, 16, 17, 18, 19, 20, 21.3], colors: colors10},
-    'Rb Concentration': {values: [26, 35,45, 55, 65, 71, 77, 82, 86, 90, 95], colors: colors10},
-    'S Concentration': {values: [125, 140, 150, 160, 170, 190, 210, 230, 250, 270, 291], colors: colors10},
-    'Si Concentration':  {values: [8*10000, 10*10000, 12*10000, 14*10000, 16*10000, 18*10000, 20*10000, 22*10000, 24*10000, 26*10000, 28*10000], colors: colors10},
-    'Sr Concentration': {values: [65, 75, 85, 95, 105, 115, 125, 135, 150, 250, 331], colors: colors10},
-    'Th Concentration': {values: [9.7, 10.4, 11.2, 12, 12.6, 13.0, 13.6, 14.4, 15.2, 16, 16.9], colors: colors10},
-    'Ti Concentration':  {values: [0.13*10000, 0.16*10000, 0.20*10000, 0.24*10000, 0.28*10000, 0.30*10000, 0.32*10000, 0.34*10000, 0.36*10000, 0.38*10000, 0.40*10000], colors: colors10},
-    'V Concentration': {values: [48, 52, 56, 60, 64, 66, 68, 70, 72, 74, 77], colors: colors10},
-    'Y Concentration': {values: [8.7, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30], colors: colors10},
-    'Zn Concentration': {values: [24, 30, 40, 50, 54, 58, 62, 65, 67, 70, 74], colors: colors10},
-    'Zr Concentration': {values: [134, 180, 220, 250, 260, 270, 280, 290, 300, 330, 370], colors: colors10},
-}
-
-let colors20 =  ['#4A8FC2', '#609ABB', '#71A2B3', '#87AFAC', '#98B9A5', '#AAC29B', '#BBCF93', '#CEDB8C', '#E2E888', '#F4F581', '#F8F076', '#F7DA6A', '#F4C461', '#F0AE57', '#EC994C', '#E98544', '#E5713C', '#E05C33', '#DC472D', '#D53327'];
-let colorScales20 = {
-    'Al Concentration': {values: [1.6*10000, 1.9*10000, 2.1*10000, 2.4*10000, 2.7*10000, 3.0*10000, 3.3*10000, 3.6*10000, 3.9*10000, 4.2*10000, 4.5*10000, 4.8*10000, 5.1*10000, 5.4*10000, 5.7*10000, 6.0*10000, 6.3*10000, 6.6*10000, 6.9*10000, 7.2*10000, 7.9*10000], colors: colors20},
-    'Ca Concentration':  {values: [-1*1000, 0.2*10000, .4*10000, .6*10000, .8*10000, 1.0*10000, 1.5*10000, 2.0*10000, 2.5*10000, 3.0*10000, 3.5*10000, 4.0*10000, 4.5*10000, 5.0*10000, 6*10000, 8*10000, 10*10000, 12*10000, 15*10000, 20*10000, 23*10000], colors: colors20},
-    'Cr Concentration': {values: [29, 33, 35, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 52, 54, 56, 62], colors: colors20},
-    'Cu Concentration': {values: [11, 12, 14, 16, 17, 18, 19, 19.5, 20, 20.5, 21,21.5, 22, 22.5, 23, 23.5, 24, 24.5, 25, 25.5, 26], colors: colors20},
-    'Fe Concentration':  {values: [0.8*10000, 0.9*10000, 1*10000, 1.1*10000, 1.2*10000, 1.3*10000, 1.4*10000, 1.5*10000, 1.6*10000, 1.7*10000, 1.8*10000, 1.9*10000, 2*10000, 2.1*10000, 2.2*10000, 2.3*10000, 2.4*10000, 2.5*10000, 2.6*10000, 2.7*10000, 3*10000], colors: colors20},
-    'K Concentration':  {values: [0.4*10000, 0.5*10000, 0.6*10000, 0.7*10000, 0.8*10000, 0.9*10000, 1*10000, 1.05*10000, 1.1*10000, 1.15*10000, 1.2*10000, 1.25*10000, 1.3*10000, 1.35*10000, 1.4*10000, 1.45*10000, 1.5*10000, 1.55*10000, 1.6*10000, 1.65*10000, 1.73*10000], colors: colors20},
-    'Mn Concentration': {values: [130, 160, 200, 220, 240, 260, 280, 300, 320, 340, 350, 360, 370, 380, 390, 400, 420, 450, 500, 550, 636], colors: colors20},
-    'Nb Concentration': {values: [6.4, 7, 8, 9, 10, 11, 12, 13, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20.3], colors: colors20},
-    'Ni Concentration': {values: [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 35], colors: colors20},
-    'Pb Concentration': {values: [7.7, 9, 10, 11, 12, 13, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 20.5, 21.3], colors: colors20},
-    'Rb Concentration': {values: [26, 30, 35, 40, 45, 50, 55, 60, 65, 68, 71, 74, 77, 80, 82, 84, 86, 88, 90, 92, 95], colors: colors20},
-    'S Concentration': {values: [125, 130, 140, 145, 150, 155, 160, 165, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 291], colors: colors20},
-    'Si Concentration':  {values: [8.5*10000, 9*10000, 10*10000, 11*10000, 12*10000, 13*10000, 14*10000, 15*10000, 16*10000, 17*10000, 18*10000, 19*10000, 20*10000, 21*10000, 22*10000, 23*10000, 24*10000, 25*10000, 26*10000, 27*10000, 28*10000], colors: colors20},
-    'Sr Concentration': {values: [65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 150, 200, 250, 300, 331], colors: colors20},
-    'Th Concentration': {values: [4, 10, 10.4, 10.8, 11.2, 11.6, 12, 12.4, 12.6, 12.8, 13, 13.2, 13.6, 14, 14.4, 14.8, 15.2, 15.6, 16, 16.4, 16.9], colors: colors20},
-    'Ti Concentration':  {values: [0.12*10000, 0.14*10000, 0.16*10000, 0.18*10000, 0.2*10000, 0.22*10000, 0.24*10000, 0.26*10000, 0.28*10000, 0.29*10000, 0.3*10000, 0.31*10000, 0.32*10000, 0.33*10000, 0.34*10000, 0.35*10000, 0.36*10000, 0.37*10000, 0.38*10000, 0.39*10000, 0.4*10000], colors: colors20},
-    'V Concentration': {values: [48, 50, 52, 54, 56, 58, 60, 62, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 77], colors: colors20},
-    'Y Concentration': {values: [8.7, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30], colors: colors20},
-    'Zn Concentration': {values: [24, 25, 30, 35, 40, 45, 50, 52, 54, 56, 58, 60, 62, 64, 65, 66, 67, 68, 70, 72, 74], colors: colors20},
-    'Zr Concentration': {values: [134, 160, 180, 200, 220, 240, 250, 255, 260, 265, 270, 275, 280, 285, 290, 295, 300, 310, 330, 350, 370], colors: colors20},
-}
-
-let colorScales = [colorScales5, colorScales10, colorScales20];
-let colorScaleIndex = 0;
-function smoothenData(contourData){
+function smoothenData(contourData) {
     let t = [];
     let x = [];
     let y = [];
     //Remove outliers
     let q95 = ss.quantile(contourData.z, 0.95);
     let q05 = ss.quantile(contourData.z, 0.05);
-    for (let i = 0; i < contourData.z.length ; i++) {
-        if(contourData.z[i] <= q95 && contourData.z[i] >= q05){
+    for (let i = 0; i < contourData.z.length; i++) {
+        if (contourData.z[i] <= q95 && contourData.z[i] >= q05) {
             t.push(contourData.z[i]);
             x.push(digits.indexOf(contourData.x[i]));
             y.push(letters.indexOf(contourData.y[i]));
@@ -316,25 +415,26 @@ function smoothenData(contourData){
     contourData.x = [];
     contourData.y = [];
     let step = 0.05;
-    for (let i = 0; i < digits.length; i=i+step) {
-        for (let j = 0; j < letters.length; j = j+step) {
+    for (let i = 0; i < digits.length; i = i + step) {
+        for (let j = 0; j < letters.length; j = j + step) {
             contourData.x.push(i);
             contourData.y.push(j);
             contourData.z.push(kriging.predict(i, j, variogram))
         }
     }
 }
+
 function setContourData(index) {
 
     let columnName = currentColumnNames[index]
     let colorScale = 'Portland';
     let selectedColorScales = colorScales[colorScaleIndex];
-    if(selectedColorScales[columnName]){
+    if (selectedColorScales[columnName]) {
         colorScale = [];
         let valueScale = d3.scaleLinear().domain(d3.extent(selectedColorScales[columnName].values)).range([0, 1]);
-        for (let i = 0; i < selectedColorScales[columnName].values.length-1; i++) {
+        for (let i = 0; i < selectedColorScales[columnName].values.length - 1; i++) {
             colorScale.push([valueScale(selectedColorScales[columnName].values[i]), selectedColorScales[columnName].colors[i]]);
-            colorScale.push([valueScale(selectedColorScales[columnName].values[i+1]), selectedColorScales[columnName].colors[i]])
+            colorScale.push([valueScale(selectedColorScales[columnName].values[i + 1]), selectedColorScales[columnName].colors[i]])
         }
     }
     contourData[index] = [{
@@ -357,7 +457,7 @@ function setContourData(index) {
         },
         connectgaps: true,
     }];
-    if(plotTypeSelection!='heatmap'){
+    if (plotTypeSelection != 'heatmap') {
         smoothenData(contourData[index][0]);
     }
 }
@@ -373,7 +473,7 @@ let plotMargins = {
 };
 
 function plotContour(index) {
-    var contourLayout = {
+    let contourLayout = {
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
         margin: plotMargins,
@@ -462,7 +562,7 @@ function setBoxPlotData(index) {
 }
 
 function plotBoxPlot(index) {
-    var layout = {
+    let layout = {
         paper_bgcolor: 'rgba(255,266,255,.75)',
         plot_bgcolor: 'rgba(0,0,0,0)',
         title: currentColumnNames[index],
@@ -495,10 +595,144 @@ function plotBoxPlots() {
     plotBoxPlot(1);
 }
 
+function setCurvePlotData(index) {
+    let x = getNumberColumn(avgData, currentColumnNames[index]);
+    if (x == null) x = [];
+    let y = getColumn(avgData, 'Depth').map(d => +d.split('-')[1]);
+    if (y == null) y = [];
+    let x1 = x.slice(0, 13);//First 13 is for 10cm, the last are for the 6 levels
+    let x2 = x.slice(13);
+    let y1 = y.slice(0, 13);//First 13 is for 10cm, the last are for the 6 levels
+    let y2 = y.slice(13);
+    adjustedRSquaredScores[index] = calculateAdjustedRSquared(x1, y1, x2, y2);
+    curvePlotData[index] = [{
+        x: x1,
+        y: y1,
+        type: 'scatter',
+        name: '10cm',
+        mode: 'lines',
+        line: {shape: 'spline'}
+    }, {
+        x: x2,
+        y: y2,
+        type: 'scatter',
+        name: 'Horizon',
+        mode: 'lines',
+        line: {shape: 'spline'}
+    }
+    ];
+}
+
+function calculateAdjustedRSquared(x1, y1, x2, y2) {
+    if(x1.length===0){
+        return 0;
+    }
+    let result;
+    let points = x2.map((v, i) => [v, y2[i]]);
+    var line = d3.line()
+        .x(d => d[0])
+        .y(d => d[1])
+        .curve(d3.curveCardinal);
+
+    var tempSvg = document.createElement('svg');
+    tempSvg = d3.select(tempSvg);
+    var tempPath = tempSvg.append("svg:path").attr("d", line(points));
+    var tpNode = tempPath.node();
+    let prevY = 0;
+    let currY = 0;
+    let x2Interpolated = [];
+    let y2Interpolated = [];
+    let counter = 0;
+    let totalLength = tpNode.getTotalLength();
+    let step = 0.01;
+    var curlen = 0;
+    while (curlen <= totalLength + step) {
+        prevY = currY;
+        let point = getXY(curlen);
+        currY = point[1];
+        if (prevY < y1[counter] && currY >= y1[counter]) {
+            x2Interpolated.push(point[0]);
+            y2Interpolated.push(point[1]);
+            counter += 1;
+        }
+        curlen += step;
+    }
+
+    function getXY(len) {
+        var point = tpNode.getPointAtLength(len);
+        return [point.x, point.y];
+    }
+
+    let sse = ss.sum(x2Interpolated.map((x2v, i) => (x1[i] - x2v) * (x1[i] - x2v)));
+    let mx1 = ss.mean(x1);
+    let sst = ss.sum(x1.map((x1v) => (x1v - mx1) * (x1v - mx1)));
+    result = 1-(sse/sst);
+    return result;
+}
+
+function plotCurvePlot(index) {
+
+    let layout = {
+        paper_bgcolor: 'rgba(255,266,255,.75)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        title: currentColumnNames[index]+", R-Squared:"+adjustedRSquaredScores[index].toFixed(3),
+        margin: {
+            l: 40,
+            r: 100,
+            t: 50,
+            b: 30,
+            pad: 0,
+            autoexpand: false
+        },
+        xaxis: {
+            showgrid: true,
+            zeroline: true,
+            showline: true,
+            autotick: true,
+            showticklabels: true,
+            ticklen: 4,
+            tickwidth: 2,
+            tickcolor: '#000',
+            tickfont: {
+                family: "Impact",
+                size: 12,
+                color: "black"
+            },
+
+        },
+        yaxis: {
+            showgrid: true,
+            zeroline: true,
+            showline: true,
+            autotick: true,
+            showticklabels: true,
+            ticklen: 4,
+            tickwidth: 2,
+            tickcolor: '#000',
+            tickfont: {
+                family: "Impact",
+                size: 12,
+                color: "black"
+            },
+            range: [140, 0]
+        },
+
+    };
+
+    Plotly.newPlot('curvePlot' + (index + 1), curvePlotData[index], layout);
+}
+
+function plotCurvePlots() {
+    setCurvePlotData(0);
+    plotCurvePlot(0);
+    setCurvePlotData(1);
+    plotCurvePlot(1);
+}
+
 function plotScatter() {
     //Do the sorting.
-    var scatterData = data.map(function (d) {
-        var result = {};
+    let scatterData = data.map(function (d) {
+        let result = {};
         result[currentColumnNames[0]] = (d[currentColumnNames[0]].indexOf('<LOD') != -1) ? 0 : +d[currentColumnNames[0]];
         result[currentColumnNames[1]] = (d[currentColumnNames[1]].indexOf('<LOD') != -1) ? 0 : +d[currentColumnNames[1]];
         return result;
@@ -507,11 +741,11 @@ function plotScatter() {
         return a[currentColumnNames[0]] - b[currentColumnNames[0]];
     });
 
-    var xData = getColumn(scatterData, currentColumnNames[0]);
-    var yData = getColumn(scatterData, currentColumnNames[1]);
-    var model = linearRegiression(xData, yData);
-    var yPredictedData = predict(xData, model);
-    var scatterTraces = [{
+    let xData = getColumn(scatterData, currentColumnNames[0]);
+    let yData = getColumn(scatterData, currentColumnNames[1]);
+    let model = linearRegiression(xData, yData);
+    let yPredictedData = predict(xData, model);
+    let scatterTraces = [{
         x: xData,
         y: yData,
         type: 'scatter',
@@ -532,7 +766,7 @@ function plotScatter() {
     }
     ];
 
-    var layout = {
+    let layout = {
         title: currentColumnNames[0].split(" ")[0] + " vs. " + currentColumnNames[1].split(" ")[0] + " correlation: " + getCurrentCorrelation(),
         xaxis: {
             title: currentColumnNames[0]
@@ -558,28 +792,28 @@ function plotScatter() {
 }
 
 function getCurrentCorrelation() {
-    var corcoef = ss.sampleCorrelation(elmConcentrations[0], elmConcentrations[1]);
+    let corcoef = ss.sampleCorrelation(elmConcentrations[0], elmConcentrations[1]);
     return Math.round(corcoef * 1000) / 1000;
 }
 
 //</editor-fold>
 /*Creating the the selection box*/
 function createByJson(div, jsonData, name, selectedIndex, changeHandler, width) {
-    var msdd = $("#" + div).msDropDown({byJson: {data: jsonData, name: name, width: width}}).data("dd");
+    let msdd = $("#" + div).msDropDown({byJson: {data: jsonData, name: name, width: width}}).data("dd");
     msdd.set("selectedIndex", selectedIndex);
-    var theOption = $("select[name='" + name + "']");
+    let theOption = $("select[name='" + name + "']");
     theOption.change(changeHandler);
     return theOption;
 }
 
 function getAllElements() {
-    var headers = d3.keys(data[0]);
-    var elements = headers.filter(function (d) {
+    let headers = d3.keys(data[0]);
+    let elements = headers.filter(function (d) {
         return d.indexOf('Concentration') != -1;
     });
     //Create option 1
-    var jsonData = [];
-    for (var i = 0; i < elements.length; i++) {
+    let jsonData = [];
+    for (let i = 0; i < elements.length; i++) {
         jsonData.push({value: elements[i], text: elements[i]});
     }
     jsonData.sort((a, b) => {
@@ -614,11 +848,14 @@ function updateElement(index) {
     //Update the box plot
     setBoxPlotData(index);
     plotBoxPlot(index);
+    //Update the curve plot
+    setCurvePlotData(index);
+    plotCurvePlot(index);
     //Reset the selection circles of the correlation graph.
     resetSelectionCircles();
 }
 
-/*Section for the force directed layout of the correlation graph*/
+//<editor-fold desc="Section for the force directed layout of the correlation graph"
 let graphNodeRadius = 12;
 let mouseOverExpand = 6;
 let selectionStrokeWidth = 3;
@@ -626,30 +863,30 @@ var force;
 let maxLinkWidth = 2;
 let minLinkWidth = 0.5;
 var corScale;
-var nodes_data = [];
-var links_data = [];
+let nodes_data = [];
+let links_data = [];
 var node;
 var link;
 let defaultThreshold = 0.75;
 let linkStrengthPower = 10;
-var selectionCounter = 0;
-var selectionCircle;
+let selectionCounter = 0;
+let selectionCircle;
 let defaultMargin = 20;
 
 function getGraphSize(svg) {
     if (!svg) {
         svg = d3.select(svgId);
     }
-    var width = svg.node().getBoundingClientRect().width;
-    var height = svg.node().getBoundingClientRect().height;
+    let width = svg.node().getBoundingClientRect().width;
+    let height = svg.node().getBoundingClientRect().height;
     return [width, height];
 }
 
 function createForce() {
-    var graphSize = getGraphSize(),
+    let graphSize = getGraphSize(),
         width = graphSize[0],
         height = graphSize[1];
-    var myForce = d3.forceSimulation()
+    let myForce = d3.forceSimulation()
         .velocityDecay(0.5)
         .alphaDecay(0)
         .force("charge", d3.forceManyBody().strength(-80).distanceMin(4 * graphNodeRadius))
@@ -668,14 +905,14 @@ function getNodes() {
 
 function setLinkData(threshold) {
     nodes_data = force.nodes();
-    var links = [];
-    for (var i = 0; i < nodes_data.length - 1; i++) {
-        var u = getNumberColumn(data, nodes_data[i].value)
-        for (var j = i + 1; j < nodes_data.length; j++) {
-            var v = getNumberColumn(data, nodes_data[j].value);
-            var corcoef = ss.sampleCorrelation(u, v);
-            var type = (corcoef >= 0) ? "positive" : "negative"
-            var corcoefabs = Math.abs(Math.round(corcoef * 1000) / 1000);
+    let links = [];
+    for (let i = 0; i < nodes_data.length - 1; i++) {
+        let u = getNumberColumn(data, nodes_data[i].value)
+        for (let j = i + 1; j < nodes_data.length; j++) {
+            let v = getNumberColumn(data, nodes_data[j].value);
+            let corcoef = ss.sampleCorrelation(u, v);
+            let type = (corcoef >= 0) ? "positive" : "negative"
+            let corcoefabs = Math.abs(Math.round(corcoef * 1000) / 1000);
             if (corcoefabs >= threshold) {
                 links.push({source: nodes_data[i], target: nodes_data[j], type: type, value: corcoefabs});
             }
@@ -690,23 +927,24 @@ function setLinkData(threshold) {
 
 function getCorScale(links_data) {
 
-    var maxCor = d3.max(links_data, function (d) {
+    let maxCor = d3.max(links_data, function (d) {
         return d.value;
     });
-    var minCor = d3.min(links_data, function (d) {
+    let minCor = d3.min(links_data, function (d) {
         return d.value;
     });
     //Make the scales before filtering
-    var corScale = d3.scaleLinear().domain([minCor, maxCor]).range([minLinkWidth, maxLinkWidth]);
+    let corScale = d3.scaleLinear().domain([minCor, maxCor]).range([minLinkWidth, maxLinkWidth]);
     return corScale;
 }
 
+//</editor-fold>
 //<editor-fold desc="Draw the force directed graph">
 function drawGraph() {
-    var svg = d3.select(svgId);
-    var graphSize = getGraphSize();
-    var width = graphSize[0];
-    var height = graphSize[0];
+    let svg = d3.select(svgId);
+    let graphSize = getGraphSize();
+    let width = graphSize[0];
+    let height = graphSize[0];
 
     force = createForce();
 
@@ -717,7 +955,7 @@ function drawGraph() {
     corScale = getCorScale(links_data);
     force.force("link", d3.forceLink(links_data).strength(Math.pow(defaultThreshold, linkStrengthPower)));
 
-    var g = svg.append("g");
+    let g = svg.append("g");
 
     //Links
     link = g.append("g")
@@ -727,7 +965,7 @@ function drawGraph() {
         .attr("stroke-width", linkWidth)
         .style("stroke", linkColor);
 
-    var node = g.append("defs")
+    let node = g.append("defs")
         .selectAll("clipPath")
         .data(nodes_data)
         .enter()
@@ -739,7 +977,7 @@ function drawGraph() {
         .attr("fill", "black")
         .attr("r", graphNodeRadius);
 
-    var plot = g.append("g")
+    let plot = g.append("g")
         .selectAll("image")
         .data(nodes_data)
         .enter()
@@ -780,7 +1018,7 @@ function drawGraph() {
     //Plot to the images
     generateNodesWithSVGData((graphNodeRadius + mouseOverExpand) * 2, (graphNodeRadius + mouseOverExpand) * 2, nodes_data);
     //Lablel
-    var label = g.append("g")
+    let label = g.append("g")
         .selectAll("text")
         .data(nodes_data)
         .enter().append("text")
@@ -847,7 +1085,7 @@ function drawGraph() {
     }
 
     //Handling drag
-    var dragHandler = d3.drag()
+    let dragHandler = d3.drag()
         .on("start", dragStart)
         .on("drag", dragDrag)
         .on("end", dragEnd);
@@ -870,7 +1108,7 @@ function drawGraph() {
     }
 
     //Handling zoom
-    var zoomHandler = d3.zoom()
+    let zoomHandler = d3.zoom()
         .on("zoom", zoomActions);
 
     zoomHandler(svg);
@@ -904,13 +1142,12 @@ function linkWidth(d) {
 }
 
 //</editor-fold>
-
-//<editor-fold desc="Section for the slider">*/
+//<editor-fold desc="Section for the slider">
 function onThreshold(threshold) {
     links_data = setLinkData(threshold);
     link = link.data(links_data);
     link.exit().remove();
-    var newLink = link.enter().append("line");
+    let newLink = link.enter().append("line");
     link = link.merge(newLink);
     //Update the values
     link.attr("stroke-width", linkWidth)
@@ -928,9 +1165,9 @@ function onOpacityThreshold(threshold) {
 
 }
 
-var sliderHeight = 24;
-var sliderWidth = 140;
-var sliderMarginRight = 20;
+let sliderHeight = 24;
+let sliderWidth = 140;
+let sliderMarginRight = 20;
 
 function drawThresholdSlider(svg, label, thresholdHandler) {
     if (!thresholdHandler) {
@@ -952,7 +1189,7 @@ function drawThresholdSlider(svg, label, thresholdHandler) {
     let graphHeight = graphSize[1];
     let sliderX = graphWidth - sliderWidth - sliderMarginRight;
     let sliderY = graphHeight - sliderHeight;
-    var g = svg.append("g")
+    let g = svg.append("g")
         .attr("transform", "translate(" + sliderX + "," + sliderY + ")");
 
     g.append("text")
@@ -968,10 +1205,10 @@ function drawThresholdSlider(svg, label, thresholdHandler) {
 //<editor-fold desc = "Section for the image generator">
 /*Section for the image on the graph nodes*/
 function generateNodesWithSVGData(imgWidth, imgHeight, nodes_data) {
-    var xContour = getGridNumberList(data);
-    var yContour = getGridLetterList(data);
+    let xContour = getGridNumberList(data);
+    let yContour = getGridLetterList(data);
 
-    var layout = {
+    let layout = {
         displayModeBar: false,
         xaxis: {
             autorange: true,
@@ -1002,9 +1239,9 @@ function generateNodesWithSVGData(imgWidth, imgHeight, nodes_data) {
     };
 
     nodes_data.forEach(function (d) {
-        var aDiv = document.createElement("div");
-        var z = getNumberColumn(data, d.value);
-        var contourData = [
+        let aDiv = document.createElement("div");
+        let z = getNumberColumn(data, d.value);
+        let contourData = [
             {
                 x: xContour,
                 y: yContour,

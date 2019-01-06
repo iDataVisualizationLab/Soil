@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+<style>
+
+    path {
+        fill: none;
+        stroke: #000;
+        stroke-width: 3px;
+    }
+
+    circle {
+        fill: steelblue;
+        stroke: #fff;
+        stroke-width: 3px;
+    }
+
+</style>
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script>
+
+    var points = [
+        [480, 200],
+        [580, 400],
+        [680, 100],
+        [780, 300],
+        [180, 300],
+        [280, 100],
+        [380, 400]
+    ];
+
+    var svg = d3.select("body").append("svg")
+        .attr("width", 960)
+        .attr("height", 500);
+    var line = d3.line()
+        .x(d=>d[0])
+        .y(d=>d[1])
+        .curve(d3.curveCardinalClosed);
+    var path = svg.append("path")
+        .attr("d", line(points));
+
+    svg.selectAll(".point")
+        .data(points)
+        .enter().append("circle")
+        .attr("r", 4)
+        .attr("transform", function(d) { return "translate(" + d + ")"; });
+
+    var circle = svg.append("circle")
+        .attr("r", 13)
+        .attr("transform", "translate(" + points[0] + ")");
+
+
+
+</script>
