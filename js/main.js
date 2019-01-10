@@ -767,7 +767,7 @@ function plotScatter() {
     ];
 
     let layout = {
-        title: currentColumnNames[0].split(" ")[0] + " vs. " + currentColumnNames[1].split(" ")[0] + " correlation: " + getCurrentCorrelation(),
+        title: currentColumnNames[0].split(" ")[0] + " vs. " + currentColumnNames[1].split(" ")[0] + ", correlation: " + getCurrentCorrelation(),
         xaxis: {
             title: currentColumnNames[0]
         },
