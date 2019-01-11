@@ -83,7 +83,7 @@
 
 .contourRoundedBorder{
     border: 1px solid rgba(0,0,0, 1);
-    background-image: url("../data/images/profile12.png");
+    background-image: url("../data/images/Profile1.png");
     border-radius: 6px;
     box-shadow: 5px 5px 5px #444;
     width: var(--box-width);

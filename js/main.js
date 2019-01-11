@@ -5,6 +5,28 @@ let defaultProfileIndex = 0;
 let svgId = "#corcoefGraph";
 let letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"];
 let digits = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"];
+let columns = [
+    'Grid ID',
+    'Al Concentration',
+    'Ca Concentration',
+    'Cr Concentration',
+    'Cu Concentration',
+    'Fe Concentration',
+    'K Concentration',
+    'Mn Concentration',
+    'Nb Concentration',
+    'Ni Concentration',
+    'Pb Concentration',
+    'Rb Concentration',
+    'S Concentration',
+    'Si Concentration',
+    'Sr Concentration',
+    'Th Concentration',
+    'Ti Concentration',
+    'V Concentration',
+    'Y Concentration',
+    'Zn Concentration',
+    'Zr Concentration'];
 let allElements = [];
 let defaultElementIndexes = [4, 1];
 let theOptions = [];
@@ -211,6 +233,8 @@ function changeProfile(event) {
     d3.select(".loader").style("display", "block").style("opacity", 1.0);
     d3.select("#page").style("visibility", "hidden");
     d3.select(svgId).selectAll("*").remove();
+    //Change the profile background.
+    d3.selectAll('.contourRoundedBorder').style('background-image', `url("data/images/${event.target.value}.png")`);
     readData("data/" + event.target.value);
 }
 
@@ -238,8 +262,14 @@ function readData(fileName) {
                 feRatio = feAW * 2 / Fe2O3AW,
                 tiO2AW = tiAW + 2 * oAW,
                 tiRatio = tiAW / tiO2AW;
-
             data.map(row => {
+                //Use only 20 elements
+                let temp = {};
+                columns.forEach(c=>{
+                    temp[c] = row[c];
+                });
+                row = temp;
+
                 //Calculate Ruxton weathering index
                 let si = (row["Si Concentration"] === "<LOD") ? 0 : +row["Si Concentration"],
                     al = (row["Al Concentration"] === "<LOD") ? 0 : +row["Al Concentration"],
@@ -288,8 +318,7 @@ function getNumberColumn(data, columnName) {
             column.push(0);
         } else if (!d[columnName]) {
             column.push(null);
-        }
-        else {
+        } else {
             column.push(+d[columnName]);
         }
     });
@@ -566,7 +595,14 @@ function plotBoxPlot(index) {
         paper_bgcolor: 'rgba(255,266,255,.75)',
         plot_bgcolor: 'rgba(0,0,0,0)',
         title: currentColumnNames[index],
-        margin: plotMargins,
+        margin: {
+            l: 20,
+            r: 80,
+            t: 50,
+            b: 76,
+            pad: 0,
+            autoexpand: false
+        },
         xaxis: {
             tickfont: {
                 family: "Impact",
@@ -624,7 +660,7 @@ function setCurvePlotData(index) {
 }
 
 function calculateAdjustedRSquared(x1, y1, x2, y2) {
-    if(x1.length===0){
+    if (x1.length === 0) {
         return 0;
     }
     let result;
@@ -666,7 +702,7 @@ function calculateAdjustedRSquared(x1, y1, x2, y2) {
     let sse = ss.sum(x2Interpolated.map((x2v, i) => (x1[i] - x2v) * (x1[i] - x2v)));
     let mx1 = ss.mean(x1);
     let sst = ss.sum(x1.map((x1v) => (x1v - mx1) * (x1v - mx1)));
-    result = 1-(sse/sst);
+    result = 1 - (sse / sst);
     return result;
 }
 
@@ -675,20 +711,20 @@ function plotCurvePlot(index) {
     let layout = {
         paper_bgcolor: 'rgba(255,266,255,.75)',
         plot_bgcolor: 'rgba(0,0,0,0)',
-        title: currentColumnNames[index]+", R-Squared:"+adjustedRSquaredScores[index].toFixed(3),
+        title: currentColumnNames[index] + ", R-Squared:" + adjustedRSquaredScores[index].toFixed(3),
         margin: {
-            l: 40,
-            r: 100,
+            l: 120,
+            r: 120,
             t: 50,
-            b: 30,
-            pad: 0,
+            b: 76,
             autoexpand: false
         },
         xaxis: {
             showgrid: true,
-            zeroline: true,
+            zeroline: false,
             showline: true,
             autotick: true,
+            autorange: true,
             showticklabels: true,
             ticklen: 4,
             tickwidth: 2,
@@ -702,7 +738,7 @@ function plotCurvePlot(index) {
         },
         yaxis: {
             showgrid: true,
-            zeroline: true,
+            zeroline: false,
             showline: true,
             autotick: true,
             showticklabels: true,
@@ -716,10 +752,18 @@ function plotCurvePlot(index) {
             },
             range: [140, 0]
         },
+        legend: {
+            "orientation": "h",
+            bgcolor: 'rgba(0, 0, 0, 0)'
+        }
 
     };
 
     Plotly.newPlot('curvePlot' + (index + 1), curvePlotData[index], layout);
+    //Then remove the clip-path, since this clipath is cutting off the curves
+    d3.select(`#curvePlot${index+1}`).select('.plot').attr('clip-path', '');
+    //Add toggle button
+    addToggleAxesButton(index);
 }
 
 function plotCurvePlots() {
@@ -727,6 +771,46 @@ function plotCurvePlots() {
     plotCurvePlot(0);
     setCurvePlotData(1);
     plotCurvePlot(1);
+
+}
+function addToggleAxesButton(index) {
+    let htmlString =
+        '<a id="toggleAxesBtn" rel="tooltip" class="modebar-btn" data-title="Toggle axes" data-toggle="false" data-gravity="n">' +
+        '<svg width="16" height="16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 1000 1000" enable-background="new 0 0 1000 1000" xml:space="preserve">' +
+        '<g><g><path d="M846.7,153.7c-191.2-191.5-501.5-191.7-693-0.4c-191.5,191.2-191.7,501.5-0.4,693c191.2,191.5,501.5,191.7,693,0.4C1037.7,655.5,1037.9,345.2,846.7,153.7z M568.4,810.9c0,7.6-6.1,13.7-13.7,13.7H445.3c-7.6,0-13.7-6.1-13.7-13.7V404.6c0-7.6,6.1-13.7,13.7-13.7h109.5c7.6,0,13.7,6.1,13.7,13.7V810.9z M500,334.1c-43.8,0-79.4-35.6-79.4-79.4c0-43.8,35.6-79.4,79.4-79.4c43.8,0,79.4,35.6,79.4,79.4C579.4,298.5,543.8,334.1,500,334.1z"/></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></g>' +
+        '</svg>'+
+        '</a>';
+    let theElm = createElementFromHTML(htmlString);
+    //Select the div
+    let theDiv = d3.select(`#curvePlot${index+1}`);
+    //Set the opacity = 1 by default. Because by default there is no opacity attribute so we can't change it
+    theElm.addEventListener('click', () => {
+        //Process the toggling here.
+        let theXAxisText = theDiv.select('.xaxislayer-above');
+        let theYAxisText = theDiv.select('.yaxislayer-above');
+        let theXLinesAbove = theDiv.select('.xlines-above.crisp');
+        let theYLinesAbove = theDiv.select('.ylines-above.crisp');
+        if(theXAxisText.attr("opacity")===null || +theXAxisText.attr("opacity") === 1){
+            theXAxisText.attr("opacity", 0);
+            theYAxisText.attr("opacity", 0);
+            theXLinesAbove.attr("opacity", 0);
+            theYLinesAbove.attr("opacity", 0);
+        }else{
+            theXAxisText.attr("opacity", 1);
+            theYAxisText.attr("opacity", 1);
+            theXLinesAbove.attr("opacity", 1);
+            theYLinesAbove.attr("opacity", 1);
+        }
+    }, false);
+    let downloadBtn = theDiv.select('[data-title="Download plot as a png"]');
+    if (!downloadBtn.empty()) {
+        downloadBtn.node().parentNode.insertBefore(theElm, downloadBtn.node());
+    }
+}
+function createElementFromHTML(htmlString) {
+    var div = document.createElement('div');
+    div.innerHTML = htmlString.trim();
+    return div.firstChild;
 }
 
 function plotScatter() {
