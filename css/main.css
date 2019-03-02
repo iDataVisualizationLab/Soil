@@ -8,7 +8,6 @@
     --corcoef-graph-margin-top: var(--default-margin);
 
     --option1-width: 150px;
-
     --option2-width: var(--option1-width);
 
     --msdropdown-height: 28px;/*28px is the default height of the msdropdown*/
@@ -16,9 +15,13 @@
     --scatter-plot-margin-left: calc(var(--default-margin) + var(--box-width) + var(--default-margin));
     --scatter-plot-margin-top: var(--corcoef-graph-margin-top);
 
+    --contour-control-panel-margin-left:var(--corcoef-graph-margin-left);
+    --contour-control-panel-margin-top:calc(var(--corcoef-graph-margin-top) + var(--box-height) + var(--default-margin));
+    --contour-control-panel-height: 18px;
+
     --contour-height: 597px;
     --contour1-margin-left: var(--default-margin);
-    --contour1-margin-top: calc(var(--corcoef-graph-margin-top) + var(--box-width) + var(--default-margin));
+    --contour1-margin-top: calc(var(--contour-control-panel-margin-top) + var(--contour-control-panel-height) + var(--default-margin));
 
     --contour2-margin-left: var(--scatter-plot-margin-left);
     --contour2-margin-top: var(--contour1-margin-top);
@@ -144,6 +147,11 @@
     position: absolute;
     margin-left: var(--scatter-plot-margin-left);
     margin-top: var(--scatter-plot-margin-top);
+}
+#contourControlPanel{
+    position: absolute;
+    margin-left: var(--contour-control-panel-margin-left);
+    margin-top: var(--contour-control-panel-margin-top);
 }
 
 #contour1Div{
