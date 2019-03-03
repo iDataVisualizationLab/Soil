@@ -1,85 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Soil analysis</title>
-    <script src="lib/d3.js"></script>
-    <!--<script src="https://d3js.org/d3-color.v1.min.js"></script>-->
-    <!--<script src="https://d3js.org/d3-interpolate.v1.min.js"></script>-->
-    <!--<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>-->
-    <script src="lib/jquery.js"></script>
-    <script src="lib/plotly-latest.min.js"></script>
-    <script src="lib/simple-statistics.min.js"></script>
-    <script src="lib/kriging.js"></script>
-    <!--for the slider-->
-    <script src="lib/d3-simple-slider.js"></script>
-    <!--main code-->
-    <link href="css/main.css" rel="stylesheet"/>
-    <!--JS + CSS needed for ms dropdown-->
-    <link href="css/msdropdown/dd.css" rel="stylesheet" type="text/css"/>
-    <script src="js/msdropdown/jquery.dd.js"></script>
-    <!--end about ms dropdown-->
-    <!--for the correlation-->
-    <script src="js/correlation.js"></script>
-    <script src="js/linearregression.js"></script>
-    <script src="js/listfilesfromfolder.js" type="application/javascript"></script>
+    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
+    <meta name="description" content="SOAViz: Visualization for Portable X-ray Fluorescence Soil Profiles"/>
+    <meta name="keywords" content="SOAViz: Visualization for Portable X-ray Fluorescence Soil Profiles"/>
+    <meta name="author" content="SOAViz"/>
+    <link rel="stylesheet" type="text/css" href="styles/default.css" media="screen"/>
+    <title>SOAViz</title>
 </head>
+
 <body>
-<div id="profileDiv">
-    <div id="profileContainerDiv"></div>
-</div>
-<div class="loader"></div>
-<div id="page">
-    <div class="roundedBorder" id="corcoefGraphDiv">
-        <div id="corcoefGraphTitle">Correlation graph</div>
-        <svg id="corcoefGraph"></svg>
-    </div>
-    <div class="roundedBorder" id="scatterPlot"></div>
-
-    <div id="contourControlPanel">
-        <input id="contourPlotTypeS" name="plotType" onchange="plotTypeChange()" type="radio" value="ContourS"/>
-        <label for="contourPlotTypeS">Contour Smooth</label>
-        <input checked id="contourPlotTypeR" name="plotType" onchange="plotTypeChange()" type="radio" value="ContourR"/>
-        <label for="contourPlotTypeR">Contour Rough</label>
-        <input id="heatmapPlotType" name="plotType" onchange="plotTypeChange()" type="radio" value="Heatmap"/>
-        <label for="heatmapPlotType">Heatmap,</label>
-        <label for="colorScaleSelect"> Color scale</label>
-        <select id="colorScaleSelect" name="colorScaleSelect" onchange="colorScaleChange()">
-            <option>5 Levels</option>
-            <option>10 Levels</option>
-            <option>20 Levels</option>
-        </select>
-
-    </div>
-
-    <div class="contourRoundedBorder" id="contour1Div">
-        <div class="contour" id="contour1" style="height: 550px; width: 460px;"></div>
-        <div id="option1Container" style="z-index: 999"></div>
-        <div id="plotOpacity1">
-            <svg height="100%" width="100%"></svg>
-        </div>
-    </div>
-    <div class="contourRoundedBorder" id="contour2Div">
-        <div class="contour" id="contour2" style="height: 550px; width: 460px;"></div>
-        <div id="option2Container" style="z-index: 999"></div>
-        <div id="plotOpacity2">
-            <svg height="100%" width="100%"></svg>
-        </div>
-    </div>
-    <div class="contourRoundedBorder" id="boxPlot1Div">
-        <div class="boxPlot" id="boxPlot1" style="height: 596px; width: 460px;"></div>
-    </div>
-    <div class="contourRoundedBorder" id="boxPlot2Div">
-        <div class="boxPlot" id="boxPlot2" style="height: 596px; width: 460px;"></div>
-    </div>
-    <div class="contourRoundedBorder" id="curvePlot1Div">
-        <div class="boxPlot" id="curvePlot1" style="height: 596px; width: 460px;"></div>
-    </div>
-    <div class="contourRoundedBorder" id="curvePlot2Div">
-        <div class="boxPlot" id="curvePlot2" style="height: 596px; width: 460px;"></div>
+<div class="navigation">
+    <h1>SOAViz: Visualization for Portable X-ray Fluorescence Soil Profiles</h1>
+    <div id="menu">
+        <nav>
+            <ul>
+                <li><a href="index.html"><b><span style="color:#fff">Video</span></b></a></li>
+                <li><a href="demos.html"><span style="color:#888">Demos</span></a></li>
+            </ul>
+        </nav>
     </div>
 </div>
-<!--main data processing file-->
-<script src="js/main.js"></script>
+<center><iframe width="95%" height="800" src="media/SOAViz1.mp4" frameborder="0" allowfullscreen></iframe></center>
+
+<div class="footer">
+    <span class="right">&copy; Last revised: Oct 2, 2018</span>
+    <div class="clearer"><span></span></div>
+</div>
+</div>
 </body>
 </html>
