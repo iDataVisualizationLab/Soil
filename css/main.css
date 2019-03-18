@@ -221,6 +221,9 @@ svg image:hover{
     width: 200px;
 }
 
+#menu{
+    margin-left: var(--default-margin);
+}
 .myclip{
     clip-path: circle(15px at center);
     -webkit-clip-path: circle(15px at center);

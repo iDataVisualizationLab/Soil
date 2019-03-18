@@ -692,6 +692,14 @@ function colorScaleChange() {
     plotGridMaps();
 }
 
+function toggleGraphTopMenu(){
+    if($("#toggleGraphTopMenu").is(":checked")){
+        d3.selectAll(".modebar").style("opacity", 1);
+    }else{
+        d3.selectAll(".modebar").style("opacity", 0);
+    }
+}
+
 function plotGridMaps() {
     //Plot contour
     setContourData(0);
