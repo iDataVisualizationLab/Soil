@@ -549,7 +549,7 @@ let contourColorScales = {
 //Default color scales
 let colorScales = contourColorScales[profiles[defaultProfileIndex]];
 //The level color scale index (0, 1, 2 for 5 levels, 10 levels, and 20 levels correspondingly).
-let colorLevelsScaleIndex = 0;
+let colorLevelsScaleIndex = 2;
 
 
 loadProfiles();
