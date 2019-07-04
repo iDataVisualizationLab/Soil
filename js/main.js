@@ -802,9 +802,7 @@ function smoothenData(contourData) {
     }
 }
 
-function setContourData(index) {
-
-    let columnName = currentColumnNames[index]
+function getContourColorScale(columnName){
     let colorScale = 'Portland';
     let selectedColorScales = colorScales[colorLevelsScaleIndex];
     if (selectedColorScales[columnName]) {
@@ -815,6 +813,13 @@ function setContourData(index) {
             colorScale.push([valueScale(selectedColorScales[columnName].values[i + 1]), selectedColorScales[columnName].colors[i]])
         }
     }
+    return colorScale;
+}
+
+function setContourData(index) {
+
+    let columnName = currentColumnNames[index]
+    let colorScale = getContourColorScale(columnName);
     contourData[index] = [{
         x: xContour,
         y: yContour,
@@ -1639,7 +1644,28 @@ function drawThresholdSlider(svg, label, thresholdHandler) {
 //</editor-fold>
 //<editor-fold desc = "Section for the image generator">
 /*Section for the image on the graph nodes*/
+
 function generateNodesWithSVGData(imgWidth, imgHeight, nodes_data) {
+    // x: xContour,
+    //     y: yContour,
+    //     z: elmConcentrations[index],
+    //     type: plotType,
+    //     name: currentColumnNames[index],
+    //     showscale: true,
+    //     colorscale: colorScale,
+    //     line: {
+    //     smoothing: 0.5,
+    //         color: 'rgba(0, 0, 0,0)'
+    // },
+    // colorbar: {
+    //     tickfont: {
+    //         color: 'white'
+    //     },
+    //     ticks: colorScales[columnName]
+    // },
+    // connectgaps: true,
+
+
     let xContour = getGridNumberList(data);
     let yContour = getGridLetterList(data);
 
@@ -1676,13 +1702,19 @@ function generateNodesWithSVGData(imgWidth, imgHeight, nodes_data) {
     nodes_data.forEach(function (d) {
         let aDiv = document.createElement("div");
         let z = getNumberColumn(data, d.value);
+        let colorScale = getContourColorScale(d.value);
         let contourData = [
             {
                 x: xContour,
                 y: yContour,
                 z: z,
                 type: 'contour',
-                showscale: false
+                showscale: false,
+                colorscale: colorScale,
+                line:{
+                    smoothing: 0.5,
+                    color: 'rgba(0, 0, 0, 0)'
+                }
             }
         ];
         Plotly.plot(aDiv, contourData, layout).then(
