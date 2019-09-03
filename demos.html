@@ -22,13 +22,17 @@
     <script src="js/listfilesfromfolder.js" type="application/javascript"></script>
 </head>
 <body>
-<div id="profileDiv">
-    <div id="profileContainerDiv"></div>
-    <div id="menu">
-        <input id="toggleGraphTopMenu" onchange="toggleGraphTopMenu()" type="checkbox" checked/>
-        <label for="contourPlotTypeR">Toggle graph top menu</label>
+<div id="profileDiv" style="height: 70px;">
+    <div style="float: left;">
+        <div id="profileContainerDiv"></div>
+        <div id="menu">
+            <input id="toggleGraphTopMenu" onchange="toggleGraphTopMenu()" type="checkbox" checked/>
+            <label for="contourPlotTypeR">Toggle graph top menu</label>
+        </div>
     </div>
-
+    <div style="float:right; margin-top: 0px; margin-right: 20px;">
+        <img src="images/scanme.png" width="80px" height="80px"/>
+    </div>
 </div>
 <div class="loader"></div>
 <div id="page">
