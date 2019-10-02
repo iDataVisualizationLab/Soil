@@ -28,7 +28,7 @@ let columns = [
     'Zn Concentration',
     'Zr Concentration'];
 let allElements = [];
-let defaultElementIndexes = [0, 1];
+let defaultElementIndexes = [1, 0];
 let theOptions = [];
 let currentColumnNames = [];
 let xContour = null;
@@ -40,7 +40,9 @@ let curvePlotData = [];
 let theProfile = null;
 let opacitySliders = [];
 let adjustedRSquaredScores = [0, 0];
-
+let sliderHeight = 24;
+let sliderWidth = 140;
+let sliderMarginRight = 20;
 
 let plotType = 'heatmap';
 let plotTypeSelection = 'contour';
@@ -48,6 +50,34 @@ let colors5 = ["#4A8FC2", "#A6C09D", "#FAFA7C", "#EC9248", "#D63128"];
 let colors10 = ["#4A8FC2", "#76A5B1", "#9DBCA2", "#C3D392", "#E8EC83", "#F8E571", "#F2B659", "#EB8C47", "#EB8C47", "#D63128"];
 let colors20 = ['#4A8FC2', '#609ABB', '#71A2B3', '#87AFAC', '#98B9A5', '#AAC29B', '#BBCF93', '#CEDB8C', '#E2E888', '#F4F581', '#F8F076', '#F7DA6A', '#F4C461', '#F0AE57', '#EC994C', '#E98544', '#E5713C', '#E05C33', '#DC472D', '#D53327'];
 
+let plotMargins = {
+    l: 20,
+    r: 80,
+    t: 50,
+    b: 30,
+    pad: 0,
+    autoexpand: false
+};
+
+let graphNodeRadius = 12;
+let mouseOverExpand = 6;
+let selectionStrokeWidth = 3;
+let force;
+let maxLinkWidth = 2;
+let minLinkWidth = 0.5;
+let corScale;
+let nodes_data = [];
+let links_data = [];
+let node;
+let link;
+let defaultThreshold = 0.75;
+let linkStrengthPower = 10;
+let selectionCounter = 0;
+let selectionCircle;
+let defaultMargin = 20;
+
+
+//<editor-fold desc="colors">
 let p1ColorScales5 = {
     'Al Concentration': {
         values: [1.6 * 10000, 2.7 * 10000, 3.9 * 10000, 5.1 * 10000, 6.3 * 10000, 7.9 * 10000],
@@ -545,14 +575,14 @@ let contourColorScales = {
     Profile2: p2ColorScales,
     Profile3: p3ColorScales
 };
-
 //Default color scales
 let colorScales = contourColorScales[profiles[defaultProfileIndex]];
 //The level color scale index (0, 1, 2 for 5 levels, 10 levels, and 20 levels correspondingly).
 let colorLevelsScaleIndex = 2;
-
+//</editor-fold>
 
 loadProfiles();
+toggleGraphTopMenu();
 
 function loadProfiles() {
 
@@ -845,15 +875,6 @@ function setContourData(index) {
     }
 }
 
-
-let plotMargins = {
-    l: 20,
-    r: 80,
-    t: 50,
-    b: 30,
-    pad: 0,
-    autoexpand: false
-};
 
 function plotContour(index) {
     let contourLayout = {
@@ -1296,22 +1317,7 @@ function updateElement(index) {
 }
 
 //<editor-fold desc="Section for the force directed layout of the correlation graph"
-let graphNodeRadius = 12;
-let mouseOverExpand = 6;
-let selectionStrokeWidth = 3;
-var force;
-let maxLinkWidth = 2;
-let minLinkWidth = 0.5;
-var corScale;
-let nodes_data = [];
-let links_data = [];
-var node;
-var link;
-let defaultThreshold = 0.75;
-let linkStrengthPower = 10;
-let selectionCounter = 0;
-let selectionCircle;
-let defaultMargin = 20;
+
 
 function getGraphSize(svg) {
     if (!svg) {
@@ -1604,10 +1610,6 @@ function onOpacityThreshold(threshold) {
     d3.selectAll(".contour").selectAll(".cartesianlayer").style("opacity", threshold);
 
 }
-
-let sliderHeight = 24;
-let sliderWidth = 140;
-let sliderMarginRight = 20;
 
 function drawThresholdSlider(svg, label, thresholdHandler) {
     if (!thresholdHandler) {
