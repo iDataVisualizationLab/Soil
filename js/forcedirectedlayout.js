@@ -235,15 +235,15 @@ function drawGraph() {
         d.fy = null;
     }
 
-    // //Handling zoom, we disable zoom since we need the scrolling functionality for navigation
-    // let zoomHandler = d3.zoom()
-    //     .on("zoom", zoomActions);
-    //
-    // zoomHandler(svg);
-    //
-    // function zoomActions() {
-    //     g.attr("transform", d3.event.transform);
-    // }
+    //Handling zoom, we disable zoom since we need the scrolling functionality for navigation
+    let zoomHandler = d3.zoom()
+        .on("zoom", zoomActions);
+
+    zoomHandler(svg);
+
+    function zoomActions() {
+        g.attr("transform", d3.event.transform);
+    }
 
     function boundX(x) {
         return (x > width - graphNodeRadius * 2) ? width - graphNodeRadius * 2 : (x < graphNodeRadius * 2 ? graphNodeRadius * 2 : x);
