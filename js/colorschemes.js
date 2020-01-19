@@ -495,3 +495,13 @@ let p3ColorScales20 = {
 }
 let p3ColorScales = [p3ColorScales5, p3ColorScales10, p3ColorScales20];
 //</editor-fold>
+
+//<editor-fold desc="colors">
+let contourColorScales = {
+    Profile1: p1ColorScales,
+    Profile2: p2ColorScales,
+    Profile3: p3ColorScales,
+    others: p1ColorScales
+};
+
+//</editor-fold>

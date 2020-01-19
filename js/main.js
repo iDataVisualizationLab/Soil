@@ -1,16 +1,3 @@
-//<editor-fold desc="colors">
-let contourColorScales = {
-    Profile1: p1ColorScales,
-    Profile2: p2ColorScales,
-    Profile3: p3ColorScales,
-    others: p1ColorScales
-};
-//Default color scales
-let colorScales = contourColorScales[profiles[defaultProfileIndex]];
-//The level color scale index (0, 1, 2 for 5 levels, 10 levels, and 20 levels correspondingly).
-let colorLevelsScaleIndex = 2;
-//</editor-fold>
-
 loadProfiles();
 toggleGraphTopMenu();
 
@@ -41,108 +28,9 @@ function changeProfile(event) {
         d3.selectAll('.contourRoundedBorder').style('background-image', null);
         colorScales = contourColorScales['others'];
     }
-    readData("data/" + profile);
+    readData("data/" + profile, handleData);
 }
 
-function readData(fileName) {
-    d3.csv(fileName + "Avg.csv", function (error, rawAvgData) {
-        avgData = rawAvgData;
-        if (error) throw error;
-        d3.csv(fileName + ".csv", function (error, rawData) {
-            if (error) throw error;
-
-            data = rawData.filter(function (d) {
-                //Valid ID
-                return validGridId(d["Grid ID"]);
-            });
-
-
-            //Add data for the three formulas
-            let alAW = 26.9815385,
-                oAW = 15.999,
-                siAW = 28.085,
-                feAW = 55.845,
-                tiAW = 47.867,
-                Al2O3AW = alAW * 2 + oAW * 3,
-                alRatio = alAW * 2 / Al2O3AW,
-                siO2AW = siAW + 2 * oAW,
-                siRatio = siAW / siO2AW,
-                Fe2O3AW = feAW * 2 + oAW * 3,
-                feRatio = feAW * 2 / Fe2O3AW,
-                tiO2AW = tiAW + 2 * oAW,
-                tiRatio = tiAW / tiO2AW;
-            data = data.map(row => {
-                //Use only 20 elements
-                let temp = {};
-                columns.forEach(c => {
-                    temp[c] = row[c];
-                });
-                row = temp;
-
-                //Calculate Ruxton weathering index
-                let si = (row["Si Concentration"] === "<LOD") ? 0 : +row["Si Concentration"],
-                    al = (row["Al Concentration"] === "<LOD") ? 0 : +row["Al Concentration"],
-                    al2o3 = al / alRatio,
-                    sio2 = si / siRatio;
-                let RI = sio2 / al2o3;
-                row["RI Concentration"] = RI + "";
-                //Desilication index
-                let fe = (row["Fe Concentration"] === "<LOD") ? 0 : +row["Fe Concentration"],
-                    ti = (row["Ti Concentration"] === "<LOD") ? 0 : +row["Ti Concentration"],
-                    fe2o3 = fe / feRatio,
-                    tio2 = ti / tiRatio;
-                let DI = sio2 / (al2o3 + fe2o3 + tio2);
-                row["DI Concentration"] = DI + "";
-                // Elemental ratio of elements resistant to weathering
-                let zr = (row["Zr Concentration"] === "<LOD") ? 0 : +row["Zr Concentration"];
-                let SR = ti / zr;
-                row["SR Concentration"] = SR + "";
-                return row;
-            });
-            handleData(data);
-        });
-    });
-
-}
-
-/*Handling data after loading*/
-function getColumn(data, columnName) {
-    if (data.length <= 0 || data[0][columnName] === undefined) {
-        return null;
-    }
-    let column = [];
-    d3.map(data, function (d) {
-        column.push(d[columnName]);
-    });
-    return column;
-}
-
-function getNumberColumn(data, columnName) {
-    if (data.length <= 0 || data[0][columnName] === undefined) {
-        return null;
-    }
-    let column = [];
-    d3.map(data, function (d) {
-        if (d[columnName].indexOf('<LOD') != -1) {
-            column.push(0);
-        } else if (!d[columnName]) {
-            column.push(null);
-        } else {
-            column.push(+d[columnName]);
-        }
-    });
-    return column;
-}
-
-function validGridId(id) {
-    let re = /^[A-Z]\d\d$/g;
-    return id != null && id.match(re) != null;
-}
-
-function validGridIdNewProfiles(id) {
-    let re = /^[A-Z]\d-\d{1,2}$/g;
-    return id != null && id.match(re) != null;
-}
 
 function plotTypeChange() {
     if ($("#contourPlotTypeS").is(":checked")) {
@@ -175,21 +63,14 @@ function toggleGraphTopMenu() {
 
 function plotGridMaps() {
     //Plot contour
-    setContourData(0);
-    setContourData(1);
+    setContourData(0, plotTypeSelection !== 'heatmap');
+    setContourData(1, plotTypeSelection !== 'heatmap');
     plotContour(0);
     plotContour(1);
 }
 
 function handleData(data) {
-    allElements = getAllElements();
-    //Set the two default current elements
-    currentColumnNames[0] = allElements[defaultElementIndexes[0]].value;
-    currentColumnNames[1] = allElements[defaultElementIndexes[1]].value;
-    setContourX();
-    setContourY();
-    setElmConcentration(0);
-    setElmConcentration(1);
+    setContourInformation();
     plotGridMaps();
     populateSelectors(data);
     //Plot scatter
@@ -206,119 +87,6 @@ function handleData(data) {
 }
 
 //<editor-fold desc="functions to get information for the contours">
-function extractGridLetter(gridId) {
-    return gridId.substr(0, 1);
-}
-
-function extractGridNumber(gridId) {
-    return gridId.substr(1, 2);
-}
-
-function getGridLetterList(data) {
-    let letterList = [];
-    d3.map(data, function (d) {
-        letterList.push(extractGridLetter(d["Grid ID"]));
-    });
-    return letterList;
-}
-
-function getGridNumberList(data) {
-    let numberList = [];
-    d3.map(data, function (d) {
-        numberList.push(extractGridNumber(d["Grid ID"]));
-    });
-    return numberList;
-}
-
-function setContourX() {
-    xContour = getGridNumberList(data);
-}
-
-function setContourY() {
-    yContour = getGridLetterList(data);
-}
-
-function setElmConcentration(index) {
-    elmConcentrations[index] = getNumberColumn(data, currentColumnNames[index]);
-}
-
-function smoothenData(contourData) {
-    let t = [];
-    let x = [];
-    let y = [];
-    //Remove outliers
-    let q95 = ss.quantile(contourData.z, 0.95);
-    let q05 = ss.quantile(contourData.z, 0.05);
-    for (let i = 0; i < contourData.z.length; i++) {
-        if (contourData.z[i] <= q95 && contourData.z[i] >= q05) {
-            t.push(contourData.z[i]);
-            x.push(digits.indexOf(contourData.x[i]));
-            y.push(letters.indexOf(contourData.y[i]));
-        }
-    }
-    // var model = "exponential";
-    let model = "spherical";
-    // let model = "gaussian";
-    let sigma2 = 0, alpha = 100;
-    let variogram = kriging.train(t, x, y, model, sigma2, alpha);
-    //Now interpolate data (step) at a point
-    contourData.z = [];
-    contourData.x = [];
-    contourData.y = [];
-    let step = 0.05;
-    for (let i = 0; i < digits.length; i = i + step) {
-        for (let j = 0; j < letters.length; j = j + step) {
-            contourData.x.push(i);
-            contourData.y.push(j);
-            contourData.z.push(kriging.predict(i, j, variogram))
-        }
-    }
-}
-
-function getContourColorScale(columnName) {
-    let colorScale = 'Portland';
-    let selectedColorScales = colorScales[colorLevelsScaleIndex];
-    if (selectedColorScales[columnName]) {
-        colorScale = [];
-        let valueScale = d3.scaleLinear().domain(d3.extent(selectedColorScales[columnName].values)).range([0, 1]);
-        for (let i = 0; i < selectedColorScales[columnName].values.length - 1; i++) {
-            colorScale.push([valueScale(selectedColorScales[columnName].values[i]), selectedColorScales[columnName].colors[i]]);
-            colorScale.push([valueScale(selectedColorScales[columnName].values[i + 1]), selectedColorScales[columnName].colors[i]])
-        }
-    }
-    return colorScale;
-}
-
-function setContourData(index) {
-
-    let columnName = currentColumnNames[index]
-    let colorScale = getContourColorScale(columnName);
-    contourData[index] = [{
-        x: xContour,
-        y: yContour,
-        z: elmConcentrations[index],
-        type: plotType,
-        name: currentColumnNames[index],
-        showscale: true,
-        colorscale: colorScale,
-        line: {
-            smoothing: 0.5,
-            color: 'rgba(0, 0, 0,0)'
-        },
-        colorbar: {
-            tickfont: {
-                color: 'white'
-            },
-            ticks: colorScales[columnName]
-        },
-        connectgaps: true,
-    }];
-    if (plotTypeSelection != 'heatmap') {
-        smoothenData(contourData[index][0]);
-    }
-}
-
-
 function plotContour(index) {
     let contourLayout = {
         paper_bgcolor: 'rgba(0,0,0,0)',
@@ -710,21 +478,7 @@ function createByJson(div, jsonData, name, selectedIndex, changeHandler, width) 
     return theOption;
 }
 
-function getAllElements() {
-    let headers = d3.keys(data[0]);
-    let elements = headers.filter(function (d) {
-        return d.indexOf('Concentration') !== -1;
-    });
-    //Create option 1
-    let jsonData = [];
-    for (let i = 0; i < elements.length; i++) {
-        jsonData.push({value: elements[i], text: elements[i]});
-    }
-    jsonData.sort((a, b) => {
-        return a.text.localeCompare(b.text);
-    });
-    return jsonData;
-}
+
 
 function populateSelectors() {
     //headers
@@ -745,7 +499,7 @@ function updateElement(index) {
     currentColumnNames[index] = theOptions[index].val();
     setElmConcentration(index);
     //Update Contour
-    setContourData(index);
+    setContourData(index, plotTypeSelection !== 'heatmap');
     plotContour(index);
     //Update Scatter
     plotScatter();
