@@ -29,4 +29,6 @@ let node;
 let link;
 let defaultThreshold = 0.75;
 let linkStrengthPower = 10;
+let selectionCounter = 0;
 let selectionCircle;
+let defaultMargin = 20;
