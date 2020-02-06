@@ -27,7 +27,7 @@ function createForce() {
 }
 
 function getNodes() {
-    nodes_data = getAllElements();
+    nodes_data = getAllElements(data);
     return nodes_data;
 }
 

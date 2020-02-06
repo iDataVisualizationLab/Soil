@@ -1,4 +1,7 @@
 /*Handling data after loading*/
+//We define a global object to store and handle data
+let contourDataProducer;
+
 function getColumn(data, columnName) {
     if (data.length <= 0 || data[0][columnName] === undefined) {
         return null;
@@ -56,7 +59,7 @@ function getGridNumberList(data) {
     return numberList;
 }
 
-function getAllElements() {
+function getAllElements(data) {
     let headers = d3.keys(data[0]);
     let elements = headers.filter(function (d) {
         return d.indexOf('Concentration') !== -1;
@@ -72,7 +75,7 @@ function getAllElements() {
     return jsonData;
 }
 
-function smoothenData(contourData, step= 0.05) {
+function smoothenData(contourData, step = 0.05) {
     let t = [];
     let x = [];
     let y = [];
@@ -119,15 +122,18 @@ function setElmConcentration(index) {
 }
 
 function setContourInformation() {
-    allElements = getAllElements();
+    allElements = getAllElements(data);
     //Set the two default current elements
     currentColumnNames[0] = allElements[defaultElementIndexes[0]].value;
     currentColumnNames[1] = allElements[defaultElementIndexes[1]].value;
+    debugger
     setContourX();
     setContourY();
+
     setElmConcentration(0);
     setElmConcentration(1);
 }
+
 function getContourColorScale(columnName) {
     let colorScale = 'Portland';
     let selectedColorScales = colorScales[colorLevelsScaleIndex];
@@ -141,13 +147,20 @@ function getContourColorScale(columnName) {
     }
     return colorScale;
 }
-function setContourData(index, smoothen, smoothingStep=0.05) {
+
+function setContourData(index, smoothen, smoothingStep = 0.1) {
     let columnName = currentColumnNames[index];
     let colorScale = getContourColorScale(columnName);
+
+    if (!contourDataProducer) {
+        debugger
+        contourDataProducer = new ContourDataProducer(data);
+    }
+    let gridData = contourDataProducer.getGridDataByElmName(columnName, smoothen, smoothingStep);
     contourData[index] = [{
-        x: xContour,
-        y: yContour,
-        z: elmConcentrations[index],
+        x: gridData.x,
+        y: gridData.y,
+        z: gridData.z,
         type: plotType,
         name: currentColumnNames[index],
         showscale: true,
@@ -164,9 +177,6 @@ function setContourData(index, smoothen, smoothingStep=0.05) {
         },
         connectgaps: true,
     }];
-    if (smoothen) {
-        smoothenData(contourData[index][0], smoothingStep);
-    }
 }
 
 
@@ -230,4 +240,39 @@ function readData(fileName, handleData) {
             }
         });
     });
+}
+
+class ContourDataProducer {
+    constructor(data) {
+        this.data = data;
+        this.contourX = getGridNumberList(data);
+        this.contourY = getGridLetterList(data);
+        this.allElements = getAllElements(data);
+        this.allGridData = {}
+    }
+
+    getGridDataByElmName(elmName, smoothen, smoothingStep = 0.1) {
+        let key = elmName + "," + smoothen + "," + smoothingStep;
+        if (this.allGridData[key]) {
+            return this.allGridData[key];
+        }
+        let self = this;
+        let gridData = {
+            x: self.contourX,
+            y: self.contourY,
+            z: getNumberColumn(self.data, elmName),
+            colorScale: getContourColorScale(elmName)
+        }
+        //Smoothen the data in place
+        if (smoothen) {
+            smoothenData(gridData, smoothingStep);
+        }
+        //Save for future use.
+        this.allGridData[key] = gridData;
+        return gridData;
+    }
+
+    getGridDataByElmIndex(elmIndex, smoothen, smoothingStep = 0.1) {
+        return this.getGridDataByElmName(this.allElements[elmIndex].value, smoothen, smoothingStep);
+    }
 }

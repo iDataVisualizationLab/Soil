@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Soil 3D</title>
+    <script src="lib/d3.js"></script>
+    <script src="js/charts.min.js"></script>
+    <script src="lib/d3-color.v1.min.js"></script>
+    <script src="lib/simple-statistics.min.js"></script>
+    <script src="lib/kriging.js"></script>
+    <script src="lib/three.js"></script>
+    <script src="lib/OrbitControls.js"></script>
+    <script src="lib/DragControls.js"></script>
+    <script src="lib/dat.gui.min.js"></script>
+</head>
+<body style="margin: 0px; padding:0px;">
+<div id="container1"></div>
+<div id="container2">
+    <div id="verticalChartContainer"></div>
+    <div id="horizontalChartContainer"></div>
+</div>
+<script src="js/colorschemes.js"></script>
+<script src="js/steplinechart.js"></script>
+<script src="js/globalsettings.js"></script>
+<script src="js/dataprocessing.js"></script>
+<script src="js/pointcloud.js"></script>
+
+<script>
+    let renderer, scene, camera, bgCube;
+    let orbitControls, dragControls;
+    let verticalPlane, horizontalPlane;
+    let verticalPlaneName = "verticalPlane";
+    let horizontalPlaneName = "horizontalPlane";
+    let defaultPlaneColor = [1, 1, 1];
+    let activePlaneName;
+    let highlightedPlaneColor = [1, 0, 0];
+    let verticalChart;
+    let horizontalChart;
+    let elementColorScale;
+    let pointSize = 0.05;
+    let step = 1;
+    let pointClouds = [];
+    let width, height, cameraViewWidth, cameraViewHeight;
+    let bgCubeSize = {x: 4.6, y: 6.0, z: step};
+    let profileMargin = {left: 0.3, top: 0.5, right: 0.8, bottom: 0.8};
+    let profileSize = {
+        x: bgCubeSize.x - profileMargin.left - profileMargin.right,
+        y: bgCubeSize.y - profileMargin.top - profileMargin.bottom,
+        z: step
+    };
+    let profilePosition = {
+        x: -((bgCubeSize.x - profileSize.x) / 2 - profileMargin.left),
+        y: (bgCubeSize.y - profileSize.y) / 2 - profileMargin.top,
+        z: bgCubeSize.z / 2
+    }
+    let profileMinMax = {
+        minX: -(bgCubeSize.x / 2) + profileMargin.left,
+        maxX: (bgCubeSize.x / 2) - profileMargin.right,
+        minY: -(bgCubeSize.y / 2) + profileMargin.bottom,
+        maxY: (bgCubeSize.y / 2) - profileMargin.top
+    }
+
+    function setSizes() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        cameraViewWidth = width / 2;
+        cameraViewHeight = height;
+        let container1 = document.getElementById('container1');
+        let container2 = document.getElementById('container2');
+        let verticalChartContainer = document.getElementById('verticalChartContainer');
+        let horizontalChartContainer = document.getElementById('horizontalChartContainer');
+        d3.select(container1)
+            .style('position', 'absolute')
+            .style("left", "0px")
+            .style("top", "0px")
+            .style("width", window.innerWidth / 2 + "px")
+            .style("height", window.innerHeight + "px");
+        d3.select(container2).style('position', 'absolute')
+            .style("left", `${window.innerWidth / 2}px`)
+            .style("top", "0px")
+            .style("width", window.innerWidth / 2 + "px")
+            .style("height", window.innerHeight + "px");
+        d3.select(verticalChartContainer)
+            .style('position', 'absolute')
+            .style('left', '0px')
+            .style('top', "0px")
+            .style('width', window.innerWidth / 2 + "px")
+            .style('height', window.innerHeight / 2 + "px");
+        d3.select(horizontalChartContainer)
+            .style('position', 'absolute')
+            .style('left', '0px')
+            .style('top', window.innerHeight / 2 + "px")
+            .style('width', window.innerWidth / 2 + "px")
+            .style('height', window.innerHeight / 2 + "px");
+        //Redraw the charts in new size
+    }
+
+    //Load data
+    readData("data/" + "Profile1", handleData);
+
+    function handleData(data) {
+        if (!contourDataProducer) {
+            contourDataProducer = new ContourDataProducer(data);
+        }
+        elementColorScale = d3.scaleOrdinal().domain(contourDataProducer.allElements.map(v => v.value)).range(d3.schemeCategory20);
+
+        let numElms = contourDataProducer.allElements.length;
+        // let numElms = 1;
+
+        //Call the 3d part.
+        init();
+        animate();
+
+        function setupScene() {
+            let bgGeometry = new THREE.BoxGeometry(bgCubeSize.x, bgCubeSize.y, bgCubeSize.z);
+            let bgMaterial = [
+                new THREE.MeshStandardMaterial({
+                    color: new THREE.Color(1, 1, 1)
+                }),
+                new THREE.MeshStandardMaterial({
+                    color: new THREE.Color(1, 1, 1)
+                }),
+                new THREE.MeshStandardMaterial({
+                    color: new THREE.Color(1, 1, 1)
+                }),
+                new THREE.MeshStandardMaterial({
+                    color: new THREE.Color(1, 1, 1)
+                }),
+                new THREE.MeshLambertMaterial({
+                    map: new THREE.TextureLoader().load('data/images/Profile1.png'),
+                    // opacity: 0.5,
+                    // transparent: true
+                }),
+                new THREE.MeshStandardMaterial({
+                    color: new THREE.Color(1, 1, 1)
+                })
+            ];
+
+            //The background cube
+            bgCube = new THREE.Mesh(bgGeometry, bgMaterial);
+            bgCube.position.set(0, 0, -numElms * step);
+            scene.add(bgCube);
+
+            //The cutting planes
+            let planeMaterial = new THREE.MeshStandardMaterial({
+                color: new THREE.Color(1, 1, 1)
+            });
+
+
+            let vpg = new THREE.BoxBufferGeometry(0.1, bgCubeSize.y + 0.2, bgCubeSize.z + 0.2);
+            verticalPlane = new THREE.Mesh(vpg, planeMaterial.clone());
+            verticalPlane.position.set(profilePosition.x, 0, 0);//This is relative to the Cube (since we are adding it to the cube)
+            verticalPlane.name = verticalPlaneName;
+            bgCube.add(verticalPlane);
+
+            let hpg = new THREE.BoxBufferGeometry(bgCubeSize.x + 0.2, 0.1, bgCubeSize.z + 0.2);
+            horizontalPlane = new THREE.Mesh(hpg, planeMaterial);
+            horizontalPlane.position.set(0, profilePosition.y, 0);//This is relative to the Cube (since we are adding it to the cube)
+            horizontalPlane.name = horizontalPlaneName;
+            bgCube.add(horizontalPlane);
+
+            for (let i = 0; i < numElms; i++) {
+                let d3c = d3.color(elementColorScale(contourDataProducer.allElements[i].value));
+                pointClouds[i] = generatePointcloudForElmIdx(i, d3c);
+                pointClouds[i].name = contourDataProducer.allElements[i].value;
+                //Change color scheme
+                pointClouds[i].scale.set(profileSize.x, profileSize.y, profileSize.z);
+                pointClouds[i].position.set(profilePosition.x, profilePosition.y, profilePosition.z + i * step);
+                bgCube.add(pointClouds[i]);
+            }
+
+            //Light
+            let light = new THREE.DirectionalLight(new THREE.Color(0.9, .9, .9), 1.0);
+            light.position.set(0, 0, 20);
+            scene.add(light);
+            let aLight = new THREE.AmbientLight(new THREE.Color(0.5, 0.5, 0.5), 1.0);
+            scene.add(aLight);
+        }
+
+        //Cut data
+        function collectHorizontalCutData() {
+            return collectCutData('horizontal');
+        }
+
+        function collectVerticalCutData() {
+            return collectCutData('vertical');
+        }
+
+        function collectCutData(type) {
+            //Collect cutting data.
+            //Note that: Since x and y positions are the same for all graph, we hoist below lines out of the loop and take these values for the first one (index zero for custom data)
+            let customData = pointClouds[0].geometry.customData;
+            let yValues = Array.from(new Set(customData.gridData.y));
+            let yIdx = d3.bisectLeft(yValues, customData.yScale.invert(((horizontalPlane.position.y - profilePosition.y) / profileSize.y)));
+            let yVal = yValues[yIdx];
+            let xValues = Array.from(new Set(customData.gridData.x));
+            let xIdx = d3.bisectLeft(xValues, customData.xScale.invert(((verticalPlane.position.x - profilePosition.x) / profileSize.x)));
+            let xVal = xValues[xIdx];
+            let cutVal = type === 'horizontal' ? xVal : yVal;
+            let val = type === 'horizontal' ? yVal : xVal;
+            let cutData = {
+                traces: [],
+                type: type,
+                cutValue: cutVal,
+            };
+
+            for (let i = 0; i < numElms; i++) {
+                let cutElmData = {};
+                customData = pointClouds[i].geometry.customData;
+                let xVals = [];
+                let yVals = [];
+                let zVals = [];
+                let values = type === 'horizontal' ? customData.gridData.y : customData.gridData.x;
+
+                values.forEach((v, i) => {
+                    if (v === val) {
+                        xVals.push(customData.gridData.x[i]);
+                        yVals.push(customData.gridData.y[i]);
+                        zVals.push(customData.gridData.z[i]);
+                    }
+                });
+                cutElmData.x = xVals;
+                cutElmData.y = yVals;
+                cutElmData.z = zVals;
+                cutElmData.zScale = customData.zScale;//Store this scale (this is a scale all over the grid, not just this cut point)
+                cutElmData.elementName = pointClouds[i].name;
+                cutData.traces.push(cutElmData);
+
+            }
+            //In both cases, z value becomes y.
+            let chartData = cutData.traces.map((trace, traceIdx) => {
+                return {
+                    //If it is horizontal then the chart data we will put x for the x component, otherwise we put y for the x component
+                    x: type === 'vertical' ? trace.z.map(z => trace.zScale(z)) : trace.x,
+                    y: type === 'vertical' ? trace.y : trace.z.map(z => trace.zScale(z)),
+                    series: trace.elementName,
+                    type: 'area',
+                }
+            });
+
+            let sortedChartData = [];
+            let sortedIdxs;
+            if (type === 'horizontal') {
+                //Sort by the xIdx
+                let yValuesAtXIdx = chartData.map(d => d.y[xIdx]);
+                sortedIdxs = argSort(yValuesAtXIdx);
+            } else {
+                //Sort by the yIdx
+                let xValuesAtYIdx = chartData.map(d => d.x[yIdx]);
+                sortedIdxs = argSort(xValuesAtYIdx);
+            }
+            sortedIdxs.reverse();
+            let sortedPointClouds = [];
+            sortedIdxs.forEach(idx => {
+                sortedChartData.push(chartData[idx]);
+                sortedPointClouds.push(pointClouds[idx]);
+            });
+            //TODO: this pointClouds change shouldn't be here
+            pointClouds = sortedPointClouds;
+            //Update point clouds position.
+            for (let i = 0; i < pointClouds.length; i++) {
+                pointClouds[i].position.set(profilePosition.x, profilePosition.y, profilePosition.z + i * step);
+            }
+            chartData = sortedChartData;
+            cutData.traces = chartData;
+            return cutData;
+        }
+
+        function drawChart(cutData) {
+            let type = cutData.type;
+            let chartData = cutData.traces;
+            let cutValue = cutData.cutValue;
+
+            let annotations = type === 'horizontal' ? {
+                'xLine': {
+                    valueType: 'value',
+                    x: cutValue
+                }
+            } : {
+                'yLine': {
+                    valueType: 'value',
+                    y: cutValue
+                }
+            };
+
+            let theChart = type === 'horizontal' ? horizontalChart : verticalChart;
+            if (!theChart) {
+                let chartContainer = document.getElementById(`${type}ChartContainer`);
+                let chartWidth = chartContainer.getBoundingClientRect().width;
+                let chartHeight = chartContainer.getBoundingClientRect().height;
+                let chartSettings = {
+                    noSvg: false,
+                    showAxes: true,
+                    width: chartWidth,
+                    height: chartHeight,
+                    paddingLeft: 40,
+                    paddingRight: 30,
+                    paddingTop: 50,
+                    paddingBottom: 25,
+                    colorScale: elementColorScale,
+                    stepMode: {
+                        chartSize: 100, // Height for each chart
+                    },
+                    annotations: annotations,
+                    orientation: type,
+                };
+                //Config scales, we need to use one scale for all.
+                let chartContentHeight = chartSettings.height - chartSettings.paddingTop - chartSettings.paddingBottom;
+                let chartContentWidth = chartSettings.width - chartSettings.paddingLeft - chartSettings.paddingRight;
+                chartSettings.stepMode.stepScale = d3.scaleLinear().domain([0, 1]).range([0, chartSettings.stepMode.chartSize]);
+
+                //xScale and yScale here are actually for the z values, only set it depending on the orientation
+                if (type === 'vertical') {
+                    chartSettings.xScale = d3.scaleLinear().domain([0, 1]).range([0, chartContentWidth]);
+                } else {
+                    chartSettings.yScale = d3.scaleLinear().domain([0, 1]).range([chartContentHeight, 0]);
+                }
+
+
+                theChart = new LineChart(chartContainer, chartData, chartSettings);
+                theChart.plot();
+                if (type === 'vertical') {
+                    verticalChart = theChart;//Store for next use
+                } else {
+                    horizontalChart = theChart;//Store for next use
+                }
+
+            } else {
+                theChart.updateAnnotations(annotations);
+                theChart.update(chartData);
+            }
+        }
+
+
+        //<editor-fold desc="framework tasks">
+
+        function init() {
+            setSizes();
+
+            let container1 = document.getElementById('container1');
+
+            const aspect = (cameraViewWidth / cameraViewHeight);
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(1, 1, 1);
+            //
+            setupScene();
+
+            //
+            camera = new THREE.PerspectiveCamera(60, aspect, 1, 100);
+
+            //
+            camera.position.set(25, 0, bgCube.position.z / 2);
+            camera.lookAt(0, 0, bgCube.position.z / 2);
+
+            //
+            renderer = new THREE.WebGLRenderer({antialias: true});
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(cameraViewWidth, cameraViewHeight);
+            container1.appendChild(renderer.domElement);
+            d3.select(container1).select('canvas').style('outline', 'none');
+
+            //
+            window.addEventListener('resize', onWindowResize, false);
+
+            //
+            orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+            orbitControls.target.set(0, 0, bgCube.position.z / 2);
+            orbitControls.update();
+
+            //<editor-fold desc="For the drag controls">
+            let verticalPlanePos;
+            let horizontalPlanePos;
+
+            dragControls = new THREE.DragControls([verticalPlane, horizontalPlane], camera, renderer.domElement);
+            //Add event listener to highlight dragged objects
+            dragControls.addEventListener('hoveron', function (event) {
+                event.object.material.emissive.set(0xaaaaaa);
+                let intersectObj = event.object;
+                //Highlight
+                intersectObj.material.color.setRGB(...highlightedPlaneColor);
+                if (intersectObj.name === verticalPlaneName) {
+                    horizontalPlane.material.color.setRGB(...defaultPlaneColor);
+                } else if (intersectObj.name === horizontalPlaneName) {
+                    verticalPlane.material.color.setRGB(...defaultPlaneColor);
+                }
+            });
+
+            function setActiveCutColor() {
+                if (!activePlaneName) {
+                    verticalPlane.material.color.setRGB(...defaultPlaneColor);
+                    horizontalPlane.material.color.setRGB(...defaultPlaneColor);
+                } else if (activePlaneName === verticalPlaneName) {
+                    verticalPlane.material.color.setRGB(...highlightedPlaneColor);
+                    horizontalPlane.material.color.setRGB(...defaultPlaneColor);
+                } else if (activePlaneName === horizontalPlaneName) {
+                    verticalPlane.material.color.setRGB(...defaultPlaneColor);
+                    horizontalPlane.material.color.setRGB(...highlightedPlaneColor);
+                }
+            }
+
+            dragControls.addEventListener('hoveroff', function (event) {
+                event.object.material.emissive.set(0x000000);
+                setActiveCutColor();
+            });
+
+            dragControls.addEventListener('dragstart', function (event) {
+                //Record the plane current positions
+                activePlaneName = event.object.name;
+                verticalPlanePos = verticalPlane.position.clone();
+                horizontalPlanePos = horizontalPlane.position.clone();
+                //Disable orbit controls
+                orbitControls.enabled = false;
+
+            });
+
+            dragControls.addEventListener('drag', function (event) {
+                if (event.object.name === verticalPlaneName) {
+                    //Keep vertical plane y and z position.
+                    verticalPlane.position.y = verticalPlanePos.y;
+                    verticalPlane.position.z = verticalPlanePos.z;
+                    //Check for max and min x
+                    if (verticalPlane.position.x < 0) {
+                        verticalPlane.position.x = Math.max(profileMinMax.minX, verticalPlane.position.x);
+                    } else {
+                        verticalPlane.position.x = Math.min(profileMinMax.maxX, verticalPlane.position.x);
+                    }
+
+                } else if (event.object.name === horizontalPlaneName) {
+                    //Keep horizontal plane x and z position.
+                    horizontalPlane.position.x = horizontalPlanePos.x;
+                    horizontalPlane.position.z = horizontalPlanePos.z;
+                    //Check for max and min y
+                    if (horizontalPlane.position.y < 0) {
+                        horizontalPlane.position.y = Math.max(profileMinMax.minY, horizontalPlane.position.y);
+                    } else {
+                        horizontalPlane.position.y = Math.min(profileMinMax.maxY, horizontalPlane.position.y);
+                    }
+
+                }
+                //TODO: We may not need to collect both cut points again, just collect one and resort the another one
+                let verticalCutData = collectVerticalCutData();
+                drawChart(verticalCutData);
+                let horizontalCutData = collectHorizontalCutData();
+                drawChart(horizontalCutData);
+            });
+
+            dragControls.addEventListener('dragend', function (event) {
+                //Highlight the last one
+                setActiveCutColor();
+                orbitControls.enabled = true;
+
+            });
+
+            //</editor-fold>
+            //Draw the initial charts
+            let horizontalCutData = collectHorizontalCutData();
+            drawChart(horizontalCutData);
+
+            let verticalCutData = collectVerticalCutData();
+            drawChart(verticalCutData);
+
+        }
+
+        function onWindowResize() {
+            setSizes();
+            const aspect = (cameraViewWidth / cameraViewHeight);
+            renderer.setSize(cameraViewWidth, cameraViewHeight);
+            camera.aspect = aspect;
+            camera.updateProjectionMatrix();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+        }
+
+        function render() {
+            renderer.autoClear = true;
+            renderer.setViewport(0, 0, width * 0.5, height);
+            renderer.render(scene, camera)
+        }
+
+        //</editor-fold>
+    }
+
+    function argSort(arr) {
+        let idxs = [];
+        for (let i = 0; i < arr.length; i++) {
+            idxs.push(i);
+        }
+        idxs.sort((a, b) => arr[a] - arr[b]);
+        return idxs;
+    }
+</script>
+<script>
+
+
+</script>
+</body>
+</html>

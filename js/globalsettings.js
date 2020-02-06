@@ -37,7 +37,7 @@ let xContour = null;
 let yContour = null;
 let elmConcentrations = [];
 let contourData = [];
-let pointCloudData = [];
+
 let theProfile = null;
 
 //Default color scales
