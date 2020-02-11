@@ -1,6 +1,9 @@
 function generatePointCloudGeometry(contourData, d3c) {
+    //If doesn't input d3c, means using the individual scale for each element
     let colorScale = null;
+    let inputD3c = d3c;
     if (!d3c) {
+        inputD3c = null;
         let csD = [];
         let csR = [];
         contourData.colorScale.forEach(csv => {
@@ -35,14 +38,17 @@ function generatePointCloudGeometry(contourData, d3c) {
 
         let intensity = contourData.z[k] / maxZ;
 
-        if (!d3c) {
+        if (!inputD3c) {
             d3c = d3.color(colorScale(z));
+            intensity = 1;//Keep intensity
         }
 
         let color = new THREE.Color(d3c.r / 255.0, d3c.g / 255.0, d3c.b / 255.0);
+
         colors[k] = color.r * intensity;
         colors[k + 1] = color.g * intensity;
         colors[k + 2] = color.b * intensity;
+
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -69,5 +75,6 @@ function generatePointcloudForElmIdx(elmIndex, d3c) {
         contourDataProducer = new ContourDataProducer(data);
     }
     let gridData = contourDataProducer.getGridDataByElmIndex(elmIndex, true, 0.1);
+
     return generatePointcloud(gridData, d3c);
 }

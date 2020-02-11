@@ -94,7 +94,7 @@ function smoothenData(contourData, step = 0.05) {
     // let model = "gaussian";
     let sigma2 = 0, alpha = 100;
     let variogram = kriging.train(t, x, y, model, sigma2, alpha);
-    //Now interpolate data (step) at a point
+    //Now interpolate data (elementPlaneStepSize) at a point
     contourData.z = [];
     contourData.x = [];
     contourData.y = [];
@@ -153,7 +153,6 @@ function setContourData(index, smoothen, smoothingStep = 0.1) {
     let colorScale = getContourColorScale(columnName);
 
     if (!contourDataProducer) {
-        debugger
         contourDataProducer = new ContourDataProducer(data);
     }
     let gridData = contourDataProducer.getGridDataByElmName(columnName, smoothen, smoothingStep);
@@ -247,7 +246,7 @@ class ContourDataProducer {
         this.data = data;
         this.contourX = getGridNumberList(data);
         this.contourY = getGridLetterList(data);
-        this.allElements = getAllElements(data);
+        this.allElements = getAllElements(data).map(d => d.value.replace(' Concentration', ''));
         this.allGridData = {}
     }
 
@@ -256,12 +255,16 @@ class ContourDataProducer {
         if (this.allGridData[key]) {
             return this.allGridData[key];
         }
+        let colorScale = getContourColorScale(elmName + " Concentration");
+        if (colorScale === "Portland") {
+            colorScale = getContourColorScale(this.allElements[0] + " Concentration");//We can't use "Portland" color scheme so we need to use the first one.
+        }
         let self = this;
         let gridData = {
             x: self.contourX,
             y: self.contourY,
             z: getNumberColumn(self.data, elmName),
-            colorScale: getContourColorScale(elmName)
+            colorScale: colorScale
         }
         //Smoothen the data in place
         if (smoothen) {
@@ -273,6 +276,6 @@ class ContourDataProducer {
     }
 
     getGridDataByElmIndex(elmIndex, smoothen, smoothingStep = 0.1) {
-        return this.getGridDataByElmName(this.allElements[elmIndex].value, smoothen, smoothingStep);
+        return this.getGridDataByElmName(this.allElements[elmIndex] + ' Concentration', smoothen, smoothingStep);
     }
 }
