@@ -11,27 +11,34 @@
     <script src="lib/OrbitControls.js"></script>
     <script src="lib/DragControls.js"></script>
     <script src="lib/dat.gui.min.js"></script>
+
+    <style>
+        @import "js/loader/loader.css";
+        #gui {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            height: 95px;
+        }
+    </style>
 </head>
 <body style="margin: 0px; padding:0px;">
+<!--loader-->
+<script src="js/loader/loader.js"></script>
+
+
 <div id="container1"></div>
 <div id="container2">
     <div id="verticalChartContainer"></div>
     <div id="horizontalChartContainer"></div>
 </div>
-<div class="loader"></div>
+
 <script src="js/colorschemes.js"></script>
 <script src="js/steplinechart.js"></script>
 <script src="js/globalsettings.js"></script>
 <script src="js/dataprocessing.js"></script>
 <script src="js/pointcloud.js"></script>
-<style>
-    #gui {
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        height: 95px;
-    }
-</style>
+
 <script>
     let renderer, scene, camera, bgCube, stepHandle, gui;
     let colorOptions = ['categorical', 'interpolation'];
@@ -149,6 +156,7 @@
 
         //Call the 3d part.
         init();
+        hideLoader();
         animate();
 
         function setupScene() {
@@ -486,7 +494,6 @@
             gui.domElement.id = 'gui';
 
             let folder = gui.addFolder('View options');
-
 
             folder.add(viewOptions, 'orderOptionText', orderOptions)
                 .name('order')
