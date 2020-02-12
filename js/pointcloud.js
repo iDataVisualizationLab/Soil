@@ -64,17 +64,17 @@ function generatePointCloudGeometry(contourData, d3c) {
     return geometry;
 }
 
-function generatePointcloud(xyzData, d3c) {
+function generatePointcloud(xyzData, d3c, pointSize) {
     let geometry = generatePointCloudGeometry(xyzData, d3c);
     let material = new THREE.PointsMaterial({size: pointSize, vertexColors: THREE.VertexColors});
     return new THREE.Points(geometry, material);
 }
 
-function generatePointcloudForElmIdx(elmIndex, d3c) {
+function generatePointcloudForElmIdx(elmIndex, d3c, pointSize) {
     if (!contourDataProducer) {
         contourDataProducer = new ContourDataProducer(data);
     }
     let gridData = contourDataProducer.getGridDataByElmIndex(elmIndex, true, 0.1);
 
-    return generatePointcloud(gridData, d3c);
+    return generatePointcloud(gridData, d3c, pointSize);
 }
