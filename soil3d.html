@@ -14,12 +14,15 @@
 
     <style>
         @import "js/loader/loader.css";
+
         #gui {
             position: absolute;
             top: 0px;
             left: 0px;
             height: 95px;
         }
+
+
     </style>
 </head>
 <body style="margin: 0px; padding:0px;">
@@ -48,7 +51,8 @@
         orderOptionText: 'at the cut point',
         colorOption: 1,//0 use categorical scale + intensity, 1 use scale interpolation.
         colorOptionText: 'interpolation'
-    }
+    };
+    let highlightedElementColor = 'gray';
     let orbitControls, dragControls;
     let verticalPlane, horizontalPlane;
     let verticalPlaneName = "verticalPlane";
@@ -78,7 +82,7 @@
         x: -((bgCubeSize.x - profileSize.x) / 2 - profileMargin.left),
         y: (bgCubeSize.y - profileSize.y) / 2 - profileMargin.top,
         z: bgCubeSize.z / 2
-    }
+    };
     let profileMinMax = {
         minX: -(bgCubeSize.x / 2) + profileMargin.left,
         maxX: (bgCubeSize.x / 2) - profileMargin.right,
@@ -541,16 +545,21 @@
 
             //Get the highlight color for the hover
 
-            let highlightedElementColor = pointClouds[0].geometry.attributes.color.clone();
-            highlightedElementColor.array = highlightedElementColor.array.slice();//Deep copy for the array value
-            for (let i = 0; i < highlightedElementColor.array.length; i++) {
-                highlightedElementColor.array[i] = (i % 3 === 0) ? 1 : 0;
+            let highlightedElementColorV3 = pointClouds[0].geometry.attributes.color.clone();
+            highlightedElementColorV3.array = highlightedElementColorV3.array.slice();//Deep copy for the array value
+            let highlightedElementColorD3 = d3.color(highlightedElementColor);
+            highlightedElementColorD3.r = highlightedElementColorD3.r / 255;
+            highlightedElementColorD3.g = highlightedElementColorD3.g / 255;
+            highlightedElementColorD3.b = highlightedElementColorD3.b / 255;
+            for (let i = 0; i < highlightedElementColorV3.array.length; i += 3) {
+                highlightedElementColorV3.array[i] = highlightedElementColorD3.r;
+                highlightedElementColorV3.array[i + 1] = highlightedElementColorD3.g;
+                highlightedElementColorV3.array[i + 2] = highlightedElementColorD3.b;
             }
 
             let prevColor;
             let prevObject;
             let elementPos;
-
 
             //cut planes drag controls
             let verticalPlanePos;
@@ -579,11 +588,10 @@
                     prevObject = event.object;
                     prevColor = prevObject.geometry.attributes.color.clone();
                     prevColor.array = prevColor.array.slice();//Deep copy
-                    event.object.geometry.attributes.color = highlightedElementColor;
-                    verticalChart.highlightTraceSeries(event.object.name, 'red');
-                    horizontalChart.highlightTraceSeries(event.object.name, 'red');
+                    event.object.geometry.attributes.color = highlightedElementColorV3;
+                    verticalChart.highlightTraceSeries(event.object.name, highlightedElementColor);
+                    horizontalChart.highlightTraceSeries(event.object.name, highlightedElementColor);
                     //Also highlight the chart lines
-
                 }
             });
 
@@ -623,8 +631,8 @@
                     //Copy the current position
                     elementPos = event.object.position.clone();
                     //Highlight the element
-                    verticalChart.highlightTraceSeries(event.object.name, 'red');
-                    horizontalChart.highlightTraceSeries(event.object.name, 'red');
+                    verticalChart.highlightTraceSeries(event.object.name, highlightedElementColor);
+                    horizontalChart.highlightTraceSeries(event.object.name, highlightedElementColor);
                 }
 
             });
@@ -674,8 +682,8 @@
                     if (event.object.name === horizontalPlaneName) {
                         verticalChart.settings.annotations.yLine.color = 'gray';
                     }
-                    verticalChart.highlightTraceSeries(event.object.name, 'red');
-                    horizontalChart.highlightTraceSeries(event.object.name, 'red');
+                    verticalChart.highlightTraceSeries(event.object.name, highlightedElementColor);
+                    horizontalChart.highlightTraceSeries(event.object.name, highlightedElementColor);
                     //Keep x and y
                     event.object.position.x = elementPos.x;
                     event.object.position.y = elementPos.y;
