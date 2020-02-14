@@ -16,7 +16,7 @@ function main() {
     let orderOptions = ['cut point', 'horizontal average', 'vertical average', 'none'];
     let viewOptions = {
         orderOption: 0,
-        orderOptionText: 'at the cut point',
+        orderOptionText: 'cut point',
         colorOption: 1,//0 use categorical scale + intensity, 1 use scale interpolation.
         colorOptionText: 'interpolation'
     };
@@ -66,6 +66,32 @@ function main() {
     }
 
     //</editor-fold>
+
+    //Load data
+    readData("data/" + "Profile1", handleData);
+
+    function createMenus(elements) {
+        let elementSelectionList = d3.select('#elementSelectionList');
+        let enterElementSelectionList = elementSelectionList.selectAll('.elementSelectionListItem').data(elements, d => d).enter().append('span');
+        enterElementSelectionList.append('input')
+            .attr("id", d => `${d}elementSelectionId`)
+            .attr("class", "elementSelectionListItem")
+            .attr("value", d => d)
+            .attr("type", "checkbox")
+            .attr("checked", "true")
+            .style('margin-left', '10px')
+            .on("change", function (d) {
+                if (this.checked) {
+                    console.log(`selected ${d}`);
+                } else {
+                    console.log(`deselected ${d}`);
+                }
+
+            });
+        enterElementSelectionList.append('label')
+            .attr('for', d => `${d}elementSelectionId`)
+            .text(d => d);
+    }
 
     function setSizes() {
         width = window.innerWidth;
@@ -192,9 +218,15 @@ function main() {
 
 
         //Redraw the charts in new size
-        d3.selectAll(".detailSliceCharts").data(detailSliceCharts).enter().append("div")
+        let detailSclieChartSelections = d3.selectAll(".detailSliceCharts").data(detailSliceCharts, d => d.name);
+        //Enter
+        let detailSclieChartEnters = detailSclieChartSelections.enter().append("div")
             .attr("class", "detailSliceCharts")
-            .attr("id", d => d.name)
+            .attr("id", d => d.name);
+        //Merge
+        detailSclieChartSelections = detailSclieChartSelections.merge(detailSclieChartEnters);
+        //Update
+        detailSclieChartSelections
             .style("position", "absolute")
             .style("left", d => d.left + "px")
             .style("top", d => d.top + "px")
@@ -202,9 +234,6 @@ function main() {
             .style("height", d => d.height + "px");
 
     }
-
-    //Load data
-    readData("data/" + "Profile1", handleData);
 
     function sortPointCloudsAsIdxs(sortedIdxs) {
         let sortedPointClouds = [];
@@ -220,7 +249,6 @@ function main() {
             pointClouds[i].position.set(profilePosition.x, profilePosition.y, profilePosition.z + i * elementPlaneStepSize + stepMargin);
         }
     }
-
 
     function handleData(data) {
 
@@ -238,6 +266,7 @@ function main() {
         hideLoader();
         animate();
         highlightSelectedPointClouds();
+        createMenus(contourDataProducer.allElements);
 
         function setupScene() {
             let bgGeometry = new THREE.BoxGeometry(bgCubeSize.x, bgCubeSize.y, bgCubeSize.z);
@@ -344,7 +373,8 @@ function main() {
 
             elementInfo1 = setupElementScene1(pointClouds[0]);
             elementInfo2 = setupElementScene2(pointClouds[1]);
-
+            //By default setup the orbit control for the first one
+            setupOrbitControls(elementInfo1, elementInfo2, document.getElementById('detailChart1'));
             //Also setup orbit controls for these
             d3.select("#detailChart1").on("mouseover", function () {
                 setupOrbitControls(elementInfo1, elementInfo2, this);
@@ -635,7 +665,6 @@ function main() {
             });
         }
 
-
         function drawChart(cutData) {
             let type = cutData.type;
             let chartData = cutData.traces;
@@ -761,19 +790,26 @@ function main() {
                 }
             }, 'detail views');
 
-            resetFolder.add({
-                'chart views': function () {
-                    resetHorizontalAndVerticalCharts();
-                }
-            }, 'chart views');
+            // resetFolder.add({
+            //     'chart views': function () {
+            //         resetHorizontalAndVerticalCharts();
+            //     }
+            // }, 'chart views');
 
             resetFolder.add({
                 'all views': function () {
                     resetMainView();
                     resetDetailsViews();
-                    resetHorizontalAndVerticalCharts();
+                    // resetHorizontalAndVerticalCharts();
                 }
             }, 'all views');
+
+            gui.width = 260;
+            d3.select('#elementSelectionList')
+                .style('position', 'absolute')
+                .style('left', `${(gui.width + 5)}px`);
+            gui.close();
+
 
             function resetMainView() {
                 //Reset the main camera.
@@ -792,9 +828,9 @@ function main() {
                 }
             }
 
-            function resetHorizontalAndVerticalCharts() {
-                //TODO: to be done.
-            }
+            // function resetHorizontalAndVerticalCharts() {
+            //     //TODO: to be done.
+            // }
 
             //
             setupScene();

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!--    <link rel="manifest" href="manifest.json">-->
     <title>Soil 3D</title>
     <script src="lib/d3.js"></script>
     <script src="js/charts.min.js"></script>
@@ -22,14 +23,47 @@
             height: 223px; /* 32 * 7 - 1*/
         }
 
+        input[type="checkbox"] {
+            visibility: hidden;
+        }
+
+        label {
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] + label:before {
+            border: 1px solid #333;
+            content: "\00a0";
+            display: inline-block;
+            font: 12px/1em sans-serif;
+            height: 12px;
+            margin: 0 .25em 0 0;
+            padding: 0;
+            vertical-align: top;
+            width: 12px;
+        }
+
+        input[type="checkbox"]:checked + label:before {
+            background: #fff;
+            color: #333;
+            content: "\2713";
+            text-align: center;
+        }
+
+        input[type="checkbox"]:checked + label:after {
+            font-weight: bold;
+        }
+
+        input[type="checkbox"]:focus + label::before {
+            outline: rgb(59, 153, 252) auto 5px;
+        }
 
     </style>
 </head>
 <body style="margin: 0px; padding:0px;">
 <!--loader-->
 <script src="js/loader/loader.js"></script>
-
-
+<div id="elementSelectionList" style="margin-top: 1px; z-index: 999;"></div>
 <div id="container1" style="z-index: -1;"></div>
 <span id="detailChart1"></span>
 <span id="detailChart2"></span>
