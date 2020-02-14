@@ -230,8 +230,8 @@ function main() {
 
         elementColorScale = d3.scaleOrdinal().domain(contourDataProducer.allElements).range(d3.schemeCategory20);
 
-        let numElms = contourDataProducer.allElements.length;
-        // let numElms = 5;
+        // let numElms = contourDataProducer.allElements.length;
+        let numElms = 5;
 
         //Call the 3d part.
         init();
@@ -374,6 +374,8 @@ function main() {
             let orbitControls2 = new THREE.OrbitControls(elementInfo2.camera, domElement);
             orbitControls2.target.set(0, 0, 0);
             orbitControls2.update();
+            elementInfo1.orbitContols = orbitControls1;
+            elementInfo2.orbitContols = orbitControls2;
         }
 
         function updateTextPositions() {
@@ -722,9 +724,9 @@ function main() {
             gui = new dat.GUI({autoPlace: true});
             gui.domElement.id = 'gui';
 
-            let folder = gui.addFolder('View options');
+            let viewOptionsFolder = gui.addFolder('View options');
 
-            folder.add(viewOptions, 'orderOptionText', orderOptions)
+            viewOptionsFolder.add(viewOptions, 'orderOptionText', orderOptions)
                 .name('order')
                 .onChange(function (value) {
                     switch (value) {
@@ -746,6 +748,53 @@ function main() {
                         updateCharts();//Update chart also updates the plane positions
                     }
                 });
+            let resetFolder = gui.addFolder('Reset views');
+            resetFolder.add({
+                'main view': function () {
+                    resetMainView();
+                }
+            }, 'main view');
+
+            resetFolder.add({
+                'detail views': function () {
+                    resetDetailsViews();
+                }
+            }, 'detail views');
+
+            resetFolder.add({
+                'chart views': function () {
+                    resetHorizontalAndVerticalCharts();
+                }
+            }, 'chart views');
+
+            resetFolder.add({
+                'all views': function () {
+                    resetMainView();
+                    resetDetailsViews();
+                    resetHorizontalAndVerticalCharts();
+                }
+            }, 'all views');
+
+            function resetMainView() {
+                //Reset the main camera.
+                orbitControls.reset();
+                orbitControls.target.set(0, 0, bgCube.position.z / 2);
+                orbitControls.update();
+            }
+
+            function resetDetailsViews() {
+                //Reset the two sceneInfo
+                if (elementInfo1.orbitContols) {
+                    elementInfo1.orbitContols.reset();
+                }
+                if (elementInfo2.orbitContols) {
+                    elementInfo2.orbitContols.reset();
+                }
+            }
+
+            function resetHorizontalAndVerticalCharts() {
+
+            }
 
             //
             setupScene();
