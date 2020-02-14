@@ -13,7 +13,7 @@ function main() {
         paddingBottom: 40
     };
     let colorOptions = ['categorical', 'interpolation'];
-    let orderOptions = ['at the cut point', 'average horizontal cut', 'average vertical cut', 'none'];
+    let orderOptions = ['cut point', 'horizontal average', 'vertical average', 'none'];
     let viewOptions = {
         orderOption: 0,
         orderOptionText: 'at the cut point',
@@ -230,8 +230,8 @@ function main() {
 
         elementColorScale = d3.scaleOrdinal().domain(contourDataProducer.allElements).range(d3.schemeCategory20);
 
-        // let numElms = contourDataProducer.allElements.length;
-        let numElms = 5;
+        let numElms = contourDataProducer.allElements.length;
+        // let numElms = 5;
 
         //Call the 3d part.
         init();
