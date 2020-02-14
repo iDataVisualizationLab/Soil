@@ -805,7 +805,7 @@ function main() {
                     }
                     verticalChart.highlightTraceSeries();
                     horizontalChart.highlightTraceSeries();
-                } else { //Must be the element plain
+                } else { //Must be the element planes
                     //Reset prev object values => this step is to assure that we rest the previous one before setting any other one.
                     if (prevObject && prevColor) {
                         prevObject.geometry.attributes.color = prevColor;
@@ -817,7 +817,14 @@ function main() {
                     event.object.geometry.attributes.color = highlightedElementColorV3;
                     verticalChart.highlightTraceSeries(event.object.name, highlightedElementColor);
                     horizontalChart.highlightTraceSeries(event.object.name, highlightedElementColor);
-                    //Also highlight the chart lines
+                    //Highlight the chart text.
+                    texts.forEach(text => {
+                        if (text.text() === event.object.name) {
+                            text.style('color', highlightedElementColor);
+                        } else {
+                            text.style('color', 'black');
+                        }
+                    });
                 }
             });
 
@@ -857,7 +864,15 @@ function main() {
                     }
                     verticalChart.highlightTraceSeries();
                     horizontalChart.highlightTraceSeries();
+                    texts.forEach(text => {
+                        if (text.text() === event.object.name) {
+                            text.style('color', highlightedElementColor);
+                        } else {
+                            text.style('color', 'black');
+                        }
+                    })
                 }
+
             });
 
             dragControls.addEventListener('dragstart', function (event) {
@@ -1066,13 +1081,13 @@ function main() {
     }
 
     function highlightSelectedPointClouds() {
-
         let selectedElements = selectedPointClouds.map(d => d.name);
         texts.forEach(text => {
             let fw = (selectedElements.indexOf(text.text()) >= 0) ? 'bold' : 'normal';
             text.style('font-weight', fw);
         });
     }
+
 
     function highlightPointCloudBorder(pointCloud) {
 
