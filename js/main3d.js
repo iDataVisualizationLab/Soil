@@ -549,6 +549,7 @@ function main() {
                     colorScale: elementColorScale,
                     stepMode: {
                         chartSize: defaultChartSize, // Height for each chart
+                        stepHandle: false,
                     },
                     annotations: annotations,
                     orientation: type,
@@ -605,6 +606,7 @@ function main() {
                     colorScale: elementColorScale,
                     stepMode: {
                         chartSize: defaultChartSize, // Height for each chart
+                        stepHandle: false,
                     },
                     annotations: annotations,
                     orientation: type,
@@ -666,6 +668,7 @@ function main() {
                     colorScale: elementColorScale,
                     stepMode: {
                         chartSize: defaultChartSize, // Height for each chart
+                        stepHandle: true,
                     },
                     annotations: annotations,
                     orientation: type,
@@ -794,9 +797,11 @@ function main() {
                     //Update annotations + disable highlight of trace series
                     if (event.object.name === verticalPlaneName) {
                         horizontalChart.settings.annotations.xLine.color = 'pink';
+                        changeSlicesAnnotationColors(horizontalDetailCharts, 'xLine', 'pink');
                     }
                     if (event.object.name === horizontalPlaneName) {
                         verticalChart.settings.annotations.yLine.color = 'pink';
+                        changeSlicesAnnotationColors(verticalDetailCharts, 'yLine', 'pink');
                     }
                     verticalChart.highlightTraceSeries();
                     horizontalChart.highlightTraceSeries();
@@ -816,15 +821,28 @@ function main() {
                 }
             });
 
+            function changeDetailChartAnnotationColor(theChart, lineType, color) {
+                theChart.settings.annotations[lineType].color = color;
+                theChart.update(theChart.data);
+            }
+
+            function changeSlicesAnnotationColors(slices, lineType, color) {
+                slices.forEach(slice => {
+                    changeDetailChartAnnotationColor(slice, lineType, color);
+                });
+            }
+
             dragControls.addEventListener('hoveroff', function (event) {
                 if (event.object.name === verticalPlaneName || event.object.name === horizontalPlaneName || event.object.name === stepHandleName) {//Two planes
                     event.object.material.emissive.set(0x000000);
                     //Update annotations + disable highlight of trace series
                     if (event.object.name === verticalPlaneName) {
                         horizontalChart.settings.annotations.xLine.color = 'gray';
+                        changeSlicesAnnotationColors(horizontalDetailCharts, 'xLine', 'gray');
                     }
                     if (event.object.name === horizontalPlaneName) {
                         verticalChart.settings.annotations.yLine.color = 'gray';
+                        changeSlicesAnnotationColors(verticalDetailCharts, 'yLine', 'gray');
                     }
                     verticalChart.highlightTraceSeries();
                     horizontalChart.highlightTraceSeries();
@@ -1080,7 +1098,7 @@ function main() {
 
     function setupElementScene(pointCloud, elementId, sceneInfo) {
         //Set the text
-        d3.select(`#${elementId}`).select('.elementText').text(pointCloud.name);
+        // d3.select(`#${elementId}`).select('.elementText').text(pointCloud.name);
         //Also highlight color at its border.
         // highlightPointCloudBorder(pointCloud);
 
