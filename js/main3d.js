@@ -3,7 +3,9 @@ function main() {
     let renderer, scene, camera, bgCube, stepHandle, gui;
     let elementInfo1;
     let elementInfo2;
+
     let nextElementIdx = 0;
+    let defaultChartSize = 50;
     let chartPaddings = {
         paddingLeft: 40,
         paddingRight: 40,
@@ -27,11 +29,18 @@ function main() {
     let stepHandlerMargin = 2;
     let stepMargin = 2;
     let verticalChart;
+    let verticalDetailCharts = [undefined, undefined];
+
+
     let horizontalChart;
+    let horizontalDetailCharts = [undefined, undefined];
+
+
     let elementColorScale;
     let pointSize = 0.05;
     let elementPlaneStepSize = 1;
     let pointClouds = [];
+    let selectedPointClouds = [];
     let texts = [];
     let width, height, cameraViewWidth, cameraViewHeight, chartWidth, chartHeight;
 
@@ -83,6 +92,40 @@ function main() {
         let detailChartTop2 = detailChartTop1;
         let detailChartLeft1 = detailChartMargin;
         let detailChartLeft2 = detailChartWidth + detailChartMargin * 2;
+        let detailSliceCharts = [
+            {
+                //Left hori
+                name: 'horizontalDetailChart1',
+                left: detailChartLeft1 - chartPaddings.paddingLeft,
+                top: detailChartTop1 - defaultChartSize - chartPaddings.paddingTop - chartPaddings.paddingBottom,
+                width: detailChartWidth,
+                height: defaultChartSize
+            },
+            {
+                //Left verti
+                name: "verticalDetailChart1",
+                left: detailChartLeft1 + detailChartWidth,
+                top: detailChartTop1 - chartPaddings.paddingTop,
+                width: detailChartWidth,
+                height: detailChartHeight
+            },
+            {
+                //Right hori
+                name: 'horizontalDetailChart2',
+                left: detailChartLeft2 - chartPaddings.paddingLeft,
+                top: detailChartTop2 - defaultChartSize - chartPaddings.paddingTop - chartPaddings.paddingBottom,
+                width: detailChartWidth,
+                height: defaultChartSize
+            },
+            {
+                //Right verti
+                name: "verticalDetailChart2",
+                left: detailChartLeft2 + detailChartWidth,
+                top: detailChartTop2 - chartPaddings.paddingTop,
+                width: defaultChartSize,
+                height: detailChartHeight
+            },
+        ];
 
 
         d3.select(container1)
@@ -90,24 +133,31 @@ function main() {
             .style("left", "0px")
             .style("top", "0px")
             .style("width", cameraViewWidth + "px")
-            .style("height", cameraViewHeight + "px");
+            .style("height", cameraViewHeight + "px")
+            .style('outline', 'none');
+
         d3.select(container2).style('position', 'absolute')
             .style("left", `${cameraViewWidth}px`)
             .style("top", "0px")
             .style("width", chartWidth + "px")
-            .style("height", cameraViewHeight + "px");
+            .style("height", cameraViewHeight + "px")
+            .style('outline', 'none');
+
         d3.select(verticalChartContainer)
             .style('position', 'absolute')
             .style('left', '0px')
             .style('top', "0px")
             .style('width', chartWidth + "px")
-            .style('height', chartHeight + "px");
+            .style('height', chartHeight + "px")
+            .style('outline', 'none');
+
         d3.select(horizontalChartContainer)
             .style('position', 'absolute')
             .style('left', '0px')
             .style('top', chartHeight + "px")
             .style('width', chartWidth + "px")
-            .style('height', chartHeight + "px");
+            .style('height', chartHeight + "px")
+            .style('outline', 'none');
 
         d3.select(detailChart1)
             .style('position', 'absolute')
@@ -116,6 +166,15 @@ function main() {
             .style('width', detailChartWidth + "px")
             .style('height', detailChartHeight + "px")
             .style('border', '1px solid black')
+            .style('outline', 'none')
+            .append('div')//for the text
+            .attr("id", "detailElmText1")
+            .attr("class", "elementText")
+            .style("position", "absolute")
+            .style("left", "10px")
+            .style("top", "10px");
+
+
         d3.select(detailChart2)
             .style('position', 'absolute')
             .style('left', detailChartLeft2 + 'px')
@@ -123,8 +182,25 @@ function main() {
             .style('width', detailChartWidth + "px")
             .style('height', detailChartHeight + "px")
             .style('border', '1px solid black')
+            .style('outline', 'none')
+            .append('div')//for the text
+            .attr("id", "detailElmText2")
+            .attr("class", "elementText")
+            .style("position", "absolute")
+            .style("left", "10px")
+            .style("top", "10px");
+
 
         //Redraw the charts in new size
+        d3.selectAll(".detailSliceCharts").data(detailSliceCharts).enter().append("div")
+            .attr("class", "detailSliceCharts")
+            .attr("id", d => d.name)
+            .style("position", "absolute")
+            .style("left", d => d.left + "px")
+            .style("top", d => d.top + "px")
+            .style("width", d => d.width + "px")
+            .style("height", d => d.height + "px");
+
     }
 
     //Load data
@@ -155,35 +231,42 @@ function main() {
         elementColorScale = d3.scaleOrdinal().domain(contourDataProducer.allElements).range(d3.schemeCategory20);
 
         let numElms = contourDataProducer.allElements.length;
-        // let numElms = 2;
+        // let numElms = 5;
 
         //Call the 3d part.
         init();
         hideLoader();
         animate();
+        highlightSelectedPointClouds();
 
         function setupScene() {
             let bgGeometry = new THREE.BoxGeometry(bgCubeSize.x, bgCubeSize.y, bgCubeSize.z);
             let bgMaterial = [
                 new THREE.MeshStandardMaterial({
-                    color: new THREE.Color(1, 1, 1)
+                    color: new THREE.Color(1, 1, 1),
+                    side: THREE.DoubleSide
                 }),
                 new THREE.MeshStandardMaterial({
-                    color: new THREE.Color(1, 1, 1)
+                    color: new THREE.Color(1, 1, 1),
+                    side: THREE.DoubleSide
                 }),
                 new THREE.MeshStandardMaterial({
-                    color: new THREE.Color(1, 1, 1)
+                    color: new THREE.Color(1, 1, 1),
+                    side: THREE.DoubleSide
                 }),
                 new THREE.MeshStandardMaterial({
-                    color: new THREE.Color(1, 1, 1)
+                    color: new THREE.Color(1, 1, 1),
+                    side: THREE.DoubleSide
                 }),
                 new THREE.MeshLambertMaterial({
                     map: new THREE.TextureLoader().load('data/images/Profile1.png'),
+                    side: THREE.DoubleSide
                     // opacity: 0.5,
                     // transparent: true
                 }),
                 new THREE.MeshStandardMaterial({
-                    color: new THREE.Color(1, 1, 1)
+                    color: new THREE.Color(1, 1, 1),
+                    side: THREE.DoubleSide
                 })
             ];
 
@@ -198,7 +281,7 @@ function main() {
 
             //
             camera.position.set(20, bgCube.position.y, bgCube.position.z / 2);
-            debugger
+
             camera.lookAt(0, bgCube.position.y, bgCube.position.z / 2);
             // camera.lookAt(-10, -10, bgCube.position.z / 2);
 
@@ -223,6 +306,7 @@ function main() {
 
             //Setup the text
             let container1 = d3.select("#container1");
+
             for (let i = 0; i < numElms; i++) {
                 let d3c = null;
                 //TODO: This section changes the color options for the element plains
@@ -242,11 +326,32 @@ function main() {
                 texts[i].append('text').text(pointClouds[i].name);
             }
 
+            //TODO: We also create two pointClouds to highlight the elements.
+            selectedPointClouds[0] = pointClouds[0];
+            selectedPointClouds[1] = pointClouds[1];
+
+
             //Set two elements as default
+            // highlightPointClouds[0] = generateBorder(0.01, pointSize);
+            // highlightPointClouds[0].scale.set(profileSize.x, profileSize.y, 0);
+            // highlightPointClouds[0].position.set(profilePosition.x, profilePosition.y, pointClouds[0].position.z + elementPlaneStepSize/2);
+            // bgCube.add(highlightPointClouds[0]);
+            //
+            // highlightPointClouds[1] = generateBorder(0.01, pointSize);
+            // highlightPointClouds[1].scale.set(profileSize.x, profileSize.y, 0);
+            // highlightPointClouds[1].position.set(profilePosition.x, profilePosition.y, pointClouds[1].position.z + elementPlaneStepSize/2);
+            // bgCube.add(highlightPointClouds[1]);
 
             elementInfo1 = setupElementScene1(pointClouds[0]);
-
             elementInfo2 = setupElementScene2(pointClouds[1]);
+
+            //Also setup orbit controls for these
+            d3.select("#detailChart1").on("mouseover", function () {
+                setupOrbitControls(elementInfo1, elementInfo2, this);
+            });
+            d3.select("#detailChart2").on("mouseover", function () {
+                setupOrbitControls(elementInfo1, elementInfo2, this);
+            });
 
             //Set the handle for step size.
             let stepHandleGemoetry = new THREE.SphereBufferGeometry(0.2, 50, 50);
@@ -256,10 +361,19 @@ function main() {
             stepHandle.position.set(profilePosition.x, profilePosition.y, profilePosition.z + (numElms - 1) * elementPlaneStepSize + stepMargin + stepHandlerMargin);
             bgCube.add(stepHandle);
 
+
             let aLight = new THREE.AmbientLight(new THREE.Color(0.7, 0.7, 0.7), 1.0);
             scene.add(aLight);
 
+        }
 
+        function setupOrbitControls(elementInfo1, elementInfo2, domElement) {
+            let orbitControls1 = new THREE.OrbitControls(elementInfo1.camera, domElement);
+            orbitControls1.target.set(0, 0, 0);
+            orbitControls1.update();
+            let orbitControls2 = new THREE.OrbitControls(elementInfo2.camera, domElement);
+            orbitControls2.target.set(0, 0, 0);
+            orbitControls2.update();
         }
 
         function updateTextPositions() {
@@ -407,6 +521,117 @@ function main() {
             horizontalChart.update(sortedHorizontalData);
         }
 
+        function drawVerticalSlices(cutData) {
+            let type = cutData.type;
+            if (type !== 'vertical') {
+                return;
+            }
+
+            let cutValue = cutData.cutValue;
+            let verticalChartsData = [];
+            verticalDetailCharts.forEach((chart, i) => {
+                let annotations = {
+                    'yLine': {
+                        valueType: 'value',
+                        y: cutValue,
+                        color: verticalChart ? verticalChart.settings.annotations.yLine.color : 'gray',
+                        strokeWidth: 3
+                    }
+                };
+
+                //
+                let chartSettings = {
+                    noSvg: false,
+                    showAxes: true,
+                    width: defaultChartSize + chartPaddings.paddingLeft + chartPaddings.paddingTop,
+                    height: chartHeight,
+                    ...chartPaddings,
+                    colorScale: elementColorScale,
+                    stepMode: {
+                        chartSize: defaultChartSize, // Height for each chart
+                    },
+                    annotations: annotations,
+                    orientation: type,
+                };
+
+                let chartContentWidth = chartSettings.width - chartSettings.paddingLeft - chartSettings.paddingRight;
+                chartSettings.stepMode.stepScale = d3.scaleLinear().domain([0, 1]).range([0, chartSettings.stepMode.chartSize]);
+
+                //Config scales, we need to use one scale for all.
+                chartSettings.xScale = d3.scaleLinear().domain([0, 1]).range([0, chartContentWidth]);
+                chartSettings.yTickValues = Array.from(new Array(13), (_, i) => 0.5 + i);
+                chartSettings.yTickLabels = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"].reverse();
+
+
+                let chartData = [cutData.traces.find(trace => trace.series === selectedPointClouds[i].name)];
+                verticalChartsData.push(chartData);
+
+                let container = document.getElementById(`verticalDetailChart${i + 1}`);
+                if (!chart) {
+                    verticalDetailCharts[i] = new LineChart(container, chartData, chartSettings);
+                    verticalDetailCharts[i].plot();
+                } else {
+                    verticalDetailCharts[i].updateAnnotations(annotations);
+                    verticalDetailCharts[i].update(verticalChartsData[i]);
+                }
+            });
+        }
+
+        function drawHorizontalSlices(cutData) {
+            let type = cutData.type;
+
+            if (type !== 'horizontal') {
+                return;
+            }
+            let cutValue = cutData.cutValue;
+            let horizontalChartsData = [];
+            horizontalDetailCharts.forEach((chart, i) => {
+                let annotations = {
+                    'xLine': {
+                        valueType: 'value',
+                        x: cutValue,
+                        color: horizontalChart ? horizontalChart.settings.annotations.xLine.color : 'gray',//Take current color
+                        strokeWidth: 3
+                    }
+                };
+
+                //
+                let chartSettings = {
+                    noSvg: false,
+                    showAxes: true,
+                    width: chartWidth,
+                    height: defaultChartSize + chartPaddings.paddingTop + chartPaddings.paddingBottom,
+                    ...chartPaddings,
+                    colorScale: elementColorScale,
+                    stepMode: {
+                        chartSize: defaultChartSize, // Height for each chart
+                    },
+                    annotations: annotations,
+                    orientation: type,
+                };
+
+                let chartContentHeight = chartSettings.height - chartSettings.paddingTop - chartSettings.paddingBottom;
+                chartSettings.stepMode.stepScale = d3.scaleLinear().domain([0, 1]).range([0, chartSettings.stepMode.chartSize]);
+
+                chartSettings.yScale = d3.scaleLinear().domain([0, 1]).range([chartContentHeight, 0]);
+                chartSettings.xTickValues = Array.from(new Array(10), (_, i) => 0.5 + i);
+                chartSettings.xTickLabels = Array.from(new Array(10), (_, i) => 1 + i);
+
+                let chartData = [cutData.traces.find(trace => trace.series === selectedPointClouds[i].name)];
+                horizontalChartsData.push(chartData);
+
+                let container = document.getElementById(`horizontalDetailChart${i + 1}`);
+                if (!chart) {
+                    horizontalDetailCharts[i] = new LineChart(container, chartData, chartSettings);
+                    horizontalDetailCharts[i].plot();
+                } else {
+                    horizontalDetailCharts[i].updateAnnotations(annotations);
+                    horizontalDetailCharts[i].update(horizontalChartsData[i]);
+                }
+            });
+        }
+
+
         function drawChart(cutData) {
             let type = cutData.type;
             let chartData = cutData.traces;
@@ -431,7 +656,7 @@ function main() {
             let theChart = type === 'horizontal' ? horizontalChart : verticalChart;
             if (!theChart) {
                 let chartContainer = document.getElementById(`${type}ChartContainer`);
-                debugger
+
                 let chartSettings = {
                     noSvg: false,
                     showAxes: true,
@@ -440,7 +665,7 @@ function main() {
                     ...chartPaddings,
                     colorScale: elementColorScale,
                     stepMode: {
-                        chartSize: 50, // Height for each chart
+                        chartSize: defaultChartSize, // Height for each chart
                     },
                     annotations: annotations,
                     orientation: type,
@@ -528,7 +753,6 @@ function main() {
             renderer.setSize(cameraViewWidth, cameraViewHeight);
             container1.appendChild(renderer.domElement);
             d3.select(container1).select('canvas').style('outline', 'none');
-
 
             //
             window.addEventListener('resize', onWindowResize, false);
@@ -624,6 +848,9 @@ function main() {
                     //Record the plane current positions
                     verticalPlanePos = verticalPlane.position.clone();
                     horizontalPlanePos = horizontalPlane.position.clone();
+                } else if (event.object.name === stepHandleName) {
+                    //Copy the current position
+                    elementPos = event.object.position.clone();
                 } else {
                     //Copy the current position
                     elementPos = event.object.position.clone();
@@ -632,11 +859,18 @@ function main() {
                     horizontalChart.highlightTraceSeries(event.object.name, highlightedElementColor);
                     //Set the investigating element.
                     nextElementIdx = (nextElementIdx + 1) % 2;
+                    selectedPointClouds[nextElementIdx] = event.object;
+                    //Highlight selected pointClouds
+                    highlightSelectedPointClouds();
                     if (nextElementIdx === 0) {
                         elementInfo1 = setupElementScene1(event.object);
+                        //Update text
                     } else {
                         elementInfo2 = setupElementScene2(event.object);
                     }
+                    //TODO: may just store the cut data so we do not have to collect them again
+                    drawVerticalSlices(collectVerticalCutData());
+                    drawHorizontalSlices(collectHorizontalCutData());
 
                 }
 
@@ -735,6 +969,7 @@ function main() {
             //Draw the initial charts
             updateCharts();
 
+
         }
 
         function updateCharts() {
@@ -743,6 +978,9 @@ function main() {
 
             let verticalCutData = collectVerticalCutData();
             drawChart(verticalCutData);
+
+            drawVerticalSlices(verticalCutData);
+            drawHorizontalSlices(horizontalCutData);
         }
 
         function onWindowResize() {
@@ -775,39 +1013,89 @@ function main() {
     function makeScene(elem) {
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(1, 1, 1);
-        const fov = 45;
-        const aspect = 2; //The canvas default
-        const near = 0.1;
-        const far = 100;
-        const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+        // const fov = 45;
+        // const aspect = 2; //The canvas default
+        // const near = 0.1;
+        // const far = 100;
+        // const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+        // camera.position.set(0, 0, 6);
 
-        camera.position.set(0, 0, 8);
+        let width = profileSize.x;
+        let height = profileSize.y;
+        const camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 0.1, 100);
+        camera.position.set(0, 0, 3);
+
         camera.lookAt(0, 0, 0);
         {
-            const color = 0xFFFFFF;
-            const intensity = 1;
-            const light = new THREE.DirectionalLight(color, intensity);
-            light.position.set(-1, 2, 4);
-            scene.add(light);
+            // const color = 0xFFFFFF;
+            // const intensity = 1;
+            // const light = new THREE.DirectionalLight(color, intensity);
+            // light.position.set(0, 0, 6);
+            // scene.add(light);
+            let aLight = new THREE.AmbientLight(new THREE.Color(0.7, 0.7, 0.7), 1.0);
+            scene.add(aLight);
         }
+
         return {scene, camera, elem};
     }
 
     function setupElementScene1(pointCloud) {
-        return setupElementScene(pointCloud, 'detailChart1');
+        return setupElementScene(pointCloud, 'detailChart1', elementInfo1);
     }
 
     function setupElementScene2(pointCloud) {
-        return setupElementScene(pointCloud, 'detailChart2');
+        return setupElementScene(pointCloud, 'detailChart2', elementInfo2);
     }
 
-    function setupElementScene(pointCloud, elementId) {
+    function highlightSelectedPointClouds() {
+
+        let selectedElements = selectedPointClouds.map(d => d.name);
+        texts.forEach(text => {
+            let fw = (selectedElements.indexOf(text.text()) >= 0) ? 'bold' : 'normal';
+            text.style('font-weight', fw);
+        });
+    }
+
+    function highlightPointCloudBorder(pointCloud) {
+
+        let positionArray = pointCloud.geometry.attributes.position.array;
+        let colorArray = pointCloud.geometry.attributes.color.array;
+        //Set black if x = -0.5 or 0.5
+        for (let i = 0; i < positionArray.length; i += 3) {
+            if (positionArray[i] === -0.5 || positionArray[i] === 0.5) {
+                colorArray[i] = 0;
+                colorArray[i + 1] = 0;
+                colorArray[i + 2] = 0;
+            }
+        }
+        //Set black if y = -0.5 or 0.5
+        for (let i = 1; i < positionArray.length; i += 3) {
+            if (positionArray[i] === -0.5 || positionArray[i] === 0.5) {
+                colorArray[i - 1] = 0;
+                colorArray[i] = 0;
+                colorArray[i + 1] = 0;
+            }
+        }
+    }
+
+    function setupElementScene(pointCloud, elementId, sceneInfo) {
+        //Set the text
+        d3.select(`#${elementId}`).select('.elementText').text(pointCloud.name);
+        //Also highlight color at its border.
+        // highlightPointCloudBorder(pointCloud);
+
         pointCloud = pointCloud.clone();
-        pointCloud.position.set(0, 0, 0);
-        const sceneInfo = makeScene(document.querySelector(`#${elementId}`));
+        pointCloud.material = pointCloud.material.clone();
+        pointCloud.material.size = 3;
+        if (!sceneInfo) {
+            sceneInfo = makeScene(document.querySelector(`#${elementId}`));
+        }
+
         if (sceneInfo.mesh) {
             sceneInfo.scene.remove(sceneInfo.mesh);
-        } else if (pointCloud) {
+        }
+        if (pointCloud) {
+            pointCloud.position.set(0, 0, 0);
             sceneInfo.scene.add(pointCloud);
             sceneInfo.mesh = pointCloud;
         }

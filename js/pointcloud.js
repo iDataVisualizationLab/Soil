@@ -64,6 +64,64 @@ function generatePointCloudGeometry(contourData, d3c) {
     return geometry;
 }
 
+function generateBorderGeometry(stepSize) {
+    let geometry = new THREE.BufferGeometry();
+    let numPoints = Math.floor(1 / stepSize);
+
+
+    let positions = new Float32Array(numPoints * 4 * 3);//Four sides of a rectangle and 3 coordinates per point
+    let colors = new Float32Array(numPoints * 4 * 3);//Four sides of a rectangle and 3 values per color
+    //Initialize as black color
+    for (let i = 0; i < colors.length; i++) {
+        colors[i] = 0;
+    }
+    let xStart = -0.5;
+    let xEnd = 0.5;
+
+    let yStart = -0.5;
+    let yEnd = 0.5;
+
+    for (let side = 0; side < 4; side++) {
+        let u, v;
+        if (side === 0 || side === 2) {
+            u = (side === 0) ? xStart : xEnd;
+            for (let k = 0; k < numPoints; k += 3) {
+                let v = yStart + k * stepSize;
+                let x = u;
+                let y = v;
+                let z = 0;
+                positions[k + side * numPoints] = x;
+                positions[k + side * numPoints + 1] = y;
+                positions[k + side * numPoints + 2] = z;
+            }
+        } else {
+            v = (side === 1) ? yStart : yEnd;
+            for (let k = 0; k < numPoints; k += 3) {
+                let u = xStart + k * stepSize;
+                let x = u;
+                let y = v;
+                let z = 0;
+                positions[k + side * numPoints] = x;
+                positions[k + side * numPoints + 1] = y;
+                positions[k + side * numPoints + 2] = z;
+            }
+        }
+    }
+
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geometry.computeBoundingBox();
+
+    return geometry;
+}
+
+function generateBorder(stepSize, pointSize) {
+    let geometry = generateBorderGeometry(stepSize);
+    let material = new THREE.PointsMaterial({size: pointSize, vertexColors: THREE.VertexColors});
+    return new THREE.Points(geometry, material);
+}
+
 function generatePointcloud(xyzData, d3c, pointSize) {
     let geometry = generatePointCloudGeometry(xyzData, d3c);
     let material = new THREE.PointsMaterial({size: pointSize, vertexColors: THREE.VertexColors});
