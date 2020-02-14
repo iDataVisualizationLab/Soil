@@ -793,7 +793,7 @@ function main() {
             }
 
             function resetHorizontalAndVerticalCharts() {
-
+                //TODO: to be done.
             }
 
             //
