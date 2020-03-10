@@ -12,7 +12,22 @@ function main() {
         paddingTop: 40,
         paddingBottom: 40
     };
+
+    const HEAVY_METALS = "heavy metals";
+    const PLANT_ESSENTIAL_ELEMENTS = "plant essential elements";
+    const PEDOLOGICAL_FEATURES = "pedological features";
+    const ALL_DETECTED = "all detected";
+    const packages = {
+        "heavy metals": ['Cr', 'Pb', 'Cd', 'Hg', 'As'],
+        "plant essential elements": ['Ca', 'Cu', 'Fe', 'K', 'Mn', 'S', 'Zn'],
+        "pedological features": ['RI', 'DI', 'SR'], //Ruxton weathering index, Desilication index, "SR Concentration"
+        "all detected": []
+    }
     let colorOptions = ['categorical', 'interpolation'];
+    let profiles = ['Profile1', 'Profile2', 'Profile3'];
+    let profileOptions = {
+        profileOptionText: 'Profile1'
+    }
     let orderOptions = ['cut point', 'horizontal average', 'vertical average', 'none'];
     let viewOptions = {
         orderOption: 0,
@@ -20,13 +35,15 @@ function main() {
         colorOption: 1,//0 use categorical scale + intensity, 1 use scale interpolation.
         colorOptionText: 'interpolation'
     };
+
     let highlightedElementColor = 'gray';
     let orbitControls, dragControls;
     let verticalPlane, horizontalPlane;
     let verticalPlaneName = "verticalPlane";
     let horizontalPlaneName = "horizontalPlane";
     let stepHandleName = "stepHandle";
-    let stepHandlerMargin = 2;
+    let startElementalPosition = 0;
+    let stepHandlerMargin = 3;
     let stepMargin = 2;
     let verticalChart;
     let verticalDetailCharts = [undefined, undefined];
@@ -39,6 +56,7 @@ function main() {
     let elementColorScale;
     let pointSize = 0.05;
     let elementPlaneStepSize = 1;
+    let analyzingPointCloudNames = [];
     let pointClouds = [];
     let selectedPointClouds = [];
     let texts = [];
@@ -51,7 +69,7 @@ function main() {
     let profileSize = {
         x: bgCubeSize.x - profileMargin.left - profileMargin.right,
         y: bgCubeSize.y - profileMargin.top - profileMargin.bottom,
-        z: 1
+        z: 1.5
     };
     let profilePosition = {
         x: -((bgCubeSize.x - profileSize.x) / 2 - profileMargin.left),
@@ -80,14 +98,7 @@ function main() {
             .attr("type", "checkbox")
             .attr("checked", "true")
             .style('margin-left', '10px')
-            .on("change", function (d) {
-                if (this.checked) {
-                    console.log(`selected ${d}`);
-                } else {
-                    console.log(`deselected ${d}`);
-                }
-
-            });
+            .on("change", elementSelectionChange);
         enterElementSelectionList.append('label')
             .attr('for', d => `${d}elementSelectionId`)
             .text(d => d);
@@ -251,22 +262,21 @@ function main() {
     }
 
     function handleData(data) {
-
         if (!contourDataProducer) {
             contourDataProducer = new ContourDataProducer(data);
         }
-
         elementColorScale = d3.scaleOrdinal().domain(contourDataProducer.allElements).range(d3.schemeCategory20);
-
         let numElms = contourDataProducer.allElements.length;
-        // let numElms = 5;
 
+        // let numElms = 5;
         //Call the 3d part.
         init();
         hideLoader();
         animate();
         highlightSelectedPointClouds();
         createMenus(contourDataProducer.allElements);
+        //Add all the current elements
+        analyzingPointCloudNames = contourDataProducer.allElements.slice();
 
         function setupScene() {
             let bgGeometry = new THREE.BoxGeometry(bgCubeSize.x, bgCubeSize.y, bgCubeSize.z);
@@ -332,6 +342,19 @@ function main() {
             horizontalPlane.name = horizontalPlaneName;
             bgCube.add(horizontalPlane);
 
+            //TODO: This place is a quick fix for filtering package information
+            let thePackage = ALL_DETECTED;
+            if(thePackage === ALL_DETECTED){
+                packages[ALL_DETECTED] = contourDataProducer.allElements;
+            }
+            //Store all the elements (to keep track of its index inside the data)
+            let allElements = contourDataProducer.allElements.slice();
+            allElements = allElements.filter(d => packages[thePackage].indexOf(d) >= 0);
+            //Update package information (since some elements in the package may not be detectable in this profile.
+            packages[thePackage] =  allElements;
+            numElms = packages[thePackage].length;
+
+
 
             //Setup the text
             let container1 = d3.select("#container1");
@@ -342,18 +365,31 @@ function main() {
                 if (viewOptions.colorOption === 0) {
                     d3c = d3.color(elementColorScale(contourDataProducer.allElements[i]));
                 }
-                pointClouds[i] = generatePointcloudForElmIdx(i, d3c, pointSize);
-                pointClouds[i].name = contourDataProducer.allElements[i];
+                //TODO: this is for filtering.
+                pointClouds[i] = generatePointcloudForElmIdx(contourDataProducer.allElements.indexOf(packages[thePackage][i]), d3c, pointSize);//Since index i now has different index for the element
+                pointClouds[i].name = packages[thePackage][i];
+
+                // pointClouds[i] = generatePointcloudForElmIdx(i, d3c, pointSize);
+                // pointClouds[i].name = contourDataProducer.allElements[i];
                 //Change color scheme
                 pointClouds[i].scale.set(profileSize.x, profileSize.y, profileSize.z);
-                pointClouds[i].position.set(profilePosition.x, profilePosition.y, profilePosition.z + i * elementPlaneStepSize + stepMargin);
+                pointClouds[i].position.set(profilePosition.x, profilePosition.y, startElementalPosition + profilePosition.z + i * elementPlaneStepSize + stepMargin);
                 bgCube.add(pointClouds[i]);
 
                 //Setup the text
                 let xy = pointCloud2TextCoordinate(pointClouds[i], camera, cameraViewWidth, cameraViewHeight);
                 texts[i] = container1.append("div").attr("id", 'elmText' + i).style('position', 'absolute').style("left", xy.x + "px").style("top", xy.y + "px");
                 texts[i].append('text').text(pointClouds[i].name);
+
             }
+
+            // //TODO: This place is a quick fix for filtering package information
+            // let thePackage = PEDOLOGICAL_FEATURES;
+            // pointClouds = pointClouds.filter(d => packages[thePackage].indexOf(d.name) >= 0);
+            // //Update package information (since some elements in the package may not be detectable in this profile.
+            // packages[thePackage] = pointClouds.map(d=>d.name);
+            // contourDataProducer.allElements = contourDataProducer.allElements.filter(d => packages[thePackage].indexOf(d) >= 0);
+            // numElms = packages[thePackage].length;
 
             //TODO: We also create two pointClouds to highlight the elements.
             selectedPointClouds[0] = pointClouds[0];
@@ -417,21 +453,27 @@ function main() {
         }
 
         function pointCloud2TextCoordinate(object, camera, width, height) {
-            let pos = new THREE.Vector3();
+            try{
+                let pos = new THREE.Vector3();
+                pos = pos.setFromMatrixPosition(object.matrixWorld);
+                pos.x = pos.x - profileSize.x / 2;
+                pos.y = pos.y + profileSize.y / 2;
+                pos.z = pos.z + profileSize.z / 2;
+                pos.project(camera);
 
-            pos = pos.setFromMatrixPosition(object.matrixWorld);
-            pos.x = pos.x - profileSize.x / 2;
-            pos.y = pos.y + profileSize.y / 2;
-            pos.z = pos.z + profileSize.z / 2;
-            pos.project(camera);
+                let widthHalf = width / 2;
+                let heightHalf = height / 2;
 
-            let widthHalf = width / 2;
-            let heightHalf = height / 2;
+                pos.x = (pos.x * widthHalf) + widthHalf;
+                pos.y = -(pos.y * heightHalf) + heightHalf;
+                pos.z = 0;
+                return {x: pos.x, y: pos.y};
+            }catch (e) {
+                //TODO: this is only a quick fix. The text doesn't exist, just hide them
+                return {x: -100, y: -100}
+            }
 
-            pos.x = (pos.x * widthHalf) + widthHalf;
-            pos.y = -(pos.y * heightHalf) + heightHalf;
-            pos.z = 0;
-            return {x: pos.x, y: pos.y};
+
         }
 
         //Cut data
@@ -753,8 +795,13 @@ function main() {
             gui = new dat.GUI({autoPlace: true});
             gui.domElement.id = 'gui';
 
-            let viewOptionsFolder = gui.addFolder('View options');
+            //Section for the profiles.
+            let profileFolder = gui.addFolder("Profiles");
+            profileFolder.add(profileOptions, 'profileOptionText', profiles).name("Select profile");
 
+
+            //Section for the view options (including of order and colors, but currently not using colors)
+            let viewOptionsFolder = gui.addFolder('View options');
             viewOptionsFolder.add(viewOptions, 'orderOptionText', orderOptions)
                 .name('order')
                 .onChange(function (value) {
@@ -1217,7 +1264,6 @@ function main() {
             sceneInfo.scene.add(pointCloud);
             sceneInfo.mesh = pointCloud;
         }
-
         return sceneInfo;
     }
 
@@ -1236,6 +1282,17 @@ function main() {
         renderer.setViewport(left, positiveYUpBottom, width, height);
         renderer.render(scene, camera);
     }
+
+    function elementSelectionChange(d) {
+        if (analyzingPointCloudNames.indexOf(d) >= 0) {
+            // Remove the label
+            let thePointCloud = pointClouds.filter(pc => pc.name === d)[0];
+            bgCube.remove(thePointCloud);
+            pointClouds = pointClouds.filter(pc => pc.name !== d);
+        } else {
+            // analyzingPointCloudNames = analyzingPointCloudNames.push(d);
+        }
+    }
 }
 
 function argSort(arr) {
@@ -1246,3 +1303,4 @@ function argSort(arr) {
     idxs.sort((a, b) => arr[a] - arr[b]);
     return idxs;
 }
+
