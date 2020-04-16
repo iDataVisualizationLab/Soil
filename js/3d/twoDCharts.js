@@ -1,4 +1,4 @@
-function TwoDCharts(){
+function TwoDCharts() {
     //Exporting
     this.updateChartByIdxs = updateChartByIdxs;
     this.drawChart = drawChart;
@@ -66,11 +66,20 @@ function TwoDCharts(){
 
             let container = document.getElementById(`verticalDetailChart${i + 1}`);
             if (!chart) {
-                verticalDetailCharts[i] = new LineChart(container, chartData, chartSettings);
-                verticalDetailCharts[i].plot();
+                try {
+                    verticalDetailCharts[i] = new LineChart(container, chartData, chartSettings);
+                    verticalDetailCharts[i].plot();
+                } catch (e) {
+                    console.log(e);
+                }
+
             } else {
-                verticalDetailCharts[i].updateAnnotations(annotations);
-                verticalDetailCharts[i].update(verticalChartsData[i]);
+                try {
+                    verticalDetailCharts[i].updateAnnotations(annotations);
+                    verticalDetailCharts[i].update(verticalChartsData[i]);
+                } catch (e) {
+                    console.log(e);
+                }
             }
         });
     }
@@ -132,77 +141,81 @@ function TwoDCharts(){
 
 
     function drawChart(cutData, verticalChart, horizontalChart, defaultChartSize, chartPaddings, chartWidth, chartHeight, elementColorScale) {
-        let type = cutData.type;
-        let chartData = cutData.traces;
-        let cutValue = cutData.cutValue;
+        try {
+            let type = cutData.type;
+            let chartData = cutData.traces;
+            let cutValue = cutData.cutValue;
 
-        let annotations = type === 'horizontal' ? {
-            'xLine': {
-                valueType: 'value',
-                x: cutValue,
-                color: horizontalChart ? horizontalChart.settings.annotations.xLine.color : 'gray',//Take current color
-                strokeWidth: 3
-            }
-        } : {
-            'yLine': {
-                valueType: 'value',
-                y: cutValue,
-                color: verticalChart ? verticalChart.settings.annotations.yLine.color : 'gray',
-                strokeWidth: 3
-            }
-        };
-
-        let theChart = type === 'horizontal' ? horizontalChart : verticalChart;
-        if (!theChart) {
-            let chartContainer = document.getElementById(`${type}ChartContainer`);
-
-            let chartSettings = {
-                noSvg: false,
-                showAxes: true,
-                width: chartWidth,
-                height: chartHeight,
-                ...chartPaddings,
-                colorScale: elementColorScale,
-                stepMode: {
-                    chartSize: defaultChartSize, // Height for each chart
-                    stepHandle: true,
-                },
-                annotations: annotations,
-                orientation: type,
+            let annotations = type === 'horizontal' ? {
+                'xLine': {
+                    valueType: 'value',
+                    x: cutValue,
+                    color: horizontalChart ? horizontalChart.settings.annotations.xLine.color : 'gray',//Take current color
+                    strokeWidth: 3
+                }
+            } : {
+                'yLine': {
+                    valueType: 'value',
+                    y: cutValue,
+                    color: verticalChart ? verticalChart.settings.annotations.yLine.color : 'gray',
+                    strokeWidth: 3
+                }
             };
-            //Config scales, we need to use one scale for all.
-            let chartContentHeight = chartSettings.height - chartSettings.paddingTop - chartSettings.paddingBottom;
-            let chartContentWidth = chartSettings.width - chartSettings.paddingLeft - chartSettings.paddingRight;
-            chartSettings.stepMode.stepScale = d3.scaleLinear().domain([0, 1]).range([0, chartSettings.stepMode.chartSize]);
 
-            //xScale and yScale here are actually for the z values, only set it depending on the orientation
-            if (type === 'vertical') {
-                chartSettings.xScale = d3.scaleLinear().domain([0, 1]).range([0, chartContentWidth]);
-                chartSettings.yTickValues = Array.from(new Array(13), (_, i) => 0.5 + i);
-                chartSettings.yTickLabels = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"].reverse();
-                chartSettings.xAxisLabel = {text: "Element distributions"};
-                chartSettings.yAxisLabel = {text: "Horizons"};
+            let theChart = type === 'horizontal' ? horizontalChart : verticalChart;
+            if (!theChart) {
+                let chartContainer = document.getElementById(`${type}ChartContainer`);
+
+                let chartSettings = {
+                    noSvg: false,
+                    showAxes: true,
+                    width: chartWidth,
+                    height: chartHeight,
+                    ...chartPaddings,
+                    colorScale: elementColorScale,
+                    stepMode: {
+                        chartSize: defaultChartSize, // Height for each chart
+                        stepHandle: true,
+                    },
+                    annotations: annotations,
+                    orientation: type,
+                };
+                //Config scales, we need to use one scale for all.
+                let chartContentHeight = chartSettings.height - chartSettings.paddingTop - chartSettings.paddingBottom;
+                let chartContentWidth = chartSettings.width - chartSettings.paddingLeft - chartSettings.paddingRight;
+                chartSettings.stepMode.stepScale = d3.scaleLinear().domain([0, 1]).range([0, chartSettings.stepMode.chartSize]);
+
+                //xScale and yScale here are actually for the z values, only set it depending on the orientation
+                if (type === 'vertical') {
+                    chartSettings.xScale = d3.scaleLinear().domain([0, 1]).range([0, chartContentWidth]);
+                    chartSettings.yTickValues = Array.from(new Array(13), (_, i) => 0.5 + i);
+                    chartSettings.yTickLabels = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"].reverse();
+                    chartSettings.xAxisLabel = {text: "Element distributions"};
+                    chartSettings.yAxisLabel = {text: "Horizons"};
+                } else {
+                    chartSettings.yScale = d3.scaleLinear().domain([0, 1]).range([chartContentHeight, 0]);
+                    chartSettings.xTickValues = Array.from(new Array(10), (_, i) => 0.5 + i);
+                    chartSettings.xTickLabels = Array.from(new Array(10), (_, i) => 1 + i);
+                    chartSettings.xAxisLabel = {text: "Vertical slices"};
+                    chartSettings.yAxisLabel = {text: "Element distributions"};
+                }
+
+
+                theChart = new LineChart(chartContainer, chartData, chartSettings);
+                theChart.plot();
+                // if (type === 'vertical') {
+                //     verticalChart = theChart;//Store for next use
+                // } else {
+                //     horizontalChart = theChart;//Store for next use
+                // }
+
             } else {
-                chartSettings.yScale = d3.scaleLinear().domain([0, 1]).range([chartContentHeight, 0]);
-                chartSettings.xTickValues = Array.from(new Array(10), (_, i) => 0.5 + i);
-                chartSettings.xTickLabels = Array.from(new Array(10), (_, i) => 1 + i);
-                chartSettings.xAxisLabel = {text: "Vertical slices"};
-                chartSettings.yAxisLabel = {text: "Element distributions"};
+                theChart.updateAnnotations(annotations);
+                theChart.update(chartData);
             }
-
-
-            theChart = new LineChart(chartContainer, chartData, chartSettings);
-            theChart.plot();
-            // if (type === 'vertical') {
-            //     verticalChart = theChart;//Store for next use
-            // } else {
-            //     horizontalChart = theChart;//Store for next use
-            // }
-
-        } else {
-            theChart.updateAnnotations(annotations);
-            theChart.update(chartData);
+            return theChart;//return and store for future use.
+        } catch (e) {
+            console.log('Error ' + e);
         }
-        return theChart;//return and store for future use.
     }
 }
