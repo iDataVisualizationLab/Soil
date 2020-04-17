@@ -28,6 +28,7 @@ function createMenuStructure(soilPackages, elementSelectionChange) {
     //Add pedological features package
     soilPackages.detectedPedologicalFeatures.forEach(d => {
         let td = createCheckBoxTd(d, elementSelectionChange, false);
+        td.querySelector("label").style.fontWeight = "bold";
         row1.appendChild(td);
     });
 
@@ -75,11 +76,12 @@ function createCheckBoxTd(d, elementSelectionChange, disabled) {
     return td;
 }
 
-function createPackageTD(theElements, title, elementSelectiionChange, color){
-    let td = createCheckBoxTd(title, elementSelectiionChange, false);
+function createPackageTD(theElements, title, elementSelectionChange, color) {
+    let td = createCheckBoxTd(title, elementSelectionChange, false);
     td.style.textAlign = "center";
     td.style.borderTop = "1px solid " + color;
     td.colSpan = theElements.length;
     td.style.color = color;
+
     return td;
 }
