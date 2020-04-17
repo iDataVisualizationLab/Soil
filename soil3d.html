@@ -3,6 +3,7 @@
 <head>
     <!--    <link rel="manifest" href="manifest.json">-->
     <title>Soil 3D</title>
+    <script src="lib/jquery.js"></script>
     <script src="lib/d3.js"></script>
     <script src="js/charts.min.js"></script>
     <script src="lib/d3-color.v1.min.js"></script>
@@ -29,6 +30,8 @@
 
         label {
             cursor: pointer;
+            font: 12px/1em sans-serif;
+            vertical-align: middle;
         }
 
         input[type="checkbox"] + label:before {
@@ -36,11 +39,11 @@
             content: "\00a0";
             display: inline-block;
             font: 12px/1em sans-serif;
-            height: 12px;
+            height: 11px;
             margin: 0 .25em 0 0;
             padding: 0;
-            vertical-align: top;
-            width: 12px;
+            vertical-align: middle;
+            width: 11px;
         }
 
         input[type="checkbox"]:checked + label:before {
@@ -62,7 +65,7 @@
 <body style="margin: 0px; padding:0px;">
 <!--loader-->
 <script src="js/loader/loader.js"></script>
-<div id="elementSelectionList" style="margin-top: 1px; z-index: 999;"></div>
+<div id="elementSelectionList" style="margin-top: -4px; z-index: 999;"></div>
 <div id="container1" style="z-index: -1;"></div>
 <span id="detailChart1"></span>
 <span id="detailChart2"></span>
@@ -82,6 +85,7 @@
 <script src="js/3d/cutplanes.js"></script>
 <script src="js/3d/twoDCharts.js"></script>
 <script src="js/3d/3dscenes.js"></script>
+<script src="js/3d/packages.js"></script>
 <script src="js/3d/main3d.js"></script>
 <script>
     main();

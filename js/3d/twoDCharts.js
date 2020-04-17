@@ -7,14 +7,17 @@ function TwoDCharts() {
 
     //Update charts by sorted indexes
     function updateChartByIdxs(sortedIdxs, verticalChart, horizontalChart) {
-        let sortedVerticalData = [];
-        let sortedHorizontalData = [];
-        sortedIdxs.forEach(idx => {
-            sortedVerticalData.push(verticalChart.data[idx]);
-            sortedHorizontalData.push(horizontalChart.data[idx]);
-        });
-        verticalChart.update(sortedVerticalData);
-        horizontalChart.update(sortedHorizontalData);
+        if (sortedIdxs) {
+            let sortedVerticalData = [];
+            let sortedHorizontalData = [];
+            sortedIdxs.forEach(idx => {
+                sortedVerticalData.push(verticalChart.data[idx]);
+                sortedHorizontalData.push(horizontalChart.data[idx]);
+            });
+            verticalChart.update(sortedVerticalData);
+            horizontalChart.update(sortedHorizontalData);
+        }
+
     }
 
     function drawVerticalSlices(cutData, verticalChart, horizontalChart, selectedPointClouds, verticalDetailCharts, defaultChartSize, chartPaddings, chartWidth, chartHeight, elementColorScale) {

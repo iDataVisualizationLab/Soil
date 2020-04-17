@@ -9,13 +9,10 @@ function main() {
     let chartPaddings = {
         paddingLeft: 40,
         paddingRight: 40,
-        paddingTop: 40,
+        paddingTop: 60,
         paddingBottom: 40
     };
 
-    const HEAVY_METALS = "heavy metals";
-    const PLANT_ESSENTIAL_ELEMENTS = "plant essential elements";
-    const PEDOLOGICAL_FEATURES = "pedological features";
     const ALL_DETECTED = "all detected";
     const packages = {
         "heavy metals": ['Cr', 'Pb', 'Cd', 'Hg', 'As'],
@@ -103,7 +100,9 @@ function main() {
         hideLoader();
         animate();
         highlightSelectedPointClouds();
-        createMenus(contourDataProducer.allElements, elementSelectionChange);
+        // createMenus(contourDataProducer.allElements, elementSelectionChange);
+        let soilPackages = new SoilPackages(contourDataProducer.allElements);
+        createMenuStructure(soilPackages, elementSelectionChange);
         //Add all the current elements
         analyzingPointCloudNames = contourDataProducer.allElements.slice();
 
@@ -214,17 +213,7 @@ function main() {
                     .style("top", xy.y + "px");
                 texts[pointClouds[i].name].append('text').text(pointClouds[i].name);
             }
-
-
-            // //TODO: This place is a quick fix for filtering package information
-            // let thePackage = PEDOLOGICAL_FEATURES;
-            // pointClouds = pointClouds.filter(d => packages[thePackage].indexOf(d.name) >= 0);
-            // //Update package information (since some elements in the package may not be detectable in this profile.
-            // packages[thePackage] = pointClouds.map(d=>d.name);
-            // contourDataProducer.allElements = contourDataProducer.allElements.filter(d => packages[thePackage].indexOf(d) >= 0);
-            // numElms = packages[thePackage].length;
-
-            //TODO: We also create two pointClouds to highlight the elements.
+            //These are the two selected elements in the details comparison
             selectedPointClouds[0] = pointClouds[0];
             selectedPointClouds[1] = pointClouds[1];
 
@@ -639,7 +628,7 @@ function main() {
                             }
                         }
                         //Now update the charts too
-                        twoDCharts.updateChartByIdxs(verticalChart, horizontalChart, sortedIdxs);
+                        twoDCharts.updateChartByIdxs(sortedIdxs, verticalChart, horizontalChart);
                     }
                 }
             });
@@ -700,51 +689,61 @@ function main() {
             if (pointClouds.length === 2) {
                 alert('There must be at least one element to analyze');
                 this.checked = true;
-                return;
-            }
-            //Remove the pointCloud
-            let thePointCloud = pointClouds.filter(pc => pc.name === name)[0];
-            pointClouds = pointClouds.filter(pc => pc.name !== name);
-            //If the element is currently selected, move the selected one to the first of the list
-            selectedPointClouds.map((pc, i) => {
-                if (pc.name === thePointCloud.name) {
-                    selectedPointClouds[i] = pointClouds[0];
-                    //Also redraw th scenes
-                    if (i == 0) {
-                        elementInfo1 = threeDScences.setupElementScene1(pointClouds[0], elementInfo1);
-                    } else {
-                        elementInfo2 = threeDScences.setupElementScene2(pointClouds[1], elementInfo2);
+            } else {
+                //Remove the pointCloud
+                let thePointCloud = pointClouds.filter(pc => pc.name === name)[0];
+                pointClouds = pointClouds.filter(pc => pc.name !== name);
+                //If the element is currently selected, move the selected one to the first of the list
+                selectedPointClouds.map((pc, i) => {
+                    if (pc.name === thePointCloud.name) {
+                        selectedPointClouds[i] = pointClouds[0];
+                        //Also redraw th scenes
+                        if (i == 0) {
+                            elementInfo1 = threeDScences.setupElementScene1(pointClouds[0], elementInfo1);
+                        } else {
+                            elementInfo2 = threeDScences.setupElementScene2(pointClouds[1], elementInfo2);
+                        }
                     }
-                }
-            });
-            //Re-higlight the selected elements
-            highlightSelectedPointClouds();
-            //Hide the label
-            texts[name].style("visibility", "hidden");
-            bgCube.remove(thePointCloud);
+                });
+                //Re-higlight the selected elements
+                highlightSelectedPointClouds();
+                //Hide the label
+                texts[name].style("visibility", "hidden");
+                bgCube.remove(thePointCloud);
 
+            }
+            return pointClouds;//Store the updated point clouds
+        }
+
+        function elementSelectionChange(d) {
+            d = d.target.value;
+
+            if (soilPackages.packages.indexOf(d) >= 0) {
+                soilPackages.getDetectedElementsFromPackageName(d).forEach(elm => {
+                    if ($(this).is(":checked") !== $(`#${elm}elementSelectionId`).is(":checked")) {
+                        $(`#${elm}elementSelectionId`).click();
+                    }
+                });
+            } else {
+                if (pointClouds.map(d => d.name).indexOf(d) >= 0) {
+                    pointClouds = deselectAnElement.call(this, d, pointClouds, selectedPointClouds);
+                } else {
+                    //Add the pointCloud
+                    let name = d;
+                    let thePointCloud = allPointClouds.filter(pc => pc.name === name)[0];
+                    bgCube.add(thePointCloud);
+                    pointClouds.push(thePointCloud);
+                    //Show the label
+                    texts[name].style("visibility", "visible");
+                    updateCharts();//Update chart also updates the plane positions
+                }
+            }
             //Update vertical/horizontal charts
             horizontalChart = undefined;
             verticalChart = undefined;
             d3.select("#verticalChartContainer").selectAll("*").remove();
             d3.select("#horizontalChartContainer").selectAll("*").remove();
             updateCharts();//Update chart also updates the plane positions
-            return pointClouds;//Store the updated point clouds
-        }
-
-        function elementSelectionChange(d) {
-            if (pointClouds.map(d => d.name).indexOf(d) >= 0) {
-                pointClouds = deselectAnElement.call(this, d, pointClouds, selectedPointClouds);
-            } else {
-                //Add the pointCloud
-                let name = d;
-                let thePointCloud = allPointClouds.filter(pc => pc.name === name)[0];
-                bgCube.add(thePointCloud);
-                pointClouds.push(thePointCloud);
-                //Show the label
-                texts[name].style("visibility", "visible");
-                updateCharts();//Update chart also updates the plane positions
-            }
         }
 
         //</editor-fold>
