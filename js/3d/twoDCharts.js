@@ -43,7 +43,7 @@ function TwoDCharts() {
             let chartSettings = {
                 noSvg: false,
                 showAxes: true,
-                width: defaultChartSize + chartPaddings.paddingLeft + chartPaddings.paddingTop,
+                width: defaultChartSize + chartPaddings.paddingLeft + chartPaddings.paddingRight,
                 height: chartHeight,
                 ...chartPaddings,
                 colorScale: elementColorScale,

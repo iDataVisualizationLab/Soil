@@ -231,7 +231,7 @@ function main() {
             });
 
             //Set the handle for step size.
-            let stepHandleGemoetry = new THREE.SphereBufferGeometry(0.2, 50, 50);
+            let stepHandleGemoetry = new THREE.SphereBufferGeometry(0.5, 50, 50);
             let stepHandleMaterial = new THREE.MeshStandardMaterial({color: new THREE.Color('steelblue')});
             stepHandle = new THREE.Mesh(stepHandleGemoetry, stepHandleMaterial);
             stepHandle.name = stepHandleName;
@@ -479,18 +479,6 @@ function main() {
                     });
                 }
             });
-
-            function changeDetailChartAnnotationColor(theChart, lineType, color) {
-                theChart.settings.annotations[lineType].color = color;
-                theChart.update(theChart.data);
-            }
-
-            function changeSlicesAnnotationColors(slices, lineType, color) {
-                slices.forEach(slice => {
-                    changeDetailChartAnnotationColor(slice, lineType, color);
-                });
-            }
-
             dragControls.addEventListener('hoveroff', function (event) {
                 if (event.object.name === verticalPlaneName || event.object.name === horizontalPlaneName || event.object.name === stepHandleName) {//Two planes
                     event.object.material.emissive.set(0x000000);
@@ -523,9 +511,9 @@ function main() {
                 }
 
             });
-
             dragControls.addEventListener('dragstart', function (event) {
                 orbitControls.enabled = false;
+
                 if (event.object.name === verticalPlaneName || event.object.name === horizontalPlaneName) {//Two planes
                     //Record the plane current positions
                     verticalPlanePos = verticalPlane.position.clone();
@@ -603,9 +591,13 @@ function main() {
                     }
                     verticalChart.highlightTraceSeries(event.object.name, highlightedElementColor);
                     horizontalChart.highlightTraceSeries(event.object.name, highlightedElementColor);
-                    //Keep x and y
-                    event.object.position.x = elementPos.x;
-                    event.object.position.y = elementPos.y;
+
+                    if(elementPos){
+                        //Keep x and y, in case the element is still in the view (some might be removed)
+                        event.object.position.x = elementPos.x;
+                        event.object.position.y = elementPos.y;
+                    }
+
 
                     if (event.object.name === stepHandleName) {
                         event.object.position.z = Math.max(event.object.position.z, stepHandlerMargin + stepMargin);
@@ -632,7 +624,6 @@ function main() {
                     }
                 }
             });
-
             dragControls.addEventListener('dragend', function (event) {
                 orbitControls.enabled = true;
                 if (event.object.name === verticalPlaneName || event.object.name === horizontalPlaneName) {//Two planes
@@ -648,6 +639,18 @@ function main() {
             //</editor-fold>
             //Draw the initial charts
             updateCharts();
+
+            function changeDetailChartAnnotationColor(theChart, lineType, color) {
+                theChart.settings.annotations[lineType].color = color;
+                theChart.update(theChart.data);
+            }
+
+            function changeSlicesAnnotationColors(slices, lineType, color) {
+                slices.forEach(slice => {
+                    changeDetailChartAnnotationColor(slice, lineType, color);
+                });
+            }
+
         }
 
         function updateCharts() {
@@ -744,6 +747,7 @@ function main() {
             d3.select("#verticalChartContainer").selectAll("*").remove();
             d3.select("#horizontalChartContainer").selectAll("*").remove();
             updateCharts();//Update chart also updates the plane positions
+
         }
 
         //</editor-fold>
