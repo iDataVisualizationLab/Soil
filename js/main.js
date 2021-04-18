@@ -479,7 +479,6 @@ function createByJson(div, jsonData, name, selectedIndex, changeHandler, width) 
 }
 
 
-
 function populateSelectors() {
     //headers
     theOptions[0] = createByJson("option1Container", allElements, "option1", defaultElementIndexes[0], updateElement1);

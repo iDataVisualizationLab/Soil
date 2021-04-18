@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="lib/threejs/three.js"></script>
+    <script src="lib/threejs/OrbitControls.js"></script>
+    <script src="lib/threejs/DragControls.js"></script>
+    <script src="js/profileobject.js"></script>
+</head>
+<body>
+<script>
+
+    let camera, renderer, textureLoader;
+    let theProfile, horizCutPlane;
+    let orbitControls, dragControls;
+    init();
+
+    function init() {
+        textureLoader = new THREE.TextureLoader();
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 100);
+        camera.position.set(0, 0, 3);
+
+        scene = new THREE.Scene();
+        scene.add(new THREE.AmbientLight(0xffffff, 1));
+
+
+        //Inputs
+        let horizCutY = -0.1;
+        theProfile = createProfileObject(horizCutY);
+        scene.add(theProfile);
+        horizCutPlane = createHorizontalCutPlane(horizCutY);
+        scene.add(horizCutPlane);
+
+
+        renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0xffffff);
+
+        //Add the orbit control
+        orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+        orbitControls.minDistance = 1;
+        orbitControls.maxDistance = 4;
+        orbitControls.maxPolarAngle = Math.PI / 2;
+        orbitControls.addEventListener("change", function () {
+            theProfile.handleVertiCutAngle(orbitControls.getAzimuthalAngle());
+            theProfile.rotation.y = orbitControls.getAzimuthalAngle();
+        });
+
+        //Add the drag control
+        addDragControls([horizCutPlane], renderer, camera, orbitControls, theProfile);
+
+        document.body.appendChild(renderer.domElement);
+        render();
+    }
+
+    function render() {
+        orbitControls.update();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+    }
+
+    function addDragControls(draggableObjects, renderer, camera, orbitControls, theProfile) {
+        let vertiCutPlaneX, vertiCutPlaneZ;
+
+        dragControls = new THREE.DragControls(draggableObjects, camera, renderer.domElement);
+        dragControls.addEventListener('hoveron', function (event) {
+            event.object.material.emissive.set(0xaa0000);
+        });
+        dragControls.addEventListener('hoveroff', function (event) {
+            event.object.material.emissive.set(0x000000);
+        });
+        dragControls.addEventListener("dragstart", function (event) {
+            orbitControls.enabled = false;
+            vertiCutPlaneX = event.object.position.x;
+            vertiCutPlaneZ = event.object.position.z;
+        });
+        dragControls.addEventListener("drag", function (event) {
+            event.object.position.x = vertiCutPlaneX;
+            event.object.position.z = vertiCutPlaneZ;
+            if (event.object.position.y > 0.5) {
+                event.object.position.y = 0.5;
+            }
+            if (event.object.position.y < -0.5) {
+                event.object.position.y = -0.5;
+            }
+            theProfile.handleHorizCutPosition(event.object.position.y);
+        });
+        dragControls.addEventListener("dragend", function (event) {
+            orbitControls.enabled = true;
+        });
+    }
+</script>
+</body>
+</html>
