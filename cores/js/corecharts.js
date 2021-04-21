@@ -11,7 +11,7 @@ function plotVerticalChart(container, data, plotType) {
     const dataTraces = [{
         x: data.x,
         y: data.y,
-        z: data.z,
+        z: data.t,
         type: plotType,
         name: "name",
         showscale: true,

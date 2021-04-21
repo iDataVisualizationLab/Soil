@@ -71,9 +71,24 @@
         .style("margin-left", `0px`)
         .node();
     pd.getCsvContent().then(csvContent => {
-        //Process data
-        const interpolatedData = interpolateHorizontalData(csvContent, locationNameMapping, 0, 'Ca Concentration');
-        plotVerticalChart(verticalCutView1, interpolatedData, "heatmap");
+        pd.getElements().then(elements => {
+            const ip = new Interpolator(csvContent, elements, depthNames, locationNameMapping, 50, 50);
+            let ca9 = ip.interpolateHorizontalData(9, 'Ca Concentration');
+            ca9 = {
+                x: ca9.x,
+                y: ca9.z,
+                t: ca9.t
+            }
+            // const caipd = ip.getInterpolatedData("Ca Concentration");
+            // debugger
+            // const ca9 = {
+            //     x: caipd.x.filter((x, i)=>Math.round(caipd.y[i]) === 49),
+            //     y: caipd.z.filter((z, i)=>Math.round(caipd.y[i]) === 49),
+            //     t: caipd.t.filter((t, i)=>Math.round(caipd.y[i]) === 49)
+            // }
+            plotVerticalChart(verticalCutView1, ca9, "heatmap");
+
+        });
     });
 
 </script>

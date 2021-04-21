@@ -1,9 +1,9 @@
 function createHorizontalCutPlane(horizCutY) {
     const geometry = new THREE.RingGeometry(0.5, 0.6, 100);
-    const material = new THREE.MeshLambertMaterial({color: 0xff0000, side: THREE.DoubleSide});
+    const material = new THREE.MeshLambertMaterial({color: 0xaaaaaa, side: THREE.DoubleSide});
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.y = horizCutY;
-    mesh.rotation.x = Math.PI/2;
+    mesh.rotation.x = Math.PI / 2;
     return mesh;
 }
 
@@ -143,7 +143,7 @@ function createProfileObject(horizCutY) {
     horizCutGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(horizCutPos), positionNumComponents));
     horizCutGeo.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(horizCutNorms), normalNumComponents));
     horizCutGeo.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(horizCutUvs), uvNumComponents));
-    const horizCutTexture = textureLoader.load('./data/images/L.jpg');
+    let horizCutTexture = textureLoader.load('./data/images/L.jpg');
     horizCutTexture.center.x = 0.5;
     horizCutTexture.center.y = 0.5;
     const horizCutMat = new THREE.MeshBasicMaterial({
@@ -230,21 +230,27 @@ function createProfileObject(horizCutY) {
     theObject.add(front);
 
     //</editor-fold>
-    function handleHorizCutPosition(theHorizCutY) {
+    function handleHorizCutPosition(theHorizCutY, texture) {
         horizCutY = theHorizCutY;
         horizCut.position.y = horizCutY;
         frontTopVertices.forEach(idx => {
             front.geometry.attributes.position.array[idx * 3 + 1] = horizCutY;
             front.geometry.attributes.position.needsUpdate = true;
         });
+        if (texture) {
+            //Also need to rotate the current texture
+            texture.rotation = horizCut.material.map.rotation;
+            horizCut.material.map = texture;
+            horizCut.material.map.needsUpdate = true;
+        }
     }
 
-    function handleVertiCutAngle(theVertiCutAngle) {
+    function handleVertiCutAngle(theVertiCutAngle, texture) {
         //We only remap the texture (rotate the texture).
-        topCapTexture.rotation = theVertiCutAngle;
+        topCap.material.map.rotation = theVertiCutAngle;
         topCap.material.needsUpdate = true;
 
-        horizCutTexture.rotation = theVertiCutAngle;
+        horizCut.material.map.rotation = theVertiCutAngle;
         horizCut.material.needsUpdate = true;
     }
 

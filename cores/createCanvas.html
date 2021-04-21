@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="lib/d3/d3.v6.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/dataprocessing.js"></script>
+    <script src="lib/kriging.js"></script>
+    <script src="js/canvastexture.js"></script>
+</head>
+<body>
+
+<script>
+    async function main() {
+        const pd = new ProfileDescription('./data/L.csv', locationNameMapping);
+        const elements = await pd.getElements();
+        const csvContent = await pd.getCsvContent();
+        const elementScalers = await pd.getElementScalers();
+        const ip = new Interpolator(csvContent, elements, depthNames, locationNameMapping, 50, 50, elementScalers);
+        const colorScale = new d3.scaleLinear().domain([0, 1]).range(['blue', 'red']);
+        const hth = new HorizontalCanvasTextureHandler(ip, 'Ca Concentration', colorScale);
+        document.body.append(hth.getCanvas(10));
+
+    }
+
+
+    main();
+</script>
+</body>
+</html>
