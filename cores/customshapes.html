@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>3D Cores</title>
     <!--3D-->
     <script src="lib/threejs/three.js"></script>
     <script src="lib/threejs/OrbitControls.js"></script>
@@ -15,11 +15,16 @@
     <script src="js/dataprocessing.js"></script>
     <script src="lib/kriging.js"></script>
     <script src="js/canvastexture.js"></script>
+    <style>
+        @import "js/loader/loader.css";
+    </style>
 
 </head>
 <body>
+<!--loader-->
+<script src="js/loader/loader.js"></script>
 <script>
-
+    showLoader();
     let camera, renderer, textureLoader;
     let theProfile, horizCutPlane;
     let orbitControls, dragControls;
@@ -54,7 +59,7 @@
 
 
             //Inputs
-            let horizCutY = -0.1;
+            let horizCutY = -0.5;
             theProfile = createProfileObject(horizCutY);
             const verticalCutTexture = vth.getTexture(0);
             const horizontalCutTexture = hth.getTexture(Math.round(profileToCanvasScale(horizCutY)));
@@ -84,16 +89,21 @@
                 theProfile.handleVertiCutAngle(cutAngle, undefined);
                 theProfile.rotation.y = orbitControls.getAzimuthalAngle();
             });
+            // orbitControls.addEventListener("start", function () {
+            //     showLoader();
+            // });
             orbitControls.addEventListener("end", function () {
                 const cutAngle = orbitControls.getAzimuthalAngle();
                 const texture = vth.getTexture(cutAngle);
                 theProfile.handleVertiCutAngle(cutAngle, texture);
+                // hideLoader();
                 theProfile.rotation.y = orbitControls.getAzimuthalAngle();
             });
             //Add the drag control
             addDragControls([horizCutPlane], renderer, camera, orbitControls, theProfile);
             document.body.appendChild(renderer.domElement);
             render();
+            hideLoader();
         }
 
         function render() {
