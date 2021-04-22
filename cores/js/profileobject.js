@@ -252,6 +252,13 @@ function createProfileObject(horizCutY) {
 
         horizCut.material.map.rotation = theVertiCutAngle;
         horizCut.material.needsUpdate = true;
+
+        //Update texture
+        if (texture) {
+            vertiCut.material.map = texture;
+            vertiCut.material.map.needsUpdate = true;
+        }
+
     }
 
     // function handle

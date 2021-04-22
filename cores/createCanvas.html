@@ -19,8 +19,11 @@
         const elementScalers = await pd.getElementScalers();
         const ip = new Interpolator(csvContent, elements, depthNames, locationNameMapping, 50, 50, elementScalers);
         const colorScale = new d3.scaleLinear().domain([0, 1]).range(['blue', 'red']);
-        const hth = new HorizontalCanvasTextureHandler(ip, 'Ca Concentration', colorScale);
-        document.body.append(hth.getCanvas(10));
+        // const hth = new HorizontalCanvasTextureHandler(ip, 'Ca Concentration', colorScale);
+        const vth = new VerticalCanvasTextureHandler(ip, 'Ca Concentration', colorScale);
+        debugger
+
+        document.body.append(vth.getCanvas(Math.PI/2).canvas);
 
     }
 

@@ -177,7 +177,8 @@ class Interpolator {
             for (let xValIdx = 0; xValIdx < this.horizontalSteps; xValIdx++) {
                 interpolatedData.x.push(xValIdx);
                 interpolatedData.z.push(zValIdx);
-                interpolatedData.t.push(kriging.predict(xValIdx, zValIdx, variogram));
+                const predictedVal = kriging.predict(xValIdx, zValIdx, variogram);
+                interpolatedData.t.push(predictedVal >= 0 ? predictedVal : 0);
             }
         }
         return interpolatedData;
@@ -228,7 +229,8 @@ class Interpolator {
                         this.interpolatedData[element].x.push(xValIdx);
                         this.interpolatedData[element].y.push(yValIdx);
                         this.interpolatedData[element].z.push(zValIdx);
-                        this.interpolatedData[element].t.push(this.elementScalers[element](kriging.predict(xValIdx, yValIdx, variogram)));
+                        const predictedVal = kriging.predict(xValIdx, yValIdx, variogram);
+                        this.interpolatedData[element].t.push(this.elementScalers[element](predictedVal >= 0 ? predictedVal : 0));
                     }
                 }
             }
@@ -237,3 +239,4 @@ class Interpolator {
     }
 
 }
+
