@@ -69,7 +69,7 @@ class VerticalCanvasTextureHandler extends TextureHandler {
             y: [],
             t: []
         }
-        //We need to break this down to make it faster.
+        //Divide this work into parts and use web worker here.
         for (let yValIdx = 0; yValIdx < 50; yValIdx++) {
             let y = yValIdx;
             for (let xValIdx = 0; xValIdx < 50; xValIdx++) {

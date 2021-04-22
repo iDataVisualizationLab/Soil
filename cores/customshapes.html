@@ -18,13 +18,14 @@
     <style>
         @import "js/loader/loader.css";
     </style>
-
+    <script src="js/webworker.js"></script>
 </head>
 <body>
 <!--loader-->
 <script src="js/loader/loader.js"></script>
 <script>
     showLoader();
+    const selectedElements = ["Ca Concentration", "Al Concentration"];
     let camera, renderer, textureLoader;
     let theProfile, horizCutPlane;
     let orbitControls, dragControls;
@@ -44,6 +45,7 @@
         const colorScale = new d3.scaleLinear().domain([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]).range(colors10);
         //Preload the data for this element
         ip.getInterpolatedData('Al Concentration');
+        ip.getInterpolatedData('Ca Concentration');
         const hth = new HorizontalCanvasTextureHandler(ip, 'Al Concentration', colorScale);
         const vth = new VerticalCanvasTextureHandler(ip, 'Al Concentration', colorScale);
 
