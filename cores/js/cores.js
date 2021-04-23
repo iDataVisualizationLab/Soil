@@ -73,6 +73,7 @@ const profileToCanvasScale = d3.scaleLinear().domain([-0.5, 0.5]).range([0, 49])
 main();
 
 async function main() {
+    //<editor-fold desc="Setting up data">
     //Setup data
     const pd = new ProfileDescription('./data/L.csv', locationNameMapping);
     const elements = await pd.getElements();
@@ -89,7 +90,7 @@ async function main() {
     selectedElements.forEach((elm, i) => {
         d3.select(`#detailElmText${i + 1}`).text(elm);
     });
-
+    //</editor-fold>
 
     //<editor-fold desc="3D Cores">
     init();
@@ -258,6 +259,14 @@ async function main() {
             .on("click", change_color)
             .selectAll(".label")
             .style("font-size", "14px");
+        d3.selectAll('.dimension')
+            .on("mouseover", (event, d) => {
+                const msg = `Click ${d} label to color by ${d} values<br/>Drag ${d} label to reorder ${d} axis<br/>Brush on the ${d} axis to filter by ${d} values`;
+                showTip(event, msg);
+            })
+            .on("mouseout", () => {
+                hideTip();
+            });
 
         // update color
         function change_color(dimension) {
