@@ -38,12 +38,12 @@ function setupSizes() {
         .style('height', detailChartHeight + "px")
         .style('border', '1px solid black')
         .style('outline', 'none')
-        .append('div')//for the text
+        .append('svg')//for the text
         .attr("id", "detailElmText1")
         .attr("class", "elementText")
         .style("position", "absolute")
         .style("left", "10px")
-        .style("top", "10px");
+        .style("top", "5px");
 
     d3.select(detailChart2)
         .style('position', 'absolute')
@@ -53,12 +53,12 @@ function setupSizes() {
         .style('height', detailChartHeight + "px")
         .style('border', '1px solid black')
         .style('outline', 'none')
-        .append('div')//for the text
+        .append('svg')//for the text
         .attr("id", "detailElmText2")
         .attr("class", "elementText")
         .style("position", "absolute")
         .style("left", "10px")
-        .style("top", "10px");
+        .style("top", "5px");
 }
 
 //</editor-fold>
@@ -73,6 +73,7 @@ const profileToCanvasScale = d3.scaleLinear().domain([-0.5, 0.5]).range([0, 49])
 main();
 
 async function main() {
+
     //<editor-fold desc="Setting up data">
     //Setup data
     const pd = new ProfileDescription('./data/L.csv', locationNameMapping);
@@ -82,13 +83,26 @@ async function main() {
     const ip = new Interpolator(csvContent, elements, depthNames, locationNameMapping, 50, 50, elementScalers);
 
     // const colorScale = new d3.scaleLinear().domain([0, 1]).range(['blue', 'red']);
-    const colorScale = new d3.scaleLinear().domain([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]).range(colors10);
+    const colorScale = new d3.scaleLinear().domain([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]).range(colors10);
     //Preload the data for this element
     const hths = selectedElements.map(elm => new HorizontalCanvasTextureHandler(ip, elm, colorScale));
     const vths = selectedElements.map(elm => new VerticalCanvasTextureHandler(ip, elm, colorScale));
-    //Set the text
+    const elmScalers = await pd.getElementScalers();
+    //Set the text and the legend
     selectedElements.forEach((elm, i) => {
-        d3.select(`#detailElmText${i + 1}`).text(elm);
+        const elmScaler = elmScalers[elm];
+        const legendDomain = colorScale.domain().map(d=>elmScaler.invert(d));
+        const range = colorScale.range();
+        legend({
+            svgId: `detailElmText${i + 1}`,
+            color: d3.scaleThreshold(legendDomain, range),
+            title: elm,
+            tickSize: 0,
+            tickFormat: ",.0f",
+            ticks: 10,
+            width: 400
+        })
+        d3.select().text(elm);
     });
     //</editor-fold>
 
