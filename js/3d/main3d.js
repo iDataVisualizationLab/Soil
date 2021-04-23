@@ -879,15 +879,15 @@ function main() {
 
 
         //Redraw the charts in new size
-        let detailSclieChartSelections = d3.selectAll(".detailSliceCharts").data(detailSliceCharts, d => d.name);
+        let detailSliceChartSelections = d3.selectAll(".detailSliceCharts").data(detailSliceCharts, d => d.name);
         //Enter
-        let detailSclieChartEnters = detailSclieChartSelections.enter().append("div")
+        let detailSclieChartEnters = detailSliceChartSelections.enter().append("div")
             .attr("class", "detailSliceCharts")
             .attr("id", d => d.name);
         //Merge
-        detailSclieChartSelections = detailSclieChartSelections.merge(detailSclieChartEnters);
+        detailSliceChartSelections = detailSliceChartSelections.merge(detailSclieChartEnters);
         //Update
-        detailSclieChartSelections
+        detailSliceChartSelections
             .style("position", "absolute")
             .style("left", d => d.left + "px")
             .style("top", d => d.top + "px")

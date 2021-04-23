@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title>Soil Core Analysis</title>
+    <!-- D3.js -->
+    <script src="lib/d3/d3.v6.js"></script>
+    <script src="lib/d3/d3-color.v1.min.js"></script>
+    <!-- Parallel Coordinates -->
+    <script src="js/verticalparcoords/parcoords.js"></script>
+    <style>
+        @import "js/verticalparcoords/parcoords.css";
+    </style>
+
+    <!-- statistics -->
+    <script src="lib/simple-statistics.min.js"></script>
+    <script src="lib/kriging.js"></script>
+    <!-- THREE.js -->
+    <script src="lib/threejs/three.js"></script>
+    <script src="lib/threejs/OrbitControls.js"></script>
+    <script src="lib/threejs/DragControls.js"></script>
+    <!-- Plotly -->
+    <script src="lib/plotly/plotly-latest.min.js"></script>
+    <!-- settings -->
+    <script src="js/settings.js"></script>
+    <!-- cores -->
+    <script src="js/dataprocessing.js"></script>
+    <script src="js/3dcore.js"></script>
+    <script src="js/corecharts.js"></script>
+    <style>
+        @import "js/loader/loader.css";
+    </style>
+</head>
+<body style="margin: 0px; padding:0px;">
+<!--loader-->
+<!--<script src="js/loader/loader.js"></script>-->
+<script>
+    const pd = new ProfileDescription("data/L.csv");
+    let width = window.innerWidth / 3;
+    let height = window.innerHeight / 2;
+
+    //Setup the parallel coordinates
+    let parcoordsContainer = d3.select("body").append("div")
+        .style("width", `${width}px`)
+        .style("height", `${height}px`)
+        .style("position", "absolute")
+        .style("margin-top", `0px`)
+        .style("margin-left", `${width}px`)
+        .node();
+    pd.getParCoordsData().then(data => {
+        verticalparcoords(parcoordsContainer, data, {width: width, height: height});
+    });
+    //Setup the 3d view
+    let profileContainer = d3.select("body").append("div")
+        .style("width", `${width}px`)
+        .style("height", `${height}px`)
+        .style("position", "absolute")
+        .style("margin-top", `${height}px`)
+        .style("margin-left", `${width}px`)
+        .node();
+
+    setup3dview(profileContainer, config = {width: width, height: height});
+
+    //Setup the verticalCut view
+    let verticalCutView1 = d3.select("body").append("div")
+        .style("width", `${width}px`)
+        .style("height", `${height}px`)
+        .style("position", "absolute")
+        .style("margin-top", `0px`)
+        .style("margin-left", `0px`)
+        .node();
+    pd.getCsvContent().then(csvContent => {
+        pd.getElements().then(elements => {
+            const ip = new Interpolator(csvContent, elements, depthNames, locationNameMapping, 50, 50);
+            let ca9 = ip.interpolateHorizontalData(9, 'Ca Concentration');
+            ca9 = {
+                x: ca9.x,
+                y: ca9.z,
+                t: ca9.t
+            }
+            // const caipd = ip.getInterpolatedData("Ca Concentration");
+            // debugger
+            // const ca9 = {
+            //     x: caipd.x.filter((x, i)=>Math.round(caipd.y[i]) === 49),
+            //     y: caipd.z.filter((z, i)=>Math.round(caipd.y[i]) === 49),
+            //     t: caipd.t.filter((t, i)=>Math.round(caipd.y[i]) === 49)
+            // }
+            plotVerticalChart(verticalCutView1, ca9, "heatmap");
+
+        });
+    });
+
+</script>
+
+</body>
+</html>
