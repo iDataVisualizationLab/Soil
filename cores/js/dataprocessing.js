@@ -156,11 +156,13 @@ class Interpolator {
         this.horizontalSteps = horizontalSteps;
         this.interpolatedData = {};
         this.interpolatedElementalDepthData = null;
-        this.valuePerDepthStep = 10 / this.depthSteps;
-        this.valuePerHorizontalStep = 5 / this.horizontalSteps;
         this.horizontalRectSize = 200 / this.horizontalSteps;
     }
 
+    /**
+     * This method generate teh interpolated data at every depth (depthIdx from 0 to 9) for every element
+     * @return an object that has a key for every element, each element there is an array of interpolated value at a depth for all depths
+     */
     getInterpolatedElementalDepthData() {
         if (!this.interpolatedElementalDepthData) {
             this.interpolatedElementalDepthData = {};
@@ -175,6 +177,12 @@ class Interpolator {
         return this.interpolatedElementalDepthData;
     }
 
+    /**
+     * Interpolate data for an element at a specific depth (a depth from 0 to 9 discretely, not every interpolated step)
+     * @param depthIdx
+     * @param element
+     * @return Object that contains interpolated data for an element at a depth
+     */
     interpolateHorizontalData(depthIdx, element) {
         //Get the depth data
         let csvContent = this.csvContent;
@@ -209,6 +217,11 @@ class Interpolator {
         return interpolatedData;
     }
 
+    /**
+     * Get the complete interpolated data (for x, y, z at every interpolated steps, details)
+     * @param element
+     * @return complete interpolated data (for x, y, z at every interpolated steps, details)
+     */
     getInterpolatedData(element) {
         if (!this.interpolatedData[element]) {
             //Initialize it
@@ -248,7 +261,6 @@ class Interpolator {
                 let sigma2 = 100, alpha = 100;
                 let variogram = kriging.train(t, x, y, model, sigma2, alpha);
                 //Now interpolate data (elementPlaneStepSize) at a point
-
                 for (let xValIdx = 0; xValIdx < this.horizontalSteps; xValIdx++) {
                     for (let yValIdx = 0; yValIdx < this.depthSteps; yValIdx++) {
                         this.interpolatedData[element].x.push(xValIdx);

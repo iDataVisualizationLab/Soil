@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    const a = [], b = [], c = [];
+    const t = [];
+    let counter = 0;
+    for (let i = 0; i < 50; i++) {
+        let ai = i;
+        for (let j = 0; j < 50; j++) {
+            let bj = j;
+            for (let k = 0; k < 50; k++) {
+                let ck = k;
+                a.push(ai);
+                b.push(bj);
+                c.push(ck);
+                t.push(counter++);
+            }
+        }
+    }
+    debugger
+    console.log(a.length);
+
+</script>
+</body>
+</html>

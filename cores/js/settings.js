@@ -1,4 +1,4 @@
-let locationNameMapping = {
+const locationNameMapping = {
     "L1": [1, 1],
     "L2": [2, 1],
     "L3": [2, 0],
@@ -13,7 +13,7 @@ let locationNameMapping = {
     "L12": [3, 3],
     "L13": [2, 4]
 }
-let depthNames = {
+const depthNames = {
     "0-10 cm": 9,
     "10-20 cm": 8,
     "20-30 cm": 7,
@@ -24,4 +24,7 @@ let depthNames = {
     "70-80 cm": 2,
     "80-90 cm": 1,
     "90-100 cm": 0
+}
+const systemConfigurations = {
+    helpEnabled: false
 }

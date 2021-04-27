@@ -91,7 +91,7 @@ async function main() {
     //Set the text and the legend
     selectedElements.forEach((elm, i) => {
         const elmScaler = elmScalers[elm];
-        const legendDomain = colorScale.domain().map(d=>elmScaler.invert(d));
+        const legendDomain = colorScale.domain().map(d => elmScaler.invert(d));
         const range = colorScale.range();
         legend({
             svgId: `detailElmText${i + 1}`,
@@ -173,12 +173,17 @@ async function main() {
         orbitControls.rotateSpeed = 0.3;
 
         //
+        let callCounter = 0;
+        let prevAngle = 0;
         orbitControls.addEventListener("start", function () {
+            prevAngle = orbitControls.getAzimuthalAngle();
             showLoader();
         });
+
         orbitControls.addEventListener("change", function () {
             const cutAngle = orbitControls.getAzimuthalAngle();
-            elementInfo.theProfile.handleVertiCutAngle(cutAngle, undefined);
+            let texture = undefined;
+            elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
             elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
         });
         orbitControls.addEventListener("end", function () {
@@ -187,6 +192,7 @@ async function main() {
             hideLoader();
             elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
             elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
+            console.log(callCounter);
         });
         elementInfo.orbitControls = orbitControls;
     }
@@ -275,8 +281,10 @@ async function main() {
             .style("font-size", "14px");
         d3.selectAll('.dimension')
             .on("mouseover", (event, d) => {
-                const msg = `Click ${d} label to color by ${d} values<br/>Drag ${d} label to reorder ${d} axis<br/>Brush on the ${d} axis to filter by ${d} values`;
-                showTip(event, msg);
+                if (systemConfigurations.helpEnabled) {
+                    const msg = `Click ${d} label to color by ${d} values<br/>Drag ${d} label to reorder ${d} axis<br/>Brush on the ${d} axis to filter by ${d} values`;
+                    showTip(event, msg);
+                }
             })
             .on("mouseout", () => {
                 hideTip();
