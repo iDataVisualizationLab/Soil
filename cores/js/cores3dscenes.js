@@ -2,6 +2,12 @@ let ThreeDScences = function (renderer) {
     this.setupElementScene1 = setupElementScene1;
     this.setupElementScene2 = setupElementScene2;
     this.renderSceneInfo = renderSceneInfo;
+    this.setupElementScenes = setupElementScenes;
+
+    function setupElementScenes(elementInfos) {
+        elementInfos[0] = setupElementScene1(elementInfos[0]);
+        elementInfos[1] = setupElementScene2(elementInfos[1]);
+    }
 
     function setupElementScene1(elementInfo1) {
         return setupElementScene('detailChart1', elementInfo1);
@@ -32,7 +38,7 @@ let ThreeDScences = function (renderer) {
         }
         let horizCutY = -0.5;
         theProfile = createProfileObject(horizCutY);
-        horizCutPlane = createHorizontalCutPlane(horizCutY);
+        const horizCutPlane = createHorizontalCutPlane(horizCutY);
         scene.add(theProfile);
         scene.add(horizCutPlane);
         sceneInfo.theProfile = theProfile;

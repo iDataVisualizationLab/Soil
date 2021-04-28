@@ -126,7 +126,6 @@ class ProfileDescription {
         const allLocations = await this.getLocations();
         const allElements = await this.getElements();
         const allDepths = await this.getDepths();
-        const elementScalers = await this.getElementScalers();
         const parcoordsData = [];
         //This is every element
         allLocations.forEach(loc => {
@@ -135,7 +134,7 @@ class ProfileDescription {
                 const item = {'Location': loc, 'Depth': depth.split('-')[0]};
                 allElements.forEach(element => {
                     const elmVal = this.csvContent.filter(d => (d['Location'] === loc) && (d['Sample ID'] === depth))[0][element];
-                    item[element.split(' ')[0]] = elementScalers[element](elmVal);
+                    item[element.split(' ')[0]] = elmVal;
                 });
                 parcoordsData.push(item);
             });
@@ -198,7 +197,7 @@ class Interpolator {
         });
         //The model
         let model = "spherical";
-        let sigma2 = 100, alpha = 100;
+        let sigma2 = 0, alpha = 100;
         let variogram = kriging.train(t, x, z, model, sigma2, alpha);
         //Now interpolate data (elementPlaneStepSize) at a point
         let interpolatedData = {};
@@ -258,7 +257,7 @@ class Interpolator {
                 //Create the model
                 //The model
                 let model = "spherical";
-                let sigma2 = 100, alpha = 100;
+                let sigma2 = 0, alpha = 100;
                 let variogram = kriging.train(t, x, y, model, sigma2, alpha);
                 //Now interpolate data (elementPlaneStepSize) at a point
                 for (let xValIdx = 0; xValIdx < this.horizontalSteps; xValIdx++) {

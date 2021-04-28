@@ -19,7 +19,7 @@ function legend({
         .attr("viewBox", [0, 0, width, height])
         .style("overflow", "visible")
         .style("display", "block");
-
+    svg.selectAll("*").remove();
     let tickAdjust = g => g.selectAll(".tick line").attr("y1", marginTop + marginBottom - height);
     let x;
 

@@ -1,11 +1,14 @@
 showLoader();
-//<editor-fold desc="setup the sizes for the divs">
-let detailChart1 = document.getElementById('detailChart1');
-let detailChart2 = document.getElementById('detailChart2');
-let parcoordsChart = document.getElementById('parcoordsChart');
-setupSizes();
+//<editor-fold desc="setup the sizes for the layout">
 
-function setupSizes() {
+const defaultElementIndexes = [0, 0];
+let detailChart1Container = document.getElementById('detailChart1Container');
+let detailChart2Container = document.getElementById('detailChart2Container');
+
+let parcoordsChart = document.getElementById('parcoordsChart');
+setupLayout();
+
+function setupLayout() {
     const width = window.innerWidth / 2, height = 2 * window.innerHeight / 3;
     const margin = 10;
     const detailChartLeft1 = margin;
@@ -30,45 +33,77 @@ function setupSizes() {
         // .style('border', '1px solid black')
         .style('outline', 'none')
 
-    d3.select(detailChart1)
+    const d3DetailChart1Container = d3.select(detailChart1Container)
         .style('position', 'absolute')
         .style('left', detailChartLeft1 + 'px')
         .style('top', detailChartTop1 + 'px')
         .style('width', detailChartWidth + "px")
-        .style('height', detailChartHeight + "px")
-        .style('border', '1px solid black')
-        .style('outline', 'none')
-        .append('svg')//for the text
-        .attr("id", "detailElmText1")
-        .attr("class", "elementText")
-        .style("position", "absolute")
-        .style("left", "10px")
-        .style("top", "5px");
+        .style('height', detailChartHeight + "px");
 
-    d3.select(detailChart2)
+    d3DetailChart1Container.append('div')
+        .attr('id', 'detailChart1')
         .style('position', 'absolute')
-        .style('left', detailChartLeft2 + 'px')
-        .style('top', detailChartTop2 + 'px')
+        .style('left', 0 + 'px')
+        .style('top', 0 + 'px')
         .style('width', detailChartWidth + "px")
         .style('height', detailChartHeight + "px")
         .style('border', '1px solid black')
         .style('outline', 'none')
-        .append('svg')//for the text
+        .append('svg')//for the legends
+        .attr("id", "detailElmText1")
+        .attr("class", "elementText")
+        .style("position", "absolute")
+        .style("left", "10px")
+        .style("top", "25px");
+
+    d3DetailChart1Container
+        .append("div")//for the selection
+        .attr("id", "option1Container")
+        .style("position", "absolute")
+        .style("left", "10px")
+        .style("top", "5px");
+
+    const d3DetailChart2Container = d3.select(detailChart2Container)
+        .style('position', 'absolute')
+        .style('left', detailChartLeft2 + 'px')
+        .style('top', detailChartTop2 + 'px')
+        .style('width', detailChartWidth + "px")
+        .style('height', detailChartHeight + "px");
+
+    d3DetailChart2Container.append('div')
+        .attr('id', 'detailChart2')
+        .style('position', 'absolute')
+        .style('left', 0 + 'px')
+        .style('top', 0 + 'px')
+        .style('width', detailChartWidth + "px")
+        .style('height', detailChartHeight + "px")
+        .style('border', '1px solid black')
+        .style('outline', 'none')
+        .append('svg')//for the legend
         .attr("id", "detailElmText2")
         .attr("class", "elementText")
         .style("position", "absolute")
         .style("left", "10px")
+        .style("top", "25px");
+
+    d3DetailChart2Container
+        .append('div')//for the selection
+        .attr("id", "option2Container")
+        .style("position", "absolute")
+        .style("left", "10px")
         .style("top", "5px");
+
 }
 
 //</editor-fold>
 
-const selectedElements = ["Ca Concentration", "Al Concentration"];
+const selectedElements = ["Fe Concentration", "Al Concentration"];
 let camera, renderer, textureLoader;
 let threeDScences;
-let elementInfo1;
-let elementInfo2;
+const elementInfos = [];
 const profileToCanvasScale = d3.scaleLinear().domain([-0.5, 0.5]).range([0, 49]);
+let hths;//horizontal texture handler
+let vths;//vertical texture handler
 
 main();
 
@@ -82,30 +117,71 @@ async function main() {
     const elementScalers = await pd.getElementScalers();
     const ip = new Interpolator(csvContent, elements, depthNames, locationNameMapping, 50, 50, elementScalers);
 
+    //The selector
+    const msddOptions = elements.map(d => {
+        return {text: d, value: d}
+    }).sort((a, b) => a.text.localeCompare(b.text));
+
+    populateSelectors(msddOptions, selectedElements, handleSelectionChange, 200);
     // const colorScale = new d3.scaleLinear().domain([0, 1]).range(['blue', 'red']);
     const colorScale = new d3.scaleLinear().domain([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]).range(colors10);
+
+
     //Preload the data for this element
-    const hths = selectedElements.map(elm => new HorizontalCanvasTextureHandler(ip, elm, colorScale));
-    const vths = selectedElements.map(elm => new VerticalCanvasTextureHandler(ip, elm, colorScale));
+    hths = selectedElements.map(elm => new HorizontalCanvasTextureHandler(ip, elm, colorScale));
+    vths = selectedElements.map(elm => new VerticalCanvasTextureHandler(ip, elm, colorScale));
     const elmScalers = await pd.getElementScalers();
     //Set the text and the legend
     selectedElements.forEach((elm, i) => {
+        handleLegendChange(elm, i);
+    });
+
+    function handleLegendChange(elm, i) {
         const elmScaler = elmScalers[elm];
         const legendDomain = colorScale.domain().map(d => elmScaler.invert(d));
         const range = colorScale.range();
         legend({
             svgId: `detailElmText${i + 1}`,
             color: d3.scaleThreshold(legendDomain, range),
-            title: elm,
+            // title: elm,
             tickSize: 0,
             tickFormat: ",.0f",
             ticks: 10,
             width: 400
         })
         d3.select().text(elm);
-    });
+    }
+
     //</editor-fold>
 
+    //<editor-fold desc="Selection box change handler">
+    function handleSelectionChange(event) {
+        let optionIdx = ["option1", "option2"].indexOf(event.target.name);
+        let elm = event.target.value;
+        //Update the selected element
+        selectedElements[optionIdx] = elm;
+        //Update the texture
+        hths[optionIdx] = new HorizontalCanvasTextureHandler(ip, elm, colorScale);
+        vths[optionIdx] = new VerticalCanvasTextureHandler(ip, elm, colorScale);
+        //handle the cutChange
+        handleCutChange(elementInfos[optionIdx], optionIdx);
+        handleLegendChange(elm, optionIdx);
+    }
+
+    function handleCutChange(elementInfo, idx) {
+        //Angle cut
+        const cutAngle = elementInfo.orbitControls.getAzimuthalAngle()
+        let texture = vths[idx].getTexture(0);
+        elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
+
+        //Horizontal cut
+        const horizCutPlaneY = elementInfo.horizCutPlane.position.y;
+        const horizCutCanvasY = Math.round(profileToCanvasScale(horizCutPlaneY));
+        texture = hths[idx].getTexture(horizCutCanvasY);
+        elementInfo.theProfile.handleHorizCutPosition(horizCutPlaneY, texture);
+    }
+
+    //</editor-fold>
     //<editor-fold desc="3D Cores">
     init();
 
@@ -119,26 +195,18 @@ async function main() {
 
         //Setup the two views (scenes)
         threeDScences = new ThreeDScences(renderer);
-        elementInfo1 = threeDScences.setupElementScene1(elementInfo1);
-        elementInfo2 = threeDScences.setupElementScene2(elementInfo2);
+        threeDScences.setupElementScenes(elementInfos);
 
         //Currently for simplicity we only setup the controls on the first chart and sync to the second one
-        setupOrbitControls(elementInfo1, elementInfo2, detailChart1, vths);
-        setupDragControls(elementInfo1, elementInfo2, detailChart1, hths);
+        let orbitControlDiv = document.getElementById('detailChart1');
+        setupOrbitControls(elementInfos, orbitControlDiv, vths);
+        setupDragControls(elementInfos, orbitControlDiv, hths);
 
         //Setup the default cuts
-        const cutAngle = elementInfo1.orbitControls.getAzimuthalAngle()
-        let texture1 = vths[0].getTexture(0);
-        elementInfo1.theProfile.handleVertiCutAngle(cutAngle, texture1);
-        let texture2 = vths[1].getTexture(0);
-        elementInfo2.theProfile.handleVertiCutAngle(cutAngle, texture2);
-        //
-        const horizCutPlaneY = elementInfo1.horizCutPlane.position.y;
-        const horizCutCanvasY = Math.round(profileToCanvasScale(horizCutPlaneY));
-        texture1 = hths[0].getTexture(horizCutCanvasY);
-        elementInfo1.theProfile.handleHorizCutPosition(horizCutPlaneY, texture1);
-        texture2 = hths[1].getTexture(horizCutCanvasY);
-        elementInfo2.theProfile.handleHorizCutPosition(horizCutPlaneY, texture2);
+
+        elementInfos.forEach((elementInfo, idx) => {
+            handleCutChange(elementInfo, idx);
+        });
 
 
         render();
@@ -149,17 +217,19 @@ async function main() {
         renderer.setScissorTest(false);
         renderer.clear(true, true);
         renderer.setScissorTest(true);
-        threeDScences.renderSceneInfo(elementInfo1);
-        threeDScences.renderSceneInfo(elementInfo2);
+        elementInfos.forEach(elementInfo => {
+            threeDScences.renderSceneInfo(elementInfo);
+        });
         requestAnimationFrame(render);
     }
 
-    function setupOrbitControls(elementInfo1, elementInfo2, domElement, vths) {
-        setupOrbitControlsPerElement(elementInfo1, domElement, vths[0]);
-        setupOrbitControlsPerElement(elementInfo2, domElement, vths[1]);
+    function setupOrbitControls(elementInfos, domElement, vths) {
+        elementInfos.forEach((elementInfo, idx) => {
+            setupOrbitControlsPerElement(elementInfo, domElement, vths, idx);
+        });
     }
 
-    function setupOrbitControlsPerElement(elementInfo, domElement, vth) {
+    function setupOrbitControlsPerElement(elementInfo, domElement, vths, idx) {
         let orbitControls = new THREE.OrbitControls(elementInfo.camera, domElement);
         orbitControls.enableZoom = false;
         orbitControls.enablePan = false;
@@ -188,7 +258,7 @@ async function main() {
         });
         orbitControls.addEventListener("end", function () {
             const cutAngle = orbitControls.getAzimuthalAngle();
-            const texture = vth.getTexture(cutAngle);
+            const texture = vths[idx].getTexture(cutAngle);
             hideLoader();
             elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
             elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
@@ -197,32 +267,32 @@ async function main() {
         elementInfo.orbitControls = orbitControls;
     }
 
-    function setupDragControls(elementInfo1, elementInfo2, domElement, hths) {
-        setupDragControlsPerElement(elementInfo1, domElement, handleStart, handleEnd, handleHorizontalCutPositions);
-        setupDragControlsPerElement(elementInfo2, domElement, handleStart, handleEnd, handleHorizontalCutPositions);
+    function setupDragControls(elementInfos, domElement, hths) {
+        elementInfos.forEach(elementInfo => {
+            setupDragControlsPerElement(elementInfo, domElement, handleStart, handleEnd, handleHorizontalCutPositions);
+        });
 
         function handleStart() {
-            elementInfo1.orbitControls.enabled = false;
-            elementInfo2.orbitControls.enabled = false;
+            elementInfos.forEach(elementInfo => {
+                elementInfo.orbitControls.enabled = false;
+            });
         }
 
         function handleEnd() {
-            elementInfo1.orbitControls.enabled = true;
-            elementInfo2.orbitControls.enabled = true;
+            elementInfos.forEach(elementInfo => {
+                elementInfo.orbitControls.enabled = true;
+            });
         }
 
         function handleHorizontalCutPositions(horizCutPlaneX, horizCutPlaneY, horizCutPlaneZ) {
-            elementInfo1.horizCutPlane.position.x = horizCutPlaneX;
-            elementInfo1.horizCutPlane.position.y = horizCutPlaneY;
-            elementInfo1.horizCutPlane.position.z = horizCutPlaneZ;
-            elementInfo2.horizCutPlane.position.x = horizCutPlaneX;
-            elementInfo2.horizCutPlane.position.y = horizCutPlaneY;
-            elementInfo2.horizCutPlane.position.z = horizCutPlaneZ;
             const horizCutCanvasY = Math.round(profileToCanvasScale(horizCutPlaneY));
-            const texture1 = hths[0].getTexture(horizCutCanvasY);
-            elementInfo1.theProfile.handleHorizCutPosition(horizCutPlaneY, texture1);
-            const texture2 = hths[1].getTexture(horizCutCanvasY);
-            elementInfo2.theProfile.handleHorizCutPosition(horizCutPlaneY, texture2);
+            elementInfos.forEach((elementInfo, idx) => {
+                elementInfo.horizCutPlane.position.x = horizCutPlaneX;
+                elementInfo.horizCutPlane.position.y = horizCutPlaneY;
+                elementInfo.horizCutPlane.position.z = horizCutPlaneZ;
+                const texture = hths[idx].getTexture(horizCutCanvasY);
+                elementInfo.theProfile.handleHorizCutPosition(horizCutPlaneY, texture);
+            });
         }
 
         function setupDragControlsPerElement(elementInfo, domElement, handleStart, handleEnd, handleHorizontalCutPositions) {
@@ -267,13 +337,16 @@ async function main() {
         let pc = parcoords()("#parcoordsChart");
         pc
             .data(data)
-            .alpha(0.2)
+            .smoothness(0.05)
+            .alpha(0.3)
             .margin({top: 24, left: 10, bottom: 12, right: 10})
             .render()
             .reorderable()
             .brushMode("1D-axes")  // enable brushing
             .interactive();
+
         change_color('Ca');
+
         // click label to activate coloring
         pc.svg.selectAll(".dimension")
             .on("click", change_color)
@@ -289,19 +362,23 @@ async function main() {
             .on("mouseout", () => {
                 hideTip();
             });
-
+        pc.flipAxisAndUpdatePCP("Depth");
         // update color
         function change_color(dimension) {
-            pc.svg.selectAll(".dimension")
-                .style("font-weight", "normal")
-                .filter(function (d) {
-                    return d == dimension;
-                })
-                .style("font-weight", "bold");
+            if (dimension !== "Location" && dimension !== "Depth") {
+                pc.svg.selectAll(".dimension")
+                    .style("font-weight", "normal")
+                    .filter(function (d) {
+                        return d == dimension;
+                    })
+                    .style("font-weight", "bold");
 
-            pc.color(d => colorScale(d[dimension])).render();
+                pc.color(d => colorScale(elementScalers[`${dimension} Concentration`](d[dimension]))).render();
+            }
         }
     });
 
     //</editor-fold>
 }
+
+
