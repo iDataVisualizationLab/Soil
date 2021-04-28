@@ -164,14 +164,15 @@ async function main() {
         hths[optionIdx] = new HorizontalCanvasTextureHandler(ip, elm, colorScale);
         vths[optionIdx] = new VerticalCanvasTextureHandler(ip, elm, colorScale);
         //handle the cutChange
-        handleCutChange(elementInfos[optionIdx], optionIdx);
+        handleCutChange(elementInfos, optionIdx);
         handleLegendChange(elm, optionIdx);
     }
 
-    function handleCutChange(elementInfo, idx) {
+    function handleCutChange(elementInfos, idx) {
         //Angle cut
-        const cutAngle = elementInfo.orbitControls.getAzimuthalAngle()
-        let texture = vths[idx].getTexture(0);
+        const elementInfo = elementInfos[idx]
+        const cutAngle = elementInfo.orbitControls.getAzimuthalAngle();
+        let texture = vths[idx].getTexture(cutAngle);
         elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
 
         //Horizontal cut
@@ -205,7 +206,7 @@ async function main() {
         //Setup the default cuts
 
         elementInfos.forEach((elementInfo, idx) => {
-            handleCutChange(elementInfo, idx);
+            handleCutChange(elementInfos, idx);
         });
 
 
@@ -227,44 +228,42 @@ async function main() {
         elementInfos.forEach((elementInfo, idx) => {
             setupOrbitControlsPerElement(elementInfo, domElement, vths, idx);
         });
-    }
 
-    function setupOrbitControlsPerElement(elementInfo, domElement, vths, idx) {
-        let orbitControls = new THREE.OrbitControls(elementInfo.camera, domElement);
-        orbitControls.enableZoom = false;
-        orbitControls.enablePan = false;
-        orbitControls.maxPolarAngle = Math.PI / 2;
+        function setupOrbitControlsPerElement(elementInfo, domElement, vths, idx) {
+            let orbitControls = new THREE.OrbitControls(elementInfo.camera, domElement);
+            orbitControls.enableZoom = false;
+            orbitControls.enablePan = false;
+            orbitControls.maxPolarAngle = Math.PI / 2;
 
-        //
-        orbitControls.minAzimuthAngle = -Math.PI / 2;
-        orbitControls.maxAzimuthAngle = Math.PI / 2;
+            //
+            orbitControls.minAzimuthAngle = -Math.PI / 2;
+            orbitControls.maxAzimuthAngle = Math.PI / 2;
 
-        //
-        orbitControls.rotateSpeed = 0.3;
+            //
+            orbitControls.rotateSpeed = 0.3;
 
-        //
-        let callCounter = 0;
-        let prevAngle = 0;
-        orbitControls.addEventListener("start", function () {
-            prevAngle = orbitControls.getAzimuthalAngle();
-            showLoader();
-        });
+            //
+            let prevAngle = 0;
+            orbitControls.addEventListener("start", function () {
+                prevAngle = orbitControls.getAzimuthalAngle();
+                showLoader();
+            });
 
-        orbitControls.addEventListener("change", function () {
-            const cutAngle = orbitControls.getAzimuthalAngle();
-            let texture = undefined;
-            elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
-            elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
-        });
-        orbitControls.addEventListener("end", function () {
-            const cutAngle = orbitControls.getAzimuthalAngle();
-            const texture = vths[idx].getTexture(cutAngle);
-            hideLoader();
-            elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
-            elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
-            console.log(callCounter);
-        });
-        elementInfo.orbitControls = orbitControls;
+            orbitControls.addEventListener("change", function () {
+                const cutAngle = orbitControls.getAzimuthalAngle();
+                let texture = undefined;
+                elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
+                elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
+            });
+            orbitControls.addEventListener("end", function () {
+                const cutAngle = orbitControls.getAzimuthalAngle();
+                const texture = vths[idx].getTexture(cutAngle);
+                hideLoader();
+                elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
+                elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
+            });
+            elementInfo.orbitControls = orbitControls;
+        }
     }
 
     function setupDragControls(elementInfos, domElement, hths) {
@@ -363,6 +362,7 @@ async function main() {
                 hideTip();
             });
         pc.flipAxisAndUpdatePCP("Depth");
+
         // update color
         function change_color(dimension) {
             if (dimension !== "Location" && dimension !== "Depth") {
