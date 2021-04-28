@@ -1,11 +1,9 @@
-showLoader();
 //<editor-fold desc="setup the sizes for the layout">
-
-const defaultElementIndexes = [0, 0];
-let detailChart1Container = document.getElementById('detailChart1Container');
-let detailChart2Container = document.getElementById('detailChart2Container');
+const detailChart1Container = document.getElementById('detailChart1Container');
+const detailChart2Container = document.getElementById('detailChart2Container');
 
 let parcoordsChart = document.getElementById('parcoordsChart');
+let gui;
 setupLayout();
 
 function setupLayout() {
@@ -24,10 +22,12 @@ function setupLayout() {
     const pcWidth = window.innerWidth - 2 * pcLeft;
     const pcHeight = window.innerHeight - detailChartHeight - 4 * margin;
 
+    const legendRight = 10;
+    const legendTop = 0;
     d3.select(parcoordsChart)
         .style('position', 'absolute')
         .style('left', pcLeft + 'px')
-        .style('top', pcTop + 'px')
+        .style('top', (pcTop + 10) + 'px')
         .style('width', pcWidth + "px")
         .style('height', pcHeight + "px")
         // .style('border', '1px solid black')
@@ -53,8 +53,8 @@ function setupLayout() {
         .attr("id", "detailElmText1")
         .attr("class", "elementText")
         .style("position", "absolute")
-        .style("left", "10px")
-        .style("top", "25px");
+        .style("right", `${legendRight}px`)
+        .style("top", `${legendTop}px`);
 
     d3DetailChart1Container
         .append("div")//for the selection
@@ -68,7 +68,16 @@ function setupLayout() {
         .style('left', detailChartLeft2 + 'px')
         .style('top', detailChartTop2 + 'px')
         .style('width', detailChartWidth + "px")
-        .style('height', detailChartHeight + "px");
+        .style('height', detailChartHeight + "px")
+        .on("mousemove", (event, d) => {
+            if (systemConfigurations.helpEnabled) {
+                const msg = `The drag and orbit controls are on the left panel.`;
+                showTip(event, msg);
+            }
+        })
+        .on("mouseout", () => {
+            hideTip();
+        });;
 
     d3DetailChart2Container.append('div')
         .attr('id', 'detailChart2')
@@ -83,8 +92,8 @@ function setupLayout() {
         .attr("id", "detailElmText2")
         .attr("class", "elementText")
         .style("position", "absolute")
-        .style("left", "10px")
-        .style("top", "25px");
+        .style("right", `${legendRight}px`)
+        .style("top", `${legendTop}px`);
 
     d3DetailChart2Container
         .append('div')//for the selection
@@ -93,11 +102,34 @@ function setupLayout() {
         .style("left", "10px")
         .style("top", "5px");
 
+    //Setup the gui
+    gui = new dat.GUI({autoPlace: true});
+    gui.domElement.id = 'gui';
+    d3.select('#gui')
+        .style('position', 'absolute')
+        .style('top', '0px')
+        .style('left', '0px')
+        .style('height', '255px')
+        .style('width', '255px');
+
+    let profiles = ['L', 'S', 'R'];
+    let profileOptions = {
+        profileOptionText: 'L'
+    }
+    let profileFolder = gui.addFolder("Profiles");
+    profileFolder.add(profileOptions, 'profileOptionText', profiles).name("Select profile")
+        .onChange(function (value) {
+            console.log(`Selected profile ${value}`);
+        });
+
+    gui.add(systemConfigurations, "helpEnabled").name("Help enabled");
+
+    gui.close();//closed by default
 }
 
 //</editor-fold>
 
-const selectedElements = ["Fe Concentration", "Al Concentration"];
+const selectedElements = ["Ca Concentration", "Rb Concentration"];
 let camera, renderer, textureLoader;
 let threeDScences;
 const elementInfos = [];
@@ -105,17 +137,17 @@ const profileToCanvasScale = d3.scaleLinear().domain([-0.5, 0.5]).range([0, 49])
 let hths;//horizontal texture handler
 let vths;//vertical texture handler
 
-main();
+handleProfileChange('L');
 
-async function main() {
-
+async function handleProfileChange(profileName) {
+    showLoader();
     //<editor-fold desc="Setting up data">
     //Setup data
-    const pd = new ProfileDescription('./data/L.csv', locationNameMapping);
+    const pd = new ProfileDescription(`./data/${profileName}.csv`, systemConfigurations.profiles[profileName].locationNameMapping);
     const elements = await pd.getElements();
     const csvContent = await pd.getCsvContent();
     const elementScalers = await pd.getElementScalers();
-    const ip = new Interpolator(csvContent, elements, depthNames, locationNameMapping, 50, 50, elementScalers);
+    const ip = new Interpolator(csvContent, elements, systemConfigurations.depthNames, systemConfigurations.profiles[profileName].locationNameMapping, 50, 50, elementScalers);
 
     //The selector
     const msddOptions = elements.map(d => {
@@ -136,6 +168,10 @@ async function main() {
         handleLegendChange(elm, i);
     });
 
+
+    //</editor-fold>
+
+    //<editor-fold desc="Selection box change handler">
     function handleLegendChange(elm, i) {
         const elmScaler = elmScalers[elm];
         const legendDomain = colorScale.domain().map(d => elmScaler.invert(d));
@@ -143,7 +179,7 @@ async function main() {
         legend({
             svgId: `detailElmText${i + 1}`,
             color: d3.scaleThreshold(legendDomain, range),
-            // title: elm,
+            title: 'Parts Per Million (PPM)',
             tickSize: 0,
             tickFormat: ",.0f",
             ticks: 10,
@@ -152,9 +188,6 @@ async function main() {
         d3.select().text(elm);
     }
 
-    //</editor-fold>
-
-    //<editor-fold desc="Selection box change handler">
     function handleSelectionChange(event) {
         let optionIdx = ["option1", "option2"].indexOf(event.target.name);
         let elm = event.target.value;
@@ -183,6 +216,7 @@ async function main() {
     }
 
     //</editor-fold>
+
     //<editor-fold desc="3D Cores">
     init();
 
@@ -354,7 +388,10 @@ async function main() {
         d3.selectAll('.dimension')
             .on("mouseover", (event, d) => {
                 if (systemConfigurations.helpEnabled) {
-                    const msg = `Click ${d} label to color by ${d} values<br/>Drag ${d} label to reorder ${d} axis<br/>Brush on the ${d} axis to filter by ${d} values`;
+                    const msg = `Click ${d} label to color by ${d} values
+                                <br/>Drag ${d} label to reorder ${d} axis
+                                <br/>Brush on the ${d} axis to filter by ${d} values
+                                <br/>Double click on the ${d} label to reverse value order`;
                     showTip(event, msg);
                 }
             })
@@ -380,5 +417,3 @@ async function main() {
 
     //</editor-fold>
 }
-
-

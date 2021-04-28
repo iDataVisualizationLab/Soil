@@ -36,7 +36,8 @@
 <!--loader-->
 <!--<script src="js/loader/loader.js"></script>-->
 <script>
-    const pd = new ProfileDescription("data/L.csv");
+    const profileName = 'L';
+    const pd = new ProfileDescription(`data/${profileName}.csv`);
     let width = window.innerWidth / 3;
     let height = window.innerHeight / 2;
 
@@ -72,7 +73,7 @@
         .node();
     pd.getCsvContent().then(csvContent => {
         pd.getElements().then(elements => {
-            const ip = new Interpolator(csvContent, elements, depthNames, locationNameMapping, 50, 50);
+            const ip = new Interpolator(csvContent, elements, systemConfigurations.depthNames, systemConfigurations.profiles[profileName].locationNameMapping, 50, 50);
             let ca9 = ip.interpolateHorizontalData(9, 'Ca Concentration');
             ca9 = {
                 x: ca9.x,
