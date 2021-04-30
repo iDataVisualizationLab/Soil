@@ -8,6 +8,7 @@ function createHorizontalCutPlane(horizCutY) {
 }
 
 function createProfileObject(horizCutY, profileName) {
+    const textureLoader = new THREE.TextureLoader();
     const theObject = new THREE.Object3D();
     //Common constants
     const positionNumComponents = 3;

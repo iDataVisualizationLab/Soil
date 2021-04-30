@@ -1,14 +1,15 @@
 let profileDescriptions = {};
-const selectedElements = ["Ca Concentration", "Rb Concentration"];
-let camera, renderer, textureLoader;
-let threeDScences;
+let renderer;
 const elementInfos = [];
-const profileToCanvasScale = d3.scaleLinear().domain([-0.5, 0.5]).range([0, 49]);
+const selectedElements = ["Ca Concentration", "Rb Concentration"];
 
 showLoader();
-handleProfileChange('L');
+handleProfileChange('L').then(_ => {
+    hideLoader();
+});
 
 async function handleProfileChange(profileName) {
+    const profileToCanvasScale = d3.scaleLinear().domain([-0.5, 0.5]).range([0, 49]);
     //<editor-fold desc="Setting up data">
     //Setup data
     if (!profileDescriptions[profileName]) {
@@ -24,24 +25,22 @@ async function handleProfileChange(profileName) {
         if (elements.indexOf(elm) === -1) {
             selectedElements[i] = 'Ca Concentration';
         }
-    })
+    });
     //The selector
-    const msddOptions = elements.map(d => {
+    const elmSelectOptions = elements.map(d => {
         return {text: d, value: d}
     }).sort((a, b) => a.text.localeCompare(b.text));
 
-    populateSelectors(msddOptions, selectedElements, handleSelectionChange, 200);
+    populateSelectors(elmSelectOptions, selectedElements, handleSelectionChange);
 
-
-    // const colorScale = new d3.scaleLinear().domain([0, 1]).range(['blue', 'red']);
     const colorScale = new d3.scaleLinear().domain([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]).range(colors10);
 
 
     //Preload the data for this element
-    hths = selectedElements.map(elm => new HorizontalCanvasTextureHandler(ip, elm, colorScale));
-    hths.name = profileName;
-    vths = selectedElements.map(elm => new VerticalCanvasTextureHandler(ip, elm, colorScale));
-    vths.name = profileName;
+    let circleTextureHandlers = selectedElements.map(elm => new HorizontalCanvasTextureHandler(ip, elm, colorScale));
+    circleTextureHandlers.name = profileName;
+    let squareTextureHandlers = selectedElements.map(elm => new VerticalCanvasTextureHandler(ip, elm, colorScale));
+    squareTextureHandlers.name = profileName;
 
     const elmScalers = await profileDescriptions[profileName].getElementScalers();
     //Set the text and the legend
@@ -117,7 +116,7 @@ async function handleProfileChange(profileName) {
             tickFormat: ",.0f",
             ticks: 10,
             width: 400
-        })
+        });
         d3.select().text(elm);
     }
 
@@ -127,48 +126,51 @@ async function handleProfileChange(profileName) {
         //Update the selected element
         selectedElements[optionIdx] = elm;
         //Update the texture
-        hths[optionIdx] = new HorizontalCanvasTextureHandler(ip, elm, colorScale);
-        vths[optionIdx] = new VerticalCanvasTextureHandler(ip, elm, colorScale);
+        circleTextureHandlers[optionIdx] = new HorizontalCanvasTextureHandler(ip, elm, colorScale);
+        squareTextureHandlers[optionIdx] = new VerticalCanvasTextureHandler(ip, elm, colorScale);
         //handle the cutChange
-        handleCutChange(elementInfos, optionIdx);
+        handleCutChange(elementInfos, optionIdx, squareTextureHandlers, circleTextureHandlers);
         handleLegendChange(elm, optionIdx);
     }
 
-    function handleCutChange(elementInfos, idx) {
+    function handleCutChange(elementInfos, idx, squareTextureHandlers, circleTextureHandlers) {
         //Angle cut
         const elementInfo = elementInfos[idx]
-        const cutAngle = elementInfo.orbitControls.getAzimuthalAngle();
-        let texture = vths[idx].getTexture(cutAngle);
-        elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
+        handleCutAngleChange(elementInfo.orbitControls, squareTextureHandlers, idx, elementInfo);
 
         //Horizontal cut
+        handleHorizCutChange(elementInfo, idx, circleTextureHandlers);
+    }
+
+    function handleHorizCutChange(elementInfo, idx, circleTextureHandlers) {
         const horizCutPlaneY = elementInfo.horizCutPlane.position.y;
         const horizCutCanvasY = Math.round(profileToCanvasScale(horizCutPlaneY));
-        texture = hths[idx].getTexture(horizCutCanvasY);
+        const texture = circleTextureHandlers[idx].getTexture(horizCutCanvasY);
         elementInfo.theProfile.handleHorizCutPosition(horizCutPlaneY, texture);
+    }
+
+    function handleCutAngleChange(orbitControls, squareTextureHandlers, idx, elementInfo) {
+        const cutAngle = orbitControls.getAzimuthalAngle();
+        const texture = squareTextureHandlers[idx].getTexture(cutAngle);
+        elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
+        elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
     }
 
     //</editor-fold>
 
     //<editor-fold desc="3D Cores">
-    if (!renderer) {
-        init();
-    } else {
-        setupDataFor3DScenes();
-        hideLoader();
-    }
+    let threeDScences;
 
-
-    function setupDataFor3DScenes() {
+    function setupDataFor3DScenes(squareTextureHandlers, circleTextureHandlers) {
         //Currently for simplicity we only setup the controls on the first chart and sync to the second one
         let controlDiv = document.getElementById('detailChart1');
         debugger
-        setupOrbitControls(elementInfos, controlDiv, vths);
-        setupDragControls(elementInfos, controlDiv, hths);
 
+        setupOrbitControls(elementInfos, controlDiv, squareTextureHandlers);
+        setupDragControls(elementInfos, controlDiv, circleTextureHandlers);
         //Setup the default cuts
         elementInfos.forEach((elementInfo, idx) => {
-            handleCutChange(elementInfos, idx);
+            handleCutChange(elementInfos, idx, squareTextureHandlers, circleTextureHandlers);
         });
         //Also update texture
         elementInfos.forEach((elementInfo) => {
@@ -178,7 +180,6 @@ async function handleProfileChange(profileName) {
 
     function init() {
         //Start of the creation code
-        textureLoader = new THREE.TextureLoader();
         renderer = new THREE.WebGLRenderer({antialias: true});
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -190,7 +191,7 @@ async function handleProfileChange(profileName) {
         threeDScences = new ThreeDScences(renderer, profileName);
         threeDScences.setupElementScenes(elementInfos);
 
-        setupDataFor3DScenes();
+        setupDataFor3DScenes(squareTextureHandlers, circleTextureHandlers);
 
         render();
         hideLoader();
@@ -206,12 +207,13 @@ async function handleProfileChange(profileName) {
         requestAnimationFrame(render);
     }
 
-    function setupOrbitControls(elementInfos, domElement, vths) {
+    function setupOrbitControls(elementInfos, domElement, squareTextureHandlers) {
         elementInfos.forEach((elementInfo, idx) => {
-            setupOrbitControlsPerElement(elementInfo, domElement, vths, idx);
+            setupOrbitControlsPerElement(elementInfos, domElement, squareTextureHandlers, idx);
         });
 
-        function setupOrbitControlsPerElement(elementInfo, domElement, vths, idx) {
+        function setupOrbitControlsPerElement(elementInfos, domElement, squareTextureHandlers, idx) {
+            const elementInfo = elementInfos[idx];
             let orbitControls = new THREE.OrbitControls(elementInfo.camera, domElement);
             orbitControls.enableZoom = false;
             orbitControls.enablePan = false;
@@ -230,7 +232,6 @@ async function handleProfileChange(profileName) {
                 prevAngle = orbitControls.getAzimuthalAngle();
                 showLoader();
             });
-
             orbitControls.addEventListener("change", function () {
                 const cutAngle = orbitControls.getAzimuthalAngle();
                 let texture = undefined;
@@ -238,27 +239,25 @@ async function handleProfileChange(profileName) {
                 elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
             });
             orbitControls.addEventListener("end", function () {
-                const cutAngle = orbitControls.getAzimuthalAngle();
-                const texture = vths[idx].getTexture(cutAngle);
+                handleCutAngleChange(orbitControls, squareTextureHandlers, idx, elementInfo);
                 hideLoader();
-                elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
-                elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
             });
             elementInfo.orbitControls = orbitControls;
         }
     }
 
-    function setupDragControls(elementInfos, domElement, hths) {
-
+    function setupDragControls(elementInfos, domElement, circleTextureHandlers) {
+        debugger
         elementInfos.forEach((_, idx) => {
-            setupDragControlsPerElement(elementInfos, idx, domElement, handleStart, handleEnd, handleHorizontalCutPositions, hths);
+            setupDragControlsPerElement(elementInfos, idx, domElement, circleTextureHandlers);
         });
 
-        function setupDragControlsPerElement(elementInfos, idx, domElement, handleStart, handleEnd, handleHorizontalCutPositions, hths) {
+        function setupDragControlsPerElement(elementInfos, idx, domElement, circleTextureHandlers) {
             const elementInfo = elementInfos[idx];
             let horizCutPlaneX, horizCutPlaneY, horizCutPlaneZ;
             const draggableObjects = [elementInfo.horizCutPlane];
             const dragControls = new THREE.DragControls(draggableObjects, elementInfo.camera, domElement);
+            //Remove the previous controls on domElement
             dragControls.addEventListener('hoveron', function (event) {
                 event.object.material.emissive.set(0xaa0000);
             });
@@ -266,13 +265,18 @@ async function handleProfileChange(profileName) {
                 event.object.material.emissive.set(0x000000);
             });
             dragControls.addEventListener("dragstart", function (event) {
-                handleStart(elementInfos);
+                //Disable orbit
+                elementInfo.orbitControls.enabled = false;
+                elementInfos.forEach(elementInfo => {
+                    elementInfo.orbitControls.enabled = false;
+                });
                 horizCutPlaneX = event.object.position.x;
                 horizCutPlaneY = event.object.position.y;
                 horizCutPlaneZ = event.object.position.z;
 
             });
             dragControls.addEventListener("drag", function (event) {
+                debugger
                 event.object.position.x = horizCutPlaneX;
                 event.object.position.z = horizCutPlaneZ;
                 if (event.object.position.y > 0.5) {
@@ -282,38 +286,30 @@ async function handleProfileChange(profileName) {
                     event.object.position.y = -0.5;
                 }
                 horizCutPlaneY = event.object.position.y;
-                handleHorizontalCutPositions(elementInfos, horizCutPlaneX, horizCutPlaneY, horizCutPlaneZ, hths);
+                const horizCutCanvasY = Math.round(profileToCanvasScale(horizCutPlaneY));
+                elementInfos.forEach((elementInfo, idx) => {
+                    elementInfo.horizCutPlane.position.x = horizCutPlaneX;
+                    elementInfo.horizCutPlane.position.y = horizCutPlaneY;
+                    elementInfo.horizCutPlane.position.z = horizCutPlaneZ;
+                    const texture = circleTextureHandlers[idx].getTexture(horizCutCanvasY);
+                    elementInfo.theProfile.handleHorizCutPosition(horizCutPlaneY, texture);
+                });
             });
             dragControls.addEventListener("dragend", function (event) {
-                handleEnd(elementInfos);
+                elementInfos.forEach(elementInfo => {
+                    elementInfo.orbitControls.enabled = true;
+                });
             });
+            elementInfo.dragControls = dragControls;
         }
-
-        function handleStart(elementInfos) {
-            elementInfos.forEach(elementInfo => {
-                elementInfo.orbitControls.enabled = false;
-            });
-        }
-
-        function handleEnd(elementInfos) {
-            elementInfos.forEach(elementInfo => {
-                elementInfo.orbitControls.enabled = true;
-            });
-        }
-
-        function handleHorizontalCutPositions(elementInfos, horizCutPlaneX, horizCutPlaneY, horizCutPlaneZ, hths) {
-            const horizCutCanvasY = Math.round(profileToCanvasScale(horizCutPlaneY));
-            elementInfos.forEach((elementInfo, idx) => {
-                elementInfo.horizCutPlane.position.x = horizCutPlaneX;
-                elementInfo.horizCutPlane.position.y = horizCutPlaneY;
-                elementInfo.horizCutPlane.position.z = horizCutPlaneZ;
-                const texture = hths[idx].getTexture(horizCutCanvasY);
-                elementInfo.theProfile.handleHorizCutPosition(horizCutPlaneY, texture);
-            });
-        }
-
 
     }
 
+    if (!renderer) {
+        init();
+    } else {
+        setupDataFor3DScenes(squareTextureHandlers, circleTextureHandlers);
+        hideLoader();
+    }
     //</editor-fold>
 }

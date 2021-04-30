@@ -112,8 +112,8 @@ function setupLayout() {
 
     gui.add(profileOptions, 'profileOptionText', profiles).name("Select profile")
         .onChange(function (value) {
-            // showLoader();
-            // handleProfileChange(profileCodes[profiles.indexOf(value)]);
+            showLoader();
+            handleProfileChange(profileCodes[profiles.indexOf(value)]);
         });
 
     gui.add(systemConfigurations, "helpEnabled").name("Help enabled");
