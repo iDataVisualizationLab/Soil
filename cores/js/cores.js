@@ -164,7 +164,6 @@ async function handleProfileChange(profileName) {
     function setupDataFor3DScenes(squareTextureHandlers, circleTextureHandlers) {
         //Currently for simplicity we only setup the controls on the first chart and sync to the second one
         let controlDiv = document.getElementById('detailChart1');
-        debugger
 
         setupOrbitControls(elementInfos, controlDiv, squareTextureHandlers);
         setupDragControls(elementInfos, controlDiv, circleTextureHandlers);
@@ -253,7 +252,6 @@ async function handleProfileChange(profileName) {
     }
 
     function setupDragControls(elementInfos, domElement, circleTextureHandlers) {
-        debugger
         elementInfos.forEach((_, idx) => {
             setupDragControlsPerElement(elementInfos, idx, domElement, circleTextureHandlers);
         });
@@ -287,7 +285,6 @@ async function handleProfileChange(profileName) {
 
             });
             dragControls.addEventListener("drag", function (event) {
-                debugger
                 event.object.position.x = horizCutPlaneX;
                 event.object.position.z = horizCutPlaneZ;
                 if (event.object.position.y > 0.5) {

@@ -101,30 +101,13 @@ function setupLayout() {
     //Setup the gui
     gui = new dat.GUI({autoPlace: true});
     gui.domElement.id = 'gui';
-    d3.select('#gui')
-        .style('position', 'absolute')
-        .style('top', '0px')
-        .style('left', '0px')
-        .style('height', 'auto')
-        .style('min-height', '25px')
-        .style('width', '255px');
-
-
     gui.add(profileOptions, 'profileOptionText', profiles).name("Select profile")
         .onChange(function (value) {
             showLoader();
             handleProfileChange(profileCodes[profiles.indexOf(value)]);
         });
-
     gui.add(systemConfigurations, "helpEnabled").name("Help enabled");
-
     gui.close();//closed by default
-    gui.domElement.onclose = (event) => {
-        console.log(event);
-    };
-    gui.domElement.onopen = (event) => {
-        console.log(event);
-    };
 
     //
     d3.select("#parcoordsChart")
