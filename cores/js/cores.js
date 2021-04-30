@@ -213,7 +213,13 @@ async function handleProfileChange(profileName) {
         });
 
         function setupOrbitControlsPerElement(elementInfos, domElement, squareTextureHandlers, idx) {
+
             const elementInfo = elementInfos[idx];
+            //Remove existing one
+            if (elementInfo.orbitControls) {
+                elementInfo.orbitControls.enabled = false;
+                elementInfo.orbitControls.dispose();
+            }
             let orbitControls = new THREE.OrbitControls(elementInfo.camera, domElement);
             orbitControls.enableZoom = false;
             orbitControls.enablePan = false;
@@ -254,6 +260,11 @@ async function handleProfileChange(profileName) {
 
         function setupDragControlsPerElement(elementInfos, idx, domElement, circleTextureHandlers) {
             const elementInfo = elementInfos[idx];
+            //Disable the existing one
+            if (elementInfo.dragControls) {
+                elementInfo.dragControls.deactivate();
+                elementInfo.dragControls.dispose();
+            }
             let horizCutPlaneX, horizCutPlaneY, horizCutPlaneZ;
             const draggableObjects = [elementInfo.horizCutPlane];
             const dragControls = new THREE.DragControls(draggableObjects, elementInfo.camera, domElement);
