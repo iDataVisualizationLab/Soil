@@ -1,4 +1,4 @@
-let ThreeDScences = function (renderer) {
+let ThreeDScences = function (renderer, profileName) {
     this.setupElementScene1 = setupElementScene1;
     this.setupElementScene2 = setupElementScene2;
     this.renderSceneInfo = renderSceneInfo;
@@ -37,7 +37,7 @@ let ThreeDScences = function (renderer) {
             sceneInfo.scene.remove(sceneInfo.horizCutPlane);
         }
         let horizCutY = -0.5;
-        theProfile = createProfileObject(horizCutY);
+        const theProfile = createProfileObject(horizCutY, profileName);
         const horizCutPlane = createHorizontalCutPlane(horizCutY);
         scene.add(theProfile);
         scene.add(horizCutPlane);

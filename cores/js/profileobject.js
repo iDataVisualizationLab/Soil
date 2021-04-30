@@ -7,7 +7,7 @@ function createHorizontalCutPlane(horizCutY) {
     return mesh;
 }
 
-function createProfileObject(horizCutY) {
+function createProfileObject(horizCutY, profileName) {
     const theObject = new THREE.Object3D();
     //Common constants
     const positionNumComponents = 3;
@@ -54,7 +54,7 @@ function createProfileObject(horizCutY) {
     topCapGeo.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(topCapNorms), normalNumComponents));
     topCapGeo.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(topCapUvs), uvNumComponents));
 
-    const topCapTexture = textureLoader.load('./data/images/L.jpg');
+    const topCapTexture = textureLoader.load(`./data/images/${profileName}.jpg`);
     topCapTexture.center.x = 0.5;
     topCapTexture.center.y = 0.5;
 
@@ -261,7 +261,17 @@ function createProfileObject(horizCutY) {
 
     }
 
+    function updateTopCapTexture(profileName) {
+        const topCapTexture = textureLoader.load(`./data/images/${profileName}.jpg`);
+        topCapTexture.center.x = 0.5;
+        topCapTexture.center.y = 0.5;
+        topCapTexture.rotation = topCap.material.map.rotation;
+        topCap.material.map = topCapTexture;
+        // topCap.material.map.needsUpdate = true;
+    }
+
     // function handle
+    theObject.updateTopCapTexture = updateTopCapTexture;
     theObject.handleHorizCutPosition = handleHorizCutPosition;
     theObject.handleVertiCutAngle = handleVertiCutAngle;
     return theObject;

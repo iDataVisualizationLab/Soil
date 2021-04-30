@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>3D Cores</title>
+    <!--D3-->
+    <script src="lib/d3/d3.v6.js"></script>
+
     <!--3D-->
     <script src="lib/threejs/three.js"></script>
     <script src="lib/threejs/OrbitControls.js"></script>
@@ -10,13 +13,15 @@
     <script src="lib/threejs/dat.gui.min.js"></script>
     <script src="js/profileobject.js"></script>
     <script src="js/cores3dscenes.js"></script>
-    <!-- JQuery, JS, and CSS needed for ms dropdown-->
-    <script src="lib/jquery/jquery-1.9.0.min.js"></script>
-    <link href="js/msdropdown/dd.css" rel="stylesheet" type="text/css"/>
-    <script src="js/msdropdown/jquery.dd.js"></script>
-    <script src="js/msdropdown/msdd.js"></script>
+    <!-- Dropdown -->
+    <script src="js/dropdown.js"></script>
+    <style>
+        select {
+            font-size: .9rem;
+            padding: 2px 5px;
+        }
+    </style>
     <!--Data-->
-    <script src="lib/d3/d3.v6.js"></script>
     <script src="js/colorschemes.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/dataprocessing.js"></script>
@@ -36,12 +41,7 @@
 <body>
 <!--loader-->
 <script src="js/loader/loader.js"></script>
-
-
 <div id="parcoordsChart" class="parcoords"></div>
-<span id="detailChart1Container"></span>
-<span id="detailChart2Container"></span>
-
 <script src="js/cores.js"></script>
 <!--tooltip-->
 <script src="js/tooltip/tooltip.js"></script>

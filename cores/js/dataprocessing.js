@@ -17,10 +17,6 @@ class ProfileDescription {
         return this.pictureFile;
     }
 
-    getCoreNames() {
-        return this.coreNames;
-    }
-
     async getCsvContent() {
         if (!this.csvContent) {
             await this.loadCsvContent();
@@ -131,7 +127,7 @@ class ProfileDescription {
         allLocations.forEach(loc => {
             allDepths.forEach(depth => {
                 //Each element in one location is one item (one line)
-                const item = {'Location': loc, 'Depth': depth.split('-')[0]};
+                const item = {'Location': loc, 'Depth': +depth.split('-')[0]+5};
                 allElements.forEach(element => {
                     const elmVal = this.csvContent.filter(d => (d['Location'] === loc) && (d['Sample ID'] === depth))[0][element];
                     item[element.split(' ')[0]] = elmVal;
