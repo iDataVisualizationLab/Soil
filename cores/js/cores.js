@@ -2,7 +2,8 @@ let profileDescriptions = {};
 let renderer;
 const elementInfos = [];
 const selectedElements = ["Ca Concentration", "Rb Concentration"];
-
+let selectedVolumeRenderedElement = "Ca Concentration";
+let vr;
 showLoader();
 handleProfileChange('L').then(_ => {
     hideLoader();
@@ -65,11 +66,11 @@ async function handleProfileChange(profileName) {
             .brushMode("1D-axes")  // enable brushing
             .interactive();
 
-        change_color('Ca');
+        changeVolumeRenderElement('Ca');
 
         // click label to activate coloring
         pc.svg.selectAll(".dimension")
-            .on("click", change_color)
+            .on("click", changeVolumeRenderElement)
             .selectAll(".label")
             .style("font-size", "14px");
         d3.selectAll('.dimension')
@@ -85,21 +86,6 @@ async function handleProfileChange(profileName) {
             .on("mouseout", () => {
                 hideTip();
             });
-
-        // update color
-        function change_color(dimension) {
-            if (dimension !== "Location" && dimension !== "Depth") {
-                pc.svg.selectAll(".dimension")
-                    .style("font-weight", "normal")
-                    .filter(function (d) {
-                        return d == dimension;
-                    })
-                    .style("font-weight", "bold");
-
-                pc.color(d => colorScale(elementScalers[`${dimension} Concentration`](d[dimension]))).render();
-            }
-        }
-
         //update axis ticks to reduce space
         pc.svg.selectAll('.dimension').filter(d => (d !== 'Location' && d !== 'Depth')).selectAll('.tick').selectAll('text').text(d => {
             if (d > 1000) {
@@ -107,25 +93,65 @@ async function handleProfileChange(profileName) {
             } else {
                 return d;
             }
-
+        });
+        pc.on("brush", (d) => {
+            brushChange();
         });
 
+        function brushChange() {
+            //Get the extend of the selected element
+            let valueRange;
+            const brushExtents = pc.brushExtents();
+            const pcDimension = selectedVolumeRenderedElement.split(' ')[0];
+
+            //If the element itself is not brushed take its value ranges from selected data items (might be selected due to other brushes)
+            if (pc.brushed()) {
+                valueRange = d3.extent(pc.brushed().map(item => item[pcDimension]));
+            } else {
+                valueRange = elementScalers[selectedVolumeRenderedElement].domain();
+            }
+            //Scale that element range down to 0 to 1
+            valueRange = valueRange.map(v => elementScalers[selectedVolumeRenderedElement](v));
+            //Now handle the change
+            vr.handleDataChange(ip.getInterpolatedData(selectedVolumeRenderedElement), valueRange);
+        }
+
+        // update color
+        function changeVolumeRenderElement(dimension) {
+            if (dimension !== "Location" && dimension !== "Depth") {
+                //Change the color
+                pc.svg.selectAll(".dimension")
+                    .style("font-weight", "normal")
+                    .filter(function (d) {
+                        return d == dimension;
+                    })
+                    .style("font-weight", "bold");
+                selectedVolumeRenderedElement = `${dimension} Concentration`;
+                pc.color(d => colorScale(elementScalers[selectedVolumeRenderedElement](d[dimension]))).render();
+                //Handle the data change for the volume render
+                brushChange();
+            }
+        }
     });
 
     //</editor-fold>
 
     //<editor-fold desc="The volume renderer">
     // const ip1 = new Interpolator(csvContent, elements, systemConfigurations.depthNames, systemConfigurations.profiles[profileName].locationNameMapping, 50, 100, elementScalers);
-    let vr = createVolumeRenderer(
-        document.getElementById('volumeRenderer'),
-        ip.getInterpolatedData('Ca Concentration'),
-        layoutData.volumeRenderer.width,
-        layoutData.volumeRenderer.height,
-        50,
-        50,
-        colorScale,
-        gui
-    );
+    if (!vr) {
+        vr = createVolumeRenderer(
+            document.getElementById('volumeRenderer'),
+            ip.getInterpolatedData(selectedVolumeRenderedElement),
+            layoutData.volumeRenderer.width,
+            layoutData.volumeRenderer.height,
+            50,
+            50,
+            colorScale,
+            gui
+        );
+    } else {
+        vr.handleDataChange(ip.getInterpolatedData(selectedVolumeRenderedElement));
+    }
     //</editor-fold>
 
     //<editor-fold desc="Selection box change handler">

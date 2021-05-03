@@ -34,7 +34,7 @@ function setupLayout() {
     const vrHeight = vrWidth-30;
 
 
-    const legendRight = 10;
+    const legendRight = 20;
     const legendTop = 0;
 
     const d3DetailChart1Container = d3.select('#detailChart1Container').data([1]).join('div')

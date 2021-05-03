@@ -1,25 +1,31 @@
 function createVolumeRenderer(container, interpolatedData, width, height, horizontalInterpolatedSteps, verticalInterpolatedSteps, colorScale, gui) {
-    // Filter out the data which is not in the circle
-    debugger
-    const t = [...interpolatedData.t];
-    const r = horizontalInterpolatedSteps / 2;
-    for (let idx = 0; idx < interpolatedData.t.length; idx++) {
-        const x = interpolatedData.x[idx] + 1 - r;
-        const z = interpolatedData.z[idx] + 1 - r;
-        if ((x * x + z * z) > (r * r)) {
-            t[idx] = 0;
+    function createVolumeFromInterpolatedData(interpolatedData, valueRange=[0, 1]) {
+        const t = [...interpolatedData.t];
+        const r = horizontalInterpolatedSteps / 2;
+        for (let idx = 0; idx < interpolatedData.t.length; idx++) {
+            //Take the circle points only
+            const x = interpolatedData.x[idx] + 1 - r;
+            const z = interpolatedData.z[idx] + 1 - r;
+            if ((x * x + z * z) > (r * r)) {
+                t[idx] = 0;
+            }
+            //Take the values which is in the filtered value range
+            if((t[idx] < valueRange[0]) || t[idx] > valueRange[1]){
+                t[idx] = 0;
+            }
         }
-
+        //Data conversion
+        const volume = {
+            data: Float32Array.from(t),
+            xLength: verticalInterpolatedSteps,
+            yLength: horizontalInterpolatedSteps,
+            zLength: horizontalInterpolatedSteps
+        }
+        return volume;
     }
 
-
-    //Data conversion
-    const volume = {
-        data: Float32Array.from(t),
-        xLength: verticalInterpolatedSteps,
-        yLength: horizontalInterpolatedSteps,
-        zLength: horizontalInterpolatedSteps
-    }
+// Filter out the data which is not in the circle
+    const volume = createVolumeFromInterpolatedData(interpolatedData);
 
     //3D
     const GUI = dat.GUI;
@@ -59,7 +65,7 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         camera.rotation.set(-2.921, 0.272, 1.571);
 
 
-        camera.up.set(1, 0, 0); // In our data, -y is up
+        camera.up.set(1, 0, 0); // In our data, x is up
 
         // Create controls
         controls = new OrbitControls(camera, renderer.domElement);
@@ -70,23 +76,12 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
 
         controls.update();
 
-
-
-        // scene.add( new AxesHelper( 128 ) );
-
-        // Lighting is baked into the shader a.t.m.
-        // let dirLight = new DirectionalLight( 0xffffff );
-
         // The gui for interaction
-        volconfig = {clim1: 0, clim2: 1, renderstyle: 'iso', isothreshold: 0.1, colormap: 'custom'};
+        volconfig = {clim1: 0, clim2: 1, renderstyle: 'iso', isothreshold: 0.0, colormap: 'custom'};
         if (!gui) {
             gui = new GUI();
         }
-        gui.add(volconfig, 'clim1', 0, 1, 0.01).onChange(updateUniforms);
-        gui.add(volconfig, 'clim2', 0, 1, 0.01).onChange(updateUniforms);
-        gui.add(volconfig, 'colormap', {gray: 'gray', custom: 'custom'}).onChange(updateUniforms);
         gui.add(volconfig, 'renderstyle', {mip: 'mip', iso: 'iso'}).onChange(updateUniforms);
-        gui.add(volconfig, 'isothreshold', 0, 1, 0.01).onChange(updateUniforms);
 
         const texture = createTextureFromData(volume);
 
@@ -149,13 +144,8 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         renderer.render(scene, camera);
     }
 
-    function handleDataChange(interpolatedData) {
-        const volume = {
-            data: Float32Array.from(interpolatedData.t),
-            xLength: horizontalInterpolatedSteps,
-            yLength: verticalInterpolatedSteps,
-            zLength: horizontalInterpolatedSteps
-        };
+    function handleDataChange(interpolatedData, valueRange) {
+        const volume = createVolumeFromInterpolatedData(interpolatedData, valueRange);
         const texture = createTextureFromData(volume);
         material.uniforms['u_data'].value = texture;
         render();
