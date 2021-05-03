@@ -79,11 +79,6 @@ class VerticalCanvasTextureHandler extends TextureHandler {
                 if (x === 50) x = 49;
                 let z = Math.round(startZ + xValIdx * stepZ);
                 if (z === 50) z = 49;
-                //// This is an initial working search algo
-                // let t = this.elementalIPD.t.find((t, i) => {
-                //     return (this.elementalIPD.x[i] === x) && (this.elementalIPD.y[i] === y) && (this.elementalIPD.z[i] === z)
-                // });
-                // end of the initial method
                 // This is another approach to skip index assuming that z goes first, then x goes, then y goes
                 // e.g. zIdx: 0 0 0 - 0 0 0 - 0 0 0 - 1 1 1 - 1 1 1 - 1 1 1 - 2 2 2 - 2 2 2 - 2 2 2
                 //            0 0 0 - 1 1 1 - 2 2 2 - 0 0 0 - 1 1 1 - 2 2 2 - 0 0 0 - 1 1 1 - 2 2 2

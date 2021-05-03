@@ -6,11 +6,13 @@ let profileOptions = {
     profileOptionText: defaultProfile
 }
 let gui;
-setupLayout();
+const layoutData = setupLayout();
 
 function setupLayout() {
     const width = window.innerWidth / 2, height = 2 * window.innerHeight / 3;
     const margin = 10;
+
+    //Detail charts
     const detailChartLeft1 = margin;
     const detailChartTop1 = window.innerHeight - height + margin;
     const detailChartWidth = width - 2 * margin;
@@ -19,10 +21,18 @@ function setupLayout() {
     const detailChartLeft2 = width + margin;
     const detailChartTop2 = detailChartTop1;
 
+    //Parallel coordinates
     const pcLeft = margin;
     const pcTop = margin;
-    const pcWidth = window.innerWidth - 2 * pcLeft;
     const pcHeight = window.innerHeight - detailChartHeight - 4 * margin;
+    const pcWidth = window.innerWidth - 2 * pcLeft - pcHeight;
+
+    //Volume render element
+    const vrLeft = pcWidth;
+    const vrTop = pcTop + 30;
+    const vrWidth = pcHeight;
+    const vrHeight = vrWidth-30;
+
 
     const legendRight = 10;
     const legendTop = 0;
@@ -98,6 +108,7 @@ function setupLayout() {
         .style("left", "10px")
         .style("top", "5px");
 
+
     //Setup the gui
     gui = new dat.GUI({autoPlace: true});
     gui.domElement.id = 'gui';
@@ -118,6 +129,23 @@ function setupLayout() {
         .style('height', pcHeight + "px")
         .style('outline', 'none')
         .classed("parcoords", true);
+    //The volume renderer
+    d3.select('#volumeRenderer').data([1]).join('div')
+        .attr('id', 'volumeRenderer')
+        .style('position', 'absolute')
+        .style('left', vrLeft + 'px')
+        .style('top', (vrTop) + 'px')
+        .style('width', vrWidth + 'px')
+        .style('height', vrHeight + 'px')
+        .style('outline', 'none')
+        .style('border', '1px solid black');
+    const layoutData = {
+        volumeRenderer: {
+            width: vrWidth,
+            height: vrHeight
+        }
+    };
+    return layoutData;
 }
 
 //</editor-fold>

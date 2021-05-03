@@ -205,8 +205,9 @@ class Interpolator {
             for (let xValIdx = 0; xValIdx < this.horizontalSteps; xValIdx++) {
                 interpolatedData.x.push(xValIdx);
                 interpolatedData.z.push(zValIdx);
-                const predictedVal = kriging.predict(xValIdx, zValIdx, variogram);
-                interpolatedData.t.push(predictedVal >= 0 ? predictedVal : 0);
+                let predictedVal = kriging.predict(xValIdx, zValIdx, variogram);
+                if(predictedVal < 0) predictedVal = 0;
+                interpolatedData.t.push(predictedVal);
             }
         }
         return interpolatedData;
@@ -261,8 +262,11 @@ class Interpolator {
                         this.interpolatedData[element].x.push(xValIdx);
                         this.interpolatedData[element].y.push(yValIdx);
                         this.interpolatedData[element].z.push(zValIdx);
-                        const predictedVal = kriging.predict(xValIdx, yValIdx, variogram);
-                        this.interpolatedData[element].t.push(this.elementScalers[element](predictedVal >= 0 ? predictedVal : 0));
+                        let predictedVal = kriging.predict(xValIdx, yValIdx, variogram);
+                        predictedVal = this.elementScalers[element](predictedVal)
+                        if(predictedVal<0) predictedVal = 0;
+                        if(predictedVal>1) predictedVal = 1;
+                        this.interpolatedData[element].t.push(predictedVal);
                     }
                 }
             }

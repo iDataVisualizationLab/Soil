@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Volume Rendering</title>
+</head>
+<body>
+<script src="lib/d3/d3.v6.js"></script>
+<script src="lib/threejs/three.js"></script>
+<script src="lib/threejs/OrbitControls.js"></script>
+<script src="lib/threejs/DragControls.js"></script>
+<script src="lib/threejs/dat.gui.min.js"></script>
+<script src="lib/threejs/shaders/VolumeShader.js"></script>
+<script src="lib/threejs/WebGL.js"></script>
+
+<script src="js/settings.js"></script>
+<script src="js/dataprocessing.js"></script>
+<script src="lib/kriging.js"></script>
+<script src="js/volumerenderer.js"></script>
+
+<script>
+    profileDescriptions = {}
+    let interpolatedSteps = 50;
+    main();
+
+    async function main() {
+        //Data
+        let profileName = 'L';
+        //Load the data
+        if (!profileDescriptions[profileName]) {
+            profileDescriptions[profileName] = new ProfileDescription(`./data/${profileName}.csv`, systemConfigurations.profiles[profileName].locationNameMapping);
+        }
+
+        const elements = await profileDescriptions[profileName].getElements();
+        const csvContent = await profileDescriptions[profileName].getCsvContent();
+        const elementScalers = await profileDescriptions[profileName].getElementScalers();
+        const interpolator = new Interpolator(csvContent, elements, systemConfigurations.depthNames, systemConfigurations.profiles[profileName].locationNameMapping, interpolatedSteps, interpolatedSteps, elementScalers);
+        let interpolatedData = interpolator.getInterpolatedData('Ca Concentration');
+
+        createVolumeRenderer(document.body, interpolatedData, window.innerWidth, window.innerHeight, 50, 50);
+    }
+
+</script>
+</body>
+</html>

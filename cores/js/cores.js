@@ -33,7 +33,7 @@ async function handleProfileChange(profileName) {
 
     populateSelectors(elmSelectOptions, selectedElements, handleSelectionChange);
 
-    const colorScale = new d3.scaleLinear().domain([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]).range(colors10);
+    const colorScale = new d3.scaleLinear().domain([0., 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]).range(colors10);
 
 
     //Preload the data for this element
@@ -99,8 +99,33 @@ async function handleProfileChange(profileName) {
                 pc.color(d => colorScale(elementScalers[`${dimension} Concentration`](d[dimension]))).render();
             }
         }
+
+        //update axis ticks to reduce space
+        pc.svg.selectAll('.dimension').filter(d => (d !== 'Location' && d !== 'Depth')).selectAll('.tick').selectAll('text').text(d => {
+            if (d > 1000) {
+                return d / 1000 + 'K';
+            } else {
+                return d;
+            }
+
+        });
+
     });
 
+    //</editor-fold>
+
+    //<editor-fold desc="The volume renderer">
+    // const ip1 = new Interpolator(csvContent, elements, systemConfigurations.depthNames, systemConfigurations.profiles[profileName].locationNameMapping, 50, 100, elementScalers);
+    let vr = createVolumeRenderer(
+        document.getElementById('volumeRenderer'),
+        ip.getInterpolatedData('Ca Concentration'),
+        layoutData.volumeRenderer.width,
+        layoutData.volumeRenderer.height,
+        50,
+        50,
+        colorScale,
+        gui
+    );
     //</editor-fold>
 
     //<editor-fold desc="Selection box change handler">
