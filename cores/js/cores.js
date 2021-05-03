@@ -128,6 +128,8 @@ async function handleProfileChange(profileName) {
                     .style("font-weight", "bold");
                 selectedVolumeRenderedElement = `${dimension} Concentration`;
                 pc.color(d => colorScale(elementScalers[selectedVolumeRenderedElement](d[dimension]))).render();
+                //Update the label on the volume renderer
+                layoutObject.handleVolumeRendererLabelChange(`Current element: <b>${dimension}</b>`);
                 //Handle the data change for the volume render
                 brushChange();
             }
@@ -142,8 +144,8 @@ async function handleProfileChange(profileName) {
         vr = createVolumeRenderer(
             document.getElementById('volumeRenderer'),
             ip.getInterpolatedData(selectedVolumeRenderedElement),
-            layoutData.volumeRenderer.width,
-            layoutData.volumeRenderer.height,
+            layoutObject.volumeRenderer.width,
+            layoutObject.volumeRenderer.height,
             50,
             50,
             colorScale,

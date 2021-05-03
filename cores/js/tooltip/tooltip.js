@@ -1,5 +1,5 @@
 //Build tooltip
-let div = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0);
+let div = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0).style('z-index', 10000);
 
 function showTip(event, htmlStr) {
     div.html(htmlStr).style("left", (event.pageX - 5) + "px")

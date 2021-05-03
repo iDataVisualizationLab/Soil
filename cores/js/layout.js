@@ -6,7 +6,7 @@ let profileOptions = {
     profileOptionText: defaultProfile
 }
 let gui;
-const layoutData = setupLayout();
+const layoutObject = setupLayout();
 
 function setupLayout() {
     const width = window.innerWidth / 2, height = 2 * window.innerHeight / 3;
@@ -31,7 +31,7 @@ function setupLayout() {
     const vrLeft = pcWidth;
     const vrTop = pcTop + 30;
     const vrWidth = pcHeight;
-    const vrHeight = vrWidth-30;
+    const vrHeight = vrWidth - 30;
 
 
     const legendRight = 20;
@@ -140,13 +140,34 @@ function setupLayout() {
         .style('height', vrHeight + 'px')
         .style('outline', 'none')
         .style('border', '1px solid black');
-    const layoutData = {
+
+    handleVolumeRendererLabelChange('Current element')
+
+    function handleVolumeRendererLabelChange(text) {
+        d3.select('#volumeRendererLabel')
+            .style('position', 'absolute')
+            .style('left', vrLeft + 'px')
+            .style('top', '20px')
+            .on('mousemove', (event, d) => {
+                if (systemConfigurations.helpEnabled) {
+                    showTip(event, "The color scale is on the parallel coordinate<br/>" +
+                        "Click on the elmenet on the parallel coordinate to change the selection.<br/>");
+                }
+            })
+            .on('mouseleave', (event, d) => {
+                hideTip();
+            })
+            .node().innerHTML = text;
+    }
+
+    const layoutObject = {
         volumeRenderer: {
             width: vrWidth,
             height: vrHeight
         }
     };
-    return layoutData;
+    layoutObject.handleVolumeRendererLabelChange = handleVolumeRendererLabelChange;
+    return layoutObject;
 }
 
 //</editor-fold>
