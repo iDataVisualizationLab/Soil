@@ -111,6 +111,7 @@ function setupLayout() {
 
     //Setup the gui
     gui = new dat.GUI({autoPlace: true});
+    gui.close();//closed by default
     gui.domElement.id = 'gui';
     gui.add(profileOptions, 'profileOptionText', profiles).name("Select profile")
         .onChange(function (value) {
@@ -118,7 +119,7 @@ function setupLayout() {
             handleProfileChange(profileCodes[profiles.indexOf(value)]);
         });
     gui.add(systemConfigurations, "helpEnabled").name("Help enabled");
-    gui.close();//closed by default
+
 
     //
     d3.select("#parcoordsChart")
