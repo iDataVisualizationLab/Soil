@@ -135,6 +135,12 @@ function setupLayout() {
     gui.add(systemConfigurations, "isOuterVisible").name("Outer visibility").onChange(function(value){
         handleOuterVisibility(systemConfigurations.isOuterVisible);
     });
+    gui.add(systemConfigurations, "isHorizCutVisible").name("Horizontal cut visibility").onChange(function(value){
+        handleHorizCutVisibility(systemConfigurations.isHorizCutVisible);
+    });
+    gui.add(systemConfigurations, "isVertiCutVisible").name("Vertical cut visibility").onChange(function(value){
+        handleVertiCutVisibility(systemConfigurations.isVertiCutVisible);
+    });
 
 
     //

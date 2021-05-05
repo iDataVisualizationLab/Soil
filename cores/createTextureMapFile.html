@@ -5,27 +5,15 @@
     <title>Title</title>
     <script src="lib/d3/d3.v6.js"></script>
     <script src="js/colorschemes.js"></script>
+    <script src="js/volumerenderer.js"></script>
 </head>
 <body>
 
 <script>
     const colorDomain = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
     const colorScale = new d3.scaleLinear().domain(colorDomain).range(colors10);
-    document.body.appendChild(createColorMapCanvas(colorScale));
-    function createColorMapCanvas(colorScale){
-        const width = 256;
-        const height = 1;
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext('2d');
-        ctx.canvas.width = width;
-        ctx.canvas.height = height;
-        const widthScale = new d3.scaleLinear().domain([0, 1]).range([0, width]);
-        colorScale.domain().forEach(val=>{
-            ctx.fillStyle = colorScale(val);
-            ctx.fillRect(widthScale(val), 0, width/colorScale.domain().length, 1);
-        });
-        return canvas;
-    }
+    document.body.appendChild(createContinuousColorMapCanvas(colorScale));
+
 
 </script>
 </body>

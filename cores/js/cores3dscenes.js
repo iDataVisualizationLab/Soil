@@ -33,16 +33,16 @@ let ThreeDScences = function (renderer, profileName) {
         if (sceneInfo.theProfile) {
             sceneInfo.scene.remove(sceneInfo.theProfile);
         }
-        if (sceneInfo.horizCutPlane) {
-            sceneInfo.scene.remove(sceneInfo.horizCutPlane);
-        }
+        // if (sceneInfo.horizCutPlane) {
+        //     sceneInfo.scene.remove(sceneInfo.horizCutPlane);
+        // }
         let horizCutY = -0.5;
         const theProfile = createProfileObject(horizCutY, profileName);
-        const horizCutPlane = createHorizontalCutPlane(horizCutY);
+        // const horizCutPlane = createHorizontalCutPlane(horizCutY);
         scene.add(theProfile);
-        scene.add(horizCutPlane);
+        // scene.add(horizCutPlane);
         sceneInfo.theProfile = theProfile;
-        sceneInfo.horizCutPlane = horizCutPlane;
+        // sceneInfo.horizCutPlane = horizCutPlane;
 
         return sceneInfo;
     }

@@ -89,7 +89,9 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         const texture = createTextureFromData(volume);
 
         // Colormap textures
-        const cmCanvas = createColorMapCanvas(colorScale);
+        // const cmCanvas = createColorMapCanvas(colorScale);
+        const cmCanvas = createContinuousColorMapCanvas(colorScale);
+
         cmtextures = {
             custom: new THREE.CanvasTexture(cmCanvas),
             gray: new THREE.TextureLoader().load('textures/cm_gray.png', render)
@@ -171,5 +173,20 @@ function createColorMapCanvas(colorScale) {
         ctx.fillStyle = colorScale(val);
         ctx.fillRect(widthScale(val), 0, width / colorScale.domain().length, 1);
     });
+    return canvas;
+}
+function createContinuousColorMapCanvas(colorScale) {
+    const width = 256;
+    const height = 1;
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext('2d');
+    ctx.canvas.width = width;
+    ctx.canvas.height = height;
+    const widthScale = new d3.scaleLinear().domain([0, width]).range([0, 1]);
+    for (let i = 0; i < width; i++) {
+        ctx.fillStyle = colorScale(widthScale(i));
+        ctx.fillRect(i, 0, 1, height);
+    }
+
     return canvas;
 }

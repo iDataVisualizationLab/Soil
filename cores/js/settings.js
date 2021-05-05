@@ -4,6 +4,8 @@ let locationNameMapping;
 const systemConfigurations = {
     helpEnabled: false,
     isOuterVisible: true,
+    isHorizCutVisible: true,
+    isVertiCutVisible: true,
     depthNames: {
         "0-10 cm": 9,
         "10-20 cm": 8,
@@ -16,8 +18,8 @@ const systemConfigurations = {
         "80-90 cm": 1,
         "90-100 cm": 0
     },
-    profiles:{
-        "L":{
+    profiles: {
+        "L": {
             locationNameMapping: {
                 "L1": [1, 1],
                 "L2": [2, 1],
@@ -34,7 +36,7 @@ const systemConfigurations = {
                 "L13": [2, 4]
             }
         },
-        "R":{
+        "R": {
             locationNameMapping: {
                 "R1": [1, 1],
                 "R12": [2, 1],
@@ -51,7 +53,7 @@ const systemConfigurations = {
                 "R7": [2, 4]
             }
         },
-        "S":{
+        "S": {
             locationNameMapping: {
                 "S1": [1, 1],
                 "S12": [2, 1],

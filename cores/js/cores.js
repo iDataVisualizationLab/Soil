@@ -196,7 +196,8 @@ async function handleProfileChange(profileName) {
     }
 
     function handleHorizCutChange(elementInfo, idx, circleTextureHandlers) {
-        const horizCutPlaneY = elementInfo.horizCutPlane.position.y;
+        // const horizCutPlaneY = elementInfo.horizCutPlane.position.y;
+        const horizCutPlaneY = elementInfo.theProfile.horizCut.position.y;
         const horizCutCanvasY = Math.round(profileToCanvasScale(horizCutPlaneY));
         // const texture = circleTextureHandlers[idx].getTexture(horizCutCanvasY);
         const texture = circleTextureHandlers[idx].getTextureWithLocation(horizCutCanvasY, systemConfigurations.profiles[profileName].locationNameMapping);
@@ -277,6 +278,8 @@ async function handleProfileChange(profileName) {
             let orbitControls = new THREE.OrbitControls(elementInfo.camera, domElement);
             orbitControls.enableZoom = false;
             orbitControls.enablePan = false;
+
+            //
             orbitControls.maxPolarAngle = Math.PI / 2;
 
             //
@@ -319,7 +322,7 @@ async function handleProfileChange(profileName) {
                 elementInfo.dragControls.dispose();
             }
             let horizCutPlaneX, horizCutPlaneY, horizCutPlaneZ;
-            const draggableObjects = [elementInfo.horizCutPlane];
+            const draggableObjects = [elementInfo.theProfile.horizCut];
             const dragControls = new THREE.DragControls(draggableObjects, elementInfo.camera, domElement);
             //Remove the previous controls on domElement
             dragControls.addEventListener('hoveron', function (event) {
@@ -330,14 +333,13 @@ async function handleProfileChange(profileName) {
             });
             dragControls.addEventListener("dragstart", function (event) {
                 //Disable orbit
-                elementInfo.orbitControls.enabled = false;
                 elementInfos.forEach(elementInfo => {
                     elementInfo.orbitControls.enabled = false;
                 });
                 horizCutPlaneX = event.object.position.x;
                 horizCutPlaneY = event.object.position.y;
                 horizCutPlaneZ = event.object.position.z;
-
+                event.object.material.emissive.set(0x000000);
             });
             dragControls.addEventListener("drag", function (event) {
                 event.object.position.x = horizCutPlaneX;
@@ -351,9 +353,9 @@ async function handleProfileChange(profileName) {
                 horizCutPlaneY = event.object.position.y;
                 const horizCutCanvasY = Math.round(profileToCanvasScale(horizCutPlaneY));
                 elementInfos.forEach((elementInfo, idx) => {
-                    elementInfo.horizCutPlane.position.x = horizCutPlaneX;
-                    elementInfo.horizCutPlane.position.y = horizCutPlaneY;
-                    elementInfo.horizCutPlane.position.z = horizCutPlaneZ;
+                    // elementInfo.horizCutPlane.position.x = horizCutPlaneX;
+                    // elementInfo.horizCutPlane.position.y = horizCutPlaneY;
+                    // elementInfo.horizCutPlane.position.z = horizCutPlaneZ;
                     const texture = circleTextureHandlers[idx].getTextureWithLocation(horizCutCanvasY, systemConfigurations.profiles[profileName].locationNameMapping);
                     elementInfo.theProfile.handleHorizCutPosition(horizCutPlaneY, texture);
                 });
@@ -380,3 +382,12 @@ function handleOuterVisibility(isVisible){
     elementInfos[0].theProfile.setOuterVisibility(isVisible);
     elementInfos[1].theProfile.setOuterVisibility(isVisible);
 }
+function handleVertiCutVisibility(isVisible){
+    elementInfos[0].theProfile.setVertiCutVisibility(isVisible);
+    elementInfos[1].theProfile.setVertiCutVisibility(isVisible);
+}
+function handleHorizCutVisibility(isVisible){
+    elementInfos[0].theProfile.setHorizCutVisibility(isVisible);
+    elementInfos[1].theProfile.setHorizCutVisibility(isVisible);
+}
+

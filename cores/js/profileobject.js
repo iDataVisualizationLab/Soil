@@ -147,7 +147,7 @@ function createProfileObject(horizCutY, profileName) {
     let horizCutTexture = textureLoader.load('./data/images/L.jpg');
     horizCutTexture.center.x = 0.5;
     horizCutTexture.center.y = 0.5;
-    const horizCutMat = new THREE.MeshBasicMaterial({
+    const horizCutMat = new THREE.MeshLambertMaterial({
         map: horizCutTexture,
     });
     const horizCut = new THREE.Mesh(horizCutGeo, horizCutMat);
@@ -308,11 +308,24 @@ function createProfileObject(horizCutY, profileName) {
         front.visible = isVisible;
     }
 
+    function setHorizCutVisibility(isVisible) {
+        horizCut.visible = isVisible;
+
+    }
+
+    function setVertiCutVisibility(isVisible) {
+        vertiCut.visible = isVisible;
+    }
+
     // function handle
     theObject.updateTopCapTexture = updateTopCapTexture;
     theObject.handleHorizCutPosition = handleHorizCutPosition;
     theObject.handleVertiCutAngle = handleVertiCutAngle;
     theObject.profile2TextCoordinate = profile2TextCoordinate;
     theObject.setOuterVisibility = setOuterVisibility;
+    theObject.setHorizCutVisibility = setHorizCutVisibility;
+    theObject.setVertiCutVisibility = setVertiCutVisibility;
+    // expose this object to setup draggable
+    theObject.horizCut = horizCut;
     return theObject;
 }
