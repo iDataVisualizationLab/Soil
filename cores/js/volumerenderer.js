@@ -71,8 +71,11 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         controls = new OrbitControls(camera, renderer.domElement);
         controls.addEventListener('change', render);
         controls.target.set(volume.xLength / 2, volume.yLength / 2, volume.zLength / 2);
+        //
         controls.enableZoom = false;
         controls.enablePan = false;
+        //
+        controls.rotateSpeed = 0.3;
 
         controls.update();
 
