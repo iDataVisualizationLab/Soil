@@ -376,3 +376,7 @@ async function handleProfileChange(profileName) {
     }
     //</editor-fold>
 }
+function handleTopCapVisibility(isVisible){
+    elementInfos[0].theProfile.setTopCapVisibility(isVisible);
+    elementInfos[1].theProfile.setTopCapVisibility(isVisible);
+}

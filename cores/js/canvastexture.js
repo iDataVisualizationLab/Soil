@@ -94,7 +94,7 @@ class TextureHandler {
             ctx.strokeStyle = 'white';
             ctx.fillStyle = 'black';
             ctx.lineWidth = 0.2;
-            ctx.font = '20px serif';
+            ctx.font = '15px serif';
             ctx.textAlign = 'right';
             ctx.fillText(text, canvas.width, y);
             ctx.strokeText(text, canvas.width, y);

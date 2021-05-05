@@ -303,11 +303,15 @@ function createProfileObject(horizCutY, profileName) {
         }
     }
 
+    function setTopCapVisibility(isVisible) {
+        topCap.visible = isVisible;
+    }
+
     // function handle
     theObject.updateTopCapTexture = updateTopCapTexture;
     theObject.handleHorizCutPosition = handleHorizCutPosition;
     theObject.handleVertiCutAngle = handleVertiCutAngle;
     theObject.profile2TextCoordinate = profile2TextCoordinate;
-
+    theObject.setTopCapVisibility = setTopCapVisibility;
     return theObject;
 }
