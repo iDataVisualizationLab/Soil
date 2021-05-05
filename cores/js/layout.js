@@ -43,7 +43,18 @@ function setupLayout() {
         .style('left', detailChartLeft1 + 'px')
         .style('top', detailChartTop1 + 'px')
         .style('width', detailChartWidth + "px")
-        .style('height', detailChartHeight + "px");
+        .style('height', detailChartHeight + "px")
+        .on("mousemove", (event, d) => {
+            if (systemConfigurations.helpEnabled) {
+                const msg = `Drag the horizontal cut up/down to change the depth.<br/>
+                            Drag left/right on this panel to change the vertical cut angle.<br/>
+                            Planes' visibility toggles are available in the control panel.`;
+                showTip(event, msg);
+            }
+        })
+        .on("mouseout", () => {
+            hideTip();
+        });;
 
     d3DetailChart1Container.append('div')
         .attr('id', 'detailChart1')
