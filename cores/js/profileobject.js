@@ -303,8 +303,9 @@ function createProfileObject(horizCutY, profileName) {
         }
     }
 
-    function setTopCapVisibility(isVisible) {
+    function setOuterVisibility(isVisible) {
         topCap.visible = isVisible;
+        front.visible = isVisible;
     }
 
     // function handle
@@ -312,6 +313,6 @@ function createProfileObject(horizCutY, profileName) {
     theObject.handleHorizCutPosition = handleHorizCutPosition;
     theObject.handleVertiCutAngle = handleVertiCutAngle;
     theObject.profile2TextCoordinate = profile2TextCoordinate;
-    theObject.setTopCapVisibility = setTopCapVisibility;
+    theObject.setOuterVisibility = setOuterVisibility;
     return theObject;
 }

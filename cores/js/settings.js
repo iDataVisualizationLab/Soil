@@ -3,7 +3,7 @@ let locationNameMapping;
 
 const systemConfigurations = {
     helpEnabled: false,
-    isTopCapVisible: true,
+    isOuterVisible: true,
     depthNames: {
         "0-10 cm": 9,
         "10-20 cm": 8,

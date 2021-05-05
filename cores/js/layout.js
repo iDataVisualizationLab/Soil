@@ -132,8 +132,8 @@ function setupLayout() {
             handleProfileChange(profileCodes[profiles.indexOf(value)]);
         });
     gui.add(systemConfigurations, "helpEnabled").name("Help enabled");
-    gui.add(systemConfigurations, "isTopCapVisible").name("Top view visibility").onChange(function(value){
-        handleTopCapVisibility(systemConfigurations.isTopCapVisible);
+    gui.add(systemConfigurations, "isOuterVisible").name("Outer visibility").onChange(function(value){
+        handleOuterVisibility(systemConfigurations.isOuterVisible);
     });
 
 
