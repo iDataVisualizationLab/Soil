@@ -198,7 +198,9 @@ async function handleProfileChange(profileName) {
     function handleHorizCutChange(elementInfo, idx, circleTextureHandlers) {
         const horizCutPlaneY = elementInfo.horizCutPlane.position.y;
         const horizCutCanvasY = Math.round(profileToCanvasScale(horizCutPlaneY));
-        const texture = circleTextureHandlers[idx].getTexture(horizCutCanvasY);
+        // const texture = circleTextureHandlers[idx].getTexture(horizCutCanvasY);
+        const texture = circleTextureHandlers[idx].getTextureWithLocation(horizCutCanvasY, systemConfigurations.profiles[profileName].locationNameMapping);
+
         elementInfo.theProfile.handleHorizCutPosition(horizCutPlaneY, texture);
     }
 
@@ -352,7 +354,7 @@ async function handleProfileChange(profileName) {
                     elementInfo.horizCutPlane.position.x = horizCutPlaneX;
                     elementInfo.horizCutPlane.position.y = horizCutPlaneY;
                     elementInfo.horizCutPlane.position.z = horizCutPlaneZ;
-                    const texture = circleTextureHandlers[idx].getTexture(horizCutCanvasY);
+                    const texture = circleTextureHandlers[idx].getTextureWithLocation(horizCutCanvasY, systemConfigurations.profiles[profileName].locationNameMapping);
                     elementInfo.theProfile.handleHorizCutPosition(horizCutPlaneY, texture);
                 });
             });

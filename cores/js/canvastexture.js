@@ -1,7 +1,7 @@
 //<editor-fold desc="Canvas and Texture Handler, low level classes, can be ignored">
 class CanvasTexture {
     createCanvas(data, width, height, colorScale) {
-        const scaler = d3.scaleLinear().domain([0, 50]).range([0, 200]);
+        const scaler = d3.scaleLinear().domain([0, 50]).range([0, 400]);
         const ctx = document.createElement('canvas').getContext('2d');
         ctx.canvas.width = scaler(width);
         ctx.canvas.height = scaler(height);
@@ -27,6 +27,7 @@ class CanvasTexture {
         return texture;
     }
 }
+
 class TextureHandler {
     constructor(interpolator, element, colorScale) {
         this.elementalIPD = interpolator.getInterpolatedData(element);
@@ -47,7 +48,65 @@ class TextureHandler {
         return texture;
     }
 
+    createTextureWithLocations(data, locationMapping) {
+        const canvas = this.createCanvas(data);
+        const ctx = canvas.getContext('2d');
+        const locations = Object.keys(locationMapping);
+        const step = 50 / 5;
+        const halfStep = step / 2;
+        ctx.strokeStyle = 'white';
+        ctx.fillStyle = 'black';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.lineWidth = 0.2;
+        ctx.font = '20px serif';
+
+        const scaler = d3.scaleLinear().domain([0, 50]).range([0, canvas.width]);
+
+        locations.forEach(loc => {
+            const pos = locationMapping[loc];
+            const x = scaler(pos[0] * step + halfStep);
+            const y = scaler(50 - (pos[1] * (step) + halfStep));
+            ctx.fillText(loc, x, y);
+            ctx.strokeText(loc, x, y);
+        });
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.center.x = 0.5;
+        texture.center.y = 0.5;
+        return texture;
+    }
+
+    createTextureWithDepths(data){
+        const canvas = this.createCanvas(data);
+        const ctx = canvas.getContext('2d');
+        const scaler = d3.scaleLinear().domain([0, 10]).range([0, canvas.height]);
+        for (let i = 1; i < 10; i++) {
+            const y = scaler(i);
+            //The line
+            ctx.beginPath();
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 0.2;
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width, y);
+            ctx.stroke();
+            //The text
+            const text = `${i*10} cm`;
+            ctx.strokeStyle = 'white';
+            ctx.fillStyle = 'black';
+            ctx.lineWidth = 0.2;
+            ctx.font = '20px serif';
+            ctx.textAlign = 'right';
+            ctx.fillText(text, canvas.width, y);
+            ctx.strokeText(text, canvas.width, y);
+        }
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.center.x = 0.5;
+        texture.center.y = 0.5;
+        return texture;
+    }
+
 }
+
 //</editor-fold>
 class VerticalCanvasTextureHandler extends TextureHandler {
     constructor(interpolator, element, colorScale) {
@@ -101,7 +160,8 @@ class VerticalCanvasTextureHandler extends TextureHandler {
     }
 
     getTexture(cutAngle) {
-        return this.createTexture(this.getData(cutAngle));
+        // return this.createTexture(this.getData(cutAngle));
+        return this.createTextureWithDepths(this.getData(cutAngle));
     }
 
     getCanvas(cutAngle) {
@@ -125,6 +185,10 @@ class HorizontalCanvasTextureHandler extends TextureHandler {
 
     getTexture(yValue) {
         return this.createTexture(this.getData(yValue));
+    }
+
+    getTextureWithLocation(yValue, locationMapping) {
+        return this.createTextureWithLocations(this.getData(yValue), locationMapping);
     }
 
 }

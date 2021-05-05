@@ -271,9 +271,43 @@ function createProfileObject(horizCutY, profileName) {
         // topCap.material.map.needsUpdate = true;
     }
 
+    function profile2TextCoordinate(camera, cameraViewWidth, cameraViewHeight, locationNameMapping) {
+        try {
+            const projectedLocations = {}
+            Object.keys(locationNameMapping).forEach(loc => {
+                let pos = new THREE.Vector3();
+                pos = pos.setFromMatrixPosition(theObject.matrixWorld);
+                pos.x = pos.x + (locationNameMapping[loc][0] - 2) * .2;
+                pos.z = pos.z + (locationNameMapping[loc][1] - 2) * .2;
+                if (pos.z >= 0) {
+                    pos.y = 0.5;
+                } else {
+                    pos.y = -0.5;
+                }
+
+                //Project to camera coordiante
+                pos = pos.project(camera);
+
+                let widthHalf = cameraViewWidth / 2;
+                let heightHalf = cameraViewHeight / 2;
+
+                pos.x = (pos.x * widthHalf) + widthHalf;
+                pos.y = (pos.y * heightHalf) + heightHalf;
+                pos.z = 0;
+                projectedLocations[loc] = {x: pos.x, y: pos.y};
+            });
+            return projectedLocations;
+        } catch (e) {
+            //TODO: this is only a quick fix. The text doesn't exist, just hide them
+            return {x: -100, y: -100}
+        }
+    }
+
     // function handle
     theObject.updateTopCapTexture = updateTopCapTexture;
     theObject.handleHorizCutPosition = handleHorizCutPosition;
     theObject.handleVertiCutAngle = handleVertiCutAngle;
+    theObject.profile2TextCoordinate = profile2TextCoordinate;
+
     return theObject;
 }

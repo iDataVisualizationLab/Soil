@@ -30,8 +30,8 @@ function setupLayout() {
     //Volume render element
     const vrLeft = pcWidth;
     const vrTop = pcTop + 30;
-    const vrWidth = pcHeight;
-    const vrHeight = vrWidth - 30;
+    const vrWidth = pcHeight + 10;
+    const vrHeight = vrWidth - 40;
 
 
     const legendRight = 20;
@@ -67,6 +67,19 @@ function setupLayout() {
         .style("position", "absolute")
         .style("left", "10px")
         .style("top", "5px");
+    //For the element texts
+    // d3.selectAll('.location').data(new Array(13), (d, i)=>i)
+    //     .join('div').attr('class', 'location');
+    // function updateTextPositions(projectedPositions) {
+    //     const locations = Object.keys(projectedPositions);
+    //     d3DetailChart1Container.selectAll('.location').data(locations, (loc, i)=>i)
+    //         .join('div').attr('class', 'location')
+    //         .text(loc=>loc)
+    //         .style('position', 'absolute')
+    //         .style('left', loc=>projectedPositions[loc].x + 'px')
+    //         .style('top', loc=>projectedPositions[loc].y + 'px');
+    // }
+
 
     const d3DetailChart2Container = d3.select('#detailChart2Container').data([2]).join('div')
         .attr("id", "detailChart2Container")
@@ -164,9 +177,15 @@ function setupLayout() {
         volumeRenderer: {
             width: vrWidth,
             height: vrHeight
+        },
+        detailChart1:{
+            width: detailChartWidth,
+            height: detailChartHeight
         }
     };
     layoutObject.handleVolumeRendererLabelChange = handleVolumeRendererLabelChange;
+    //Expose this
+    // layoutObject.updateTextPositions = updateTextPositions;
     return layoutObject;
 }
 
