@@ -54,7 +54,7 @@ function setupLayout() {
         })
         .on("mouseout", () => {
             hideTip();
-        });;
+        });
 
     d3DetailChart1Container.append('div')
         .attr('id', 'detailChart1')
@@ -78,19 +78,25 @@ function setupLayout() {
         .style("position", "absolute")
         .style("left", "10px")
         .style("top", "5px");
-    //For the element texts
-    // d3.selectAll('.location').data(new Array(13), (d, i)=>i)
-    //     .join('div').attr('class', 'location');
-    // function updateTextPositions(projectedPositions) {
-    //     const locations = Object.keys(projectedPositions);
-    //     d3DetailChart1Container.selectAll('.location').data(locations, (loc, i)=>i)
-    //         .join('div').attr('class', 'location')
-    //         .text(loc=>loc)
-    //         .style('position', 'absolute')
-    //         .style('left', loc=>projectedPositions[loc].x + 'px')
-    //         .style('top', loc=>projectedPositions[loc].y + 'px');
-    // }
 
+    d3DetailChart1Container
+        .append("div")//for the view options
+        .attr("id", "viewOptions")
+        .style("position", "absolute")
+        .style("left", "10px")
+        .style("bottom", "5px");
+    createCheckBox('viewOptions', 'Outer visibility', 'outerVisibility', true, (event)=>{
+        systemConfigurations.isOuterVisible = event.target.checked;
+        handleOuterVisibility(systemConfigurations.isOuterVisible);
+    });
+    createCheckBox('viewOptions', 'Horizontal cut visibility', 'horizCutVisibility', true, (event)=>{
+        systemConfigurations.isHorizCutVisible = event.target.checked;
+        handleHorizCutVisibility(systemConfigurations.isHorizCutVisible);
+    });
+    createCheckBox('viewOptions', 'Vertical cut visibility', 'vertiCutVisibility', true, (event)=>{
+        systemConfigurations.isVertiCutVisible = event.target.checked;
+        handleVertiCutVisibility(systemConfigurations.isVertiCutVisible);
+    });
 
     const d3DetailChart2Container = d3.select('#detailChart2Container').data([2]).join('div')
         .attr("id", "detailChart2Container")
@@ -143,16 +149,6 @@ function setupLayout() {
             handleProfileChange(profileCodes[profiles.indexOf(value)]);
         });
     gui.add(systemConfigurations, "helpEnabled").name("Help enabled");
-    gui.add(systemConfigurations, "isOuterVisible").name("Outer visibility").onChange(function(value){
-        handleOuterVisibility(systemConfigurations.isOuterVisible);
-    });
-    gui.add(systemConfigurations, "isHorizCutVisible").name("Horizontal cut visibility").onChange(function(value){
-        handleHorizCutVisibility(systemConfigurations.isHorizCutVisible);
-    });
-    gui.add(systemConfigurations, "isVertiCutVisible").name("Vertical cut visibility").onChange(function(value){
-        handleVertiCutVisibility(systemConfigurations.isVertiCutVisible);
-    });
-
 
     //
     d3.select("#parcoordsChart")
@@ -174,13 +170,23 @@ function setupLayout() {
         .style('outline', 'none')
         .style('border', '1px solid black');
 
-    handleVolumeRendererLabelChange('Current element')
+    //Create the selection box
+    d3.select('#volumeRenderStyle').data([1]).join('div')
+        .attr("id", 'volumeRenderStyle')
+        .style('position', 'absolute')
+        .style('right', margin + 'px')
+        .style('top', margin + 'px');
+
+    // const renderStyleOptions = [{text: 'iso', value:'iso'}, {text: 'mip', value: 'mip'}];
+    // createSelectionFromJson('volumeRenderStyle', renderStyleOptions, 'renderstyle', 'iso', undefined, 'Render style:');
+
+    handleVolumeRendererLabelChange('Current element');
 
     function handleVolumeRendererLabelChange(text) {
         d3.select('#volumeRendererLabel')
             .style('position', 'absolute')
             .style('left', vrLeft + 'px')
-            .style('top', '20px')
+            .style('top', '15px')
             .on('mousemove', (event, d) => {
                 if (systemConfigurations.helpEnabled) {
                     showTip(event, "The color scale is on the parallel coordinate<br/>" +
