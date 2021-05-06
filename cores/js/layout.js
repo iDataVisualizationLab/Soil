@@ -48,7 +48,7 @@ function setupLayout() {
             if (systemConfigurations.helpEnabled) {
                 const msg = `Drag the horizontal cut up/down to change the depth.<br/>
                             Drag left/right on this panel to change the vertical cut angle.<br/>
-                            Planes' visibility toggles are available in the control panel.`;
+                            Planes' visibility toggles are available at the bottom.`;
                 showTip(event, msg);
             }
         })

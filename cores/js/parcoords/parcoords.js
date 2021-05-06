@@ -12913,8 +12913,6 @@
             pc.render();
         }
 
-        pc.flipAxisAndUpdatePCP = flipAxisAndUpdatePCP;
-
         function rotateLabels() {
             if (!__.rotateLabels) return;
 
