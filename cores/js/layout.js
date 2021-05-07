@@ -37,7 +37,7 @@ function setupLayout() {
     const legendRight = 20;
     const legendTop = 0;
 
-    const d3DetailChart1Container = d3.select('#detailChart1Container').data([1]).join('div')
+    const d3DetailChart1Container = d3.select('body').select('#detailChart1Container').data([1]).join('div')
         .attr("id", "detailChart1Container")
         .style('position', 'absolute')
         .style('left', detailChartLeft1 + 'px')
@@ -85,20 +85,20 @@ function setupLayout() {
         .style("position", "absolute")
         .style("left", "10px")
         .style("bottom", "5px");
-    createCheckBox('viewOptions', 'Outer visibility', 'outerVisibility', true, (event)=>{
+    createCheckBox('viewOptions', 'Outer visibility', 'outerVisibility', true, (event) => {
         systemConfigurations.isOuterVisible = event.target.checked;
         handleOuterVisibility(systemConfigurations.isOuterVisible);
     });
-    createCheckBox('viewOptions', 'Horizontal cut visibility', 'horizCutVisibility', true, (event)=>{
+    createCheckBox('viewOptions', 'Horizontal cut visibility', 'horizCutVisibility', true, (event) => {
         systemConfigurations.isHorizCutVisible = event.target.checked;
         handleHorizCutVisibility(systemConfigurations.isHorizCutVisible);
     });
-    createCheckBox('viewOptions', 'Vertical cut visibility', 'vertiCutVisibility', true, (event)=>{
+    createCheckBox('viewOptions', 'Vertical cut visibility', 'vertiCutVisibility', true, (event) => {
         systemConfigurations.isVertiCutVisible = event.target.checked;
         handleVertiCutVisibility(systemConfigurations.isVertiCutVisible);
     });
 
-    const d3DetailChart2Container = d3.select('#detailChart2Container').data([2]).join('div')
+    const d3DetailChart2Container = d3.select('body').select('#detailChart2Container').data([2]).join('div')
         .attr("id", "detailChart2Container")
         .style('position', 'absolute')
         .style('left', detailChartLeft2 + 'px')
@@ -175,10 +175,18 @@ function setupLayout() {
         .attr("id", 'volumeRenderStyle')
         .style('position', 'absolute')
         .style('right', margin + 'px')
-        .style('top', margin + 'px');
+        .style('top', 20 + 'px');
 
-    // const renderStyleOptions = [{text: 'iso', value:'iso'}, {text: 'mip', value: 'mip'}];
-    // createSelectionFromJson('volumeRenderStyle', renderStyleOptions, 'renderstyle', 'iso', undefined, 'Render style:');
+    const renderStyleOptions = [{label: 'iso', value: 'iso', id: 'isoRenderStyle'}, {
+        label: 'mip',
+        value: 'mip',
+        id: 'mipRenderStyle'
+    }];
+    createRadioButtons('volumeRenderStyle', renderStyleOptions, 'renderStyle', 'iso', (event) => {
+        if (event.target.checked) {
+            vr.changeRenderStyle(event.target.value);
+        }
+    });
 
     handleVolumeRendererLabelChange('Current element');
 
@@ -186,7 +194,7 @@ function setupLayout() {
         d3.select('#volumeRendererLabel')
             .style('position', 'absolute')
             .style('left', vrLeft + 'px')
-            .style('top', '15px')
+            .style('top', '20px')
             .on('mousemove', (event, d) => {
                 if (systemConfigurations.helpEnabled) {
                     showTip(event, "The color scale is on the parallel coordinate<br/>" +
@@ -204,7 +212,7 @@ function setupLayout() {
             width: vrWidth,
             height: vrHeight
         },
-        detailChart1:{
+        detailChart1: {
             width: detailChartWidth,
             height: detailChartHeight
         }

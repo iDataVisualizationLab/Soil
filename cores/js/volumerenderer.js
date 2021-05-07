@@ -84,7 +84,6 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         if (!gui) {
             gui = new GUI();
         }
-        gui.add(volconfig, 'renderstyle', {mip: 'mip', iso: 'iso'}).onChange(updateUniforms);
 
         const texture = createTextureFromData(volume);
 
@@ -137,7 +136,6 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
     }
 
     function updateUniforms() {
-
         material.uniforms["u_clim"].value.set(volconfig.clim1, volconfig.clim2);
         material.uniforms["u_renderstyle"].value = volconfig.renderstyle == 'mip' ? 0 : 1; // 0: MIP, 1: ISO
         material.uniforms["u_renderthreshold"].value = volconfig.isothreshold; // For ISO renderstyle
@@ -156,8 +154,15 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         render();
     }
 
+    function changeRenderStyle(value){
+        volconfig.renderstyle = value;
+        updateUniforms();
+    }
+
     //Exposing handlers
     this.handleDataChange = handleDataChange;
+    this.changeRenderStyle = changeRenderStyle;
+
     return this;
 }
 

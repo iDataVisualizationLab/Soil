@@ -5,7 +5,8 @@
     <title>3D Cores</title>
     <!--D3-->
     <script src="lib/d3/d3.v6.js"></script>
-
+    <!--Close button-->
+    <script src="js/d3closebutton.js"></script>
     <!--3D-->
     <script src="lib/threejs/three.js"></script>
     <script src="lib/threejs/OrbitControls.js"></script>
@@ -28,8 +29,13 @@
     <script src="lib/kriging.js"></script>
     <script src="js/canvastexture.js"></script>
     <script src="lib/legend/legend.js"></script>
+
+    <!--Soil Packages and Menu-->
+    <script src="js/soilpackages.js"></script>
+    <script src="js/menus.js"></script>
     <!--Parallel Coordinates-->
     <script src="js/parcoords/parcoords.js"></script>
+    <script src="js/coreparcoords.js"></script>
     <style>
         @import "js/tooltip/tooltip.css";
         @import "js/loader/loader.css";
@@ -44,17 +50,96 @@
         .dg.a{
             overflow-x: visible;
         }
+        /*Input type checkbox*/
+        input[type="checkbox"] {
+            visibility: hidden;
+        }
+
+        label {
+            cursor: pointer;
+            font: 12px/1em sans-serif;
+            vertical-align: middle;
+        }
+
+        input[type="checkbox"] + label:before {
+            border: 1px solid #333;
+            content: "\00a0";
+            display: inline-block;
+            font: 12px/1em sans-serif;
+            height: 11px;
+            margin: 0 .25em 0 0;
+            padding: 0;
+            vertical-align: middle;
+            width: 11px;
+        }
+
+        input[type="checkbox"]:checked + label:before {
+            background: #fff;
+            color: #333;
+            content: "\2713";
+            text-align: center;
+        }
+
+        input[type="checkbox"]:checked + label:after {
+            font-weight: bold;
+        }
+
+        input[type="checkbox"]:focus + label::before {
+            outline: rgb(59, 153, 252) auto 5px;
+        }
+
+        /*Input type radio*/
+        input[type="radio"] {
+            visibility: hidden;
+        }
+
+        label {
+            cursor: pointer;
+            font: 12px/1em sans-serif;
+            vertical-align: middle;
+        }
+
+        input[type="radio"] + label:before {
+            border: 1px solid #333;
+            border-radius: 0.5em;
+            content: "\00a0";
+            display: inline-block;
+            font: 12px/1em sans-serif;
+            height: 11px;
+            margin: 0 .25em 0 0;
+            padding: 0;
+            vertical-align: middle;
+            width: 11px;
+        }
+
+        input[type="radio"]:checked + label:before {
+            background: #fff;
+            border-radius: 0.5em;
+            color: #333;
+            content: "\2713";
+            text-align: center;
+        }
+
+        input[type="radio"]:checked + label:after {
+            font-weight: bold;
+        }
+
+        input[type="radio"]:focus + label::before {
+            outline: rgb(59, 153, 252) auto 5px;
+        }
     </style>
     <!-- Volume Renderer-->
     <script src="lib/threejs/shaders/VolumeShader.js"></script>
     <script src="lib/threejs/WebGL.js"></script>
     <script src="js/volumerenderer.js"></script>
     <script src="js/webworker.js"></script>
+
 </head>
 <body>
 <!--loader-->
 <script src="js/loader/loader.js"></script>
-<div id="parcoordsChart" class="parcoords"></div>
+<div id="elementSelectionList" style="top: -2px; z-index: 999; position:absolute; left:250px;"></div>
+<div id="parcoordsChart" class="parcoords" style="overflow: visible;"></div>
 <div id="volumeRendererLabel"></div>
 <!--setup the layout-->
 <script src="js/layout.js"></script>

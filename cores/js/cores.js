@@ -4,6 +4,8 @@ const elementInfos = [];
 const selectedElements = ["Ca Concentration", "Rb Concentration"];
 let selectedVolumeRenderedElement = "Ca Concentration";
 let vr;
+let pc;
+let allDimensions;
 showLoader();
 handleProfileChange('L').then(_ => {
     hideLoader();
@@ -52,88 +54,30 @@ async function handleProfileChange(profileName) {
 
     //</editor-fold>
 
+    //<editor-fold desc="menu">
+    let soilPackages = new SoilPackages(elements.map(d=>d.split(' ')[0]));
+    createMenuStructure('elementSelectionList', soilPackages, elementSelectionChange);
+    function elementSelectionChange(evt){
+        let elm = evt.target.value;
+        //Current dims
+        const dims = pc.dimensions();
+        if(evt.target.checked){
+            //Added dimension
+            dims[elm] = allDimensions[elm];
+        }else{
+            //Remove dimension
+            delete dims[elm];
+        }
+        //Update
+        pc.dimensions(dims);
+
+    };
+    //</editor-fold>
     //<editor-fold desc="Parallel Coordinates">
     profileDescriptions[profileName].getParCoordsData().then(data => {
-        d3.select("#parcoordsChart").selectAll("*").remove();
-        let pc = parcoords()("#parcoordsChart");
-        pc
-            .data(data)
-            .smoothness(0.05)
-            .alpha(0.3)
-            .margin({top: 24, left: 10, bottom: 12, right: 10})
-            .render()
-            .reorderable()
-            .brushMode("1D-axes")  // enable brushing
-            .interactive();
-
-        changeVolumeRenderElement('Ca');
-
-        // click label to activate coloring
-        pc.svg.selectAll(".dimension")
-            .on("click", changeVolumeRenderElement)
-            .selectAll(".label")
-            .style("font-size", "14px");
-        d3.selectAll('.dimension')
-            .on("mouseover", (event, d) => {
-                if (systemConfigurations.helpEnabled) {
-                    const msg = `Click ${d} label to color by ${d} values
-                                <br/>Drag ${d} label to reorder ${d} axis
-                                <br/>Brush on the ${d} axis to filter by ${d} values
-                                <br/>Double click on the ${d} label to reverse value order`;
-                    showTip(event, msg);
-                }
-            })
-            .on("mouseout", () => {
-                hideTip();
-            });
-        //update axis ticks to reduce space
-        pc.svg.selectAll('.dimension').filter(d => (d !== 'Location' && d !== 'Depth')).selectAll('.tick').selectAll('text').text(d => {
-            if (d > 1000) {
-                return d / 1000 + 'K';
-            } else {
-                return d;
-            }
-        });
-        pc.on("brush", (d) => {
-            brushChange();
-        });
-
-        function brushChange() {
-            //Get the extend of the selected element
-            let valueRange;
-            const brushExtents = pc.brushExtents();
-            const pcDimension = selectedVolumeRenderedElement.split(' ')[0];
-
-            //If the element itself is not brushed take its value ranges from selected data items (might be selected due to other brushes)
-            if (pc.brushed()) {
-                valueRange = d3.extent(pc.brushed().map(item => item[pcDimension]));
-            } else {
-                valueRange = elementScalers[selectedVolumeRenderedElement].domain();
-            }
-            //Scale that element range down to 0 to 1
-            valueRange = valueRange.map(v => elementScalers[selectedVolumeRenderedElement](v));
-            //Now handle the change
-            vr.handleDataChange(ip.getInterpolatedData(selectedVolumeRenderedElement), valueRange);
-        }
-
-        // update color
-        function changeVolumeRenderElement(dimension) {
-            if (dimension !== "Location" && dimension !== "Depth") {
-                //Change the color
-                pc.svg.selectAll(".dimension")
-                    .style("font-weight", "normal")
-                    .filter(function (d) {
-                        return d == dimension;
-                    })
-                    .style("font-weight", "bold");
-                selectedVolumeRenderedElement = `${dimension} Concentration`;
-                pc.color(d => colorScale(elementScalers[selectedVolumeRenderedElement](d[dimension]))).render();
-                //Update the label on the volume renderer
-                layoutObject.handleVolumeRendererLabelChange(`Current element: <b>${dimension}</b>`);
-                //Handle the data change for the volume render
-                brushChange();
-            }
-        }
+        pc = createCoresParcoords(data, elementScalers, ip, colorScale);
+        //save all dimensions for future use
+        allDimensions = {...pc.dimensions()};
     });
 
     //</editor-fold>
@@ -253,6 +197,7 @@ async function handleProfileChange(profileName) {
     }
 
     function render() {
+
         renderer.setScissorTest(false);
         renderer.clear(true, true);
         renderer.setScissorTest(true);
@@ -305,6 +250,7 @@ async function handleProfileChange(profileName) {
                 handleCutAngleChange(orbitControls, squareTextureHandlers, idx, elementInfo);
                 hideLoader();
             });
+            orbitControls.autoRotate = true;
             elementInfo.orbitControls = orbitControls;
         }
     }
@@ -391,3 +337,6 @@ function handleHorizCutVisibility(isVisible){
     elementInfos[1].theProfile.setHorizCutVisibility(isVisible);
 }
 
+function removeAxes(name){
+    pc.removeAxes([name]);
+}
