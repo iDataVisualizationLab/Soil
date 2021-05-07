@@ -1,15 +1,18 @@
 function SoilPackages(detectedElements) {
-    let heavyMetalsLabel = "Heavy metals";
-    let plantEssentialElementsLabel = "Plant essentials";
-    let pedologicalFeaturesLabel = "Pedology";
-    let othersLabel = "Others";
-    let packages = [heavyMetalsLabel, plantEssentialElementsLabel, pedologicalFeaturesLabel, othersLabel];
+    //https://www.heritage-enviro.com/what-are-the-rcra-8-metals/
+    let heavyMetalsLabel = "RCRA 8 metals";
+    let heavyMetals = ['As', 'Ba', 'Cd', 'Cr', 'Pb', 'Hg', 'Se', 'Ag'];
 
-    let heavyMetals = ['Cr', 'Pb', 'Cd', 'Hg', 'As'];
+    let plantEssentialElementsLabel = "Plant essentials";
     let plantEssentialElements = ['Ca', 'Cu', 'Fe', 'K', 'Mn', 'S', 'Zn'];
+
+    let pedologicalFeaturesLabel = "Pedology";
     let pedologicalFeatures = ['RI', 'DI', 'SR'];
 
+    let othersLabel = "Others";
     let others = detectedElements.filter(e => heavyMetals.indexOf(e) < 0 && plantEssentialElements.indexOf(e) < 0 && pedologicalFeatures.indexOf(e) < 0);
+
+    let packages = [heavyMetalsLabel, plantEssentialElementsLabel, pedologicalFeaturesLabel, othersLabel];
 
     let detectedHeavyMetals = [];
     let notDetectedHeavyMetals = [];

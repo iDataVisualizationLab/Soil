@@ -67,6 +67,6 @@ function createPackageDiv(containerId, packageId, packageLabel, packageColor, el
             //Do nothing for not detected elements
         });
         cbx.disabled = true;
-        cbx.title = 'Not detected';
+        cbx.setAttribute('data-tooltip', 'Not detected');
     })
 }

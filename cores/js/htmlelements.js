@@ -44,7 +44,6 @@ function createSelectionFromJson(divId, allElements, name, selectedElement, chan
  * @return {HTMLInputElement}
  */
 function createCheckBox(containerId, label, name, isSelected, changeHandler, value) {
-
     const container = document.getElementById(containerId);
     const checkbox = document.createElement("input");
     checkbox.name = name;
@@ -66,7 +65,6 @@ function createCheckBox(containerId, label, name, isSelected, changeHandler, val
     container.appendChild(cbxLabel);
     //Event handler
     checkbox.onchange = changeHandler;
-
     return checkbox;
 }
 
