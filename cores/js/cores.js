@@ -56,6 +56,8 @@ async function handleProfileChange(profileName) {
 
     //<editor-fold desc="menu">
     let soilPackages = new SoilPackages(elements.map(d => d.split(' ')[0]));
+    //Clean the menu
+    document.getElementById('elementSelectionList').innerHTML = "";
     createMenuStructure('elementSelectionList', soilPackages, elementSelectionChange);
 
     function elementSelectionChange(evt) {

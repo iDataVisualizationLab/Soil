@@ -34,6 +34,11 @@ const systemConfigurations = {
                 "L11": [2, 3],
                 "L12": [3, 3],
                 "L13": [2, 4]
+            },
+            locationInfo:{
+                lat: 1,
+                long:1,
+                distance: 1
             }
         },
         "R": {
