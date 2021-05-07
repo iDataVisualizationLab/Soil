@@ -55,16 +55,17 @@ async function handleProfileChange(profileName) {
     //</editor-fold>
 
     //<editor-fold desc="menu">
-    let soilPackages = new SoilPackages(elements.map(d=>d.split(' ')[0]));
+    let soilPackages = new SoilPackages(elements.map(d => d.split(' ')[0]));
     createMenuStructure('elementSelectionList', soilPackages, elementSelectionChange);
-    function elementSelectionChange(evt){
+
+    function elementSelectionChange(evt) {
         let elm = evt.target.value;
         //Current dims
         const dims = pc.dimensions();
-        if(evt.target.checked){
+        if (evt.target.checked) {
             //Added dimension
             dims[elm] = allDimensions[elm];
-        }else{
+        } else {
             //Remove dimension
             delete dims[elm];
         }
@@ -324,19 +325,22 @@ async function handleProfileChange(profileName) {
     }
     //</editor-fold>
 }
-function handleOuterVisibility(isVisible){
+
+function handleOuterVisibility(isVisible) {
     elementInfos[0].theProfile.setOuterVisibility(isVisible);
     elementInfos[1].theProfile.setOuterVisibility(isVisible);
 }
-function handleVertiCutVisibility(isVisible){
+
+function handleVertiCutVisibility(isVisible) {
     elementInfos[0].theProfile.setVertiCutVisibility(isVisible);
     elementInfos[1].theProfile.setVertiCutVisibility(isVisible);
 }
-function handleHorizCutVisibility(isVisible){
+
+function handleHorizCutVisibility(isVisible) {
     elementInfos[0].theProfile.setHorizCutVisibility(isVisible);
     elementInfos[1].theProfile.setHorizCutVisibility(isVisible);
 }
 
-function removeAxes(name){
+function removeAxes(name) {
     pc.removeAxes([name]);
 }
