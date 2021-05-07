@@ -36,13 +36,10 @@ function createPackageDiv(containerId, packageId, packageLabel, packageColor, el
     packageLabelElm.style.marginBottom = '3px';
     packageLabelElm.style.marginLeft = '5px'
     packageLabelElm.style.marginRight = '5px'
+    packageLabelElm.onclick = function(){
+        childrenDiv.style.display = childrenDiv.style.display==='inline'?'none':'inline';
+    }
 
-    packageDiv.onmouseover = function () {
-        childrenDiv.style.display = 'inline';
-    };
-    packageDiv.onmouseleave = function () {
-        childrenDiv.style.display = 'none';
-    };
     packageDiv.appendChild(packageLabelElm);
     packageDiv.appendChild(childrenDiv);
     // One option for all
