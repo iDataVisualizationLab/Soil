@@ -35,10 +35,10 @@ const systemConfigurations = {
                 "L12": [3, 3],
                 "L13": [2, 4]
             },
-            locationInfo:{
-                lat: 1,
-                long:1,
-                distance: 1
+            locationInfo: {
+                lat: 33.747547370160966,
+                long: -101.913188856191468,
+                distance: 50000,
             }
         },
         "R": {
@@ -56,6 +56,11 @@ const systemConfigurations = {
                 "R10": [2, 3],
                 "R3": [3, 3],
                 "R7": [2, 4]
+            },
+            locationInfo: {
+                lat: 33.83461039087063,
+                long: -102.4674384046790868,
+                distance: 50000,
             }
         },
         "S": {
@@ -73,6 +78,12 @@ const systemConfigurations = {
                 "S10": [2, 3],
                 "S3": [3, 3],
                 "S7": [2, 4]
+            },
+            locationInfo: {
+                lat: 33.744746287327004,
+                long: -101.916557538506922,
+                distance: 25000,
+
             }
         }
     }

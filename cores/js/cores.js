@@ -13,6 +13,7 @@ handleProfileChange('L').then(_ => {
 
 async function handleProfileChange(profileName) {
     const profileToCanvasScale = d3.scaleLinear().domain([-0.5, 0.5]).range([0, 49]);
+
     //<editor-fold desc="Setting up data">
     //Setup data
     if (!profileDescriptions[profileName]) {
@@ -54,6 +55,11 @@ async function handleProfileChange(profileName) {
 
     //</editor-fold>
 
+    //<editor-fold desc="The Google Earth Link">
+    const locationInfo = systemConfigurations.profiles[profileName].locationInfo;
+    layoutObject.changeGoogleEarthLocation(locationInfo.lat, locationInfo.long, locationInfo.distance);
+    //</editor-fold>
+
     //<editor-fold desc="menu">
     let soilPackages = new SoilPackages(elements.map(d => d.split(' ')[0]));
     //Clean the menu
@@ -76,6 +82,7 @@ async function handleProfileChange(profileName) {
 
     };
     //</editor-fold>
+
     //<editor-fold desc="Parallel Coordinates">
     profileDescriptions[profileName].getParCoordsData().then(data => {
         pc = createCoresParcoords(data, elementScalers, ip, colorScale);

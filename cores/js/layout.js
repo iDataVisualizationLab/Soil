@@ -85,6 +85,7 @@ function setupLayout() {
         .style("position", "absolute")
         .style("left", "10px")
         .style("bottom", "5px");
+
     createCheckBox('viewOptions', 'Outer visibility', 'outerVisibility', true, (event) => {
         systemConfigurations.isOuterVisible = event.target.checked;
         handleOuterVisibility(systemConfigurations.isOuterVisible);
@@ -97,6 +98,36 @@ function setupLayout() {
         systemConfigurations.isVertiCutVisible = event.target.checked;
         handleVertiCutVisibility(systemConfigurations.isVertiCutVisible);
     });
+    //for the Google Earth link
+    const googleEarthLinkDiv = d3DetailChart1Container
+        .append('div')
+        .attr('id', 'googleEarthLinkDiv')
+        .style('position', 'absolute')
+        .style('right', '10px')
+        .style('bottom', '5px');
+
+    const googleEarthLink = googleEarthLinkDiv.append('a')
+        .attr("id", "googleEarthLink")
+        .attr("href", "#")
+        .attr('target', '_blank');
+
+    googleEarthLink.append('img')
+        .attr('src', 'data/images/googleearthlocation.png')
+        .style('width', '2em')
+        .style('height', '2em')
+        .on('mousemove', (event, d) => {
+            if (systemConfigurations.helpEnabled) {
+                showTip(event, "View this profile location on Google Earth");
+            }
+        })
+        .on('mouseleave', (event, d) => {
+            hideTip();
+        })
+
+    function changeGoogleEarthLocation(lat, lon, distance) {
+        const googleEarthUrl = `https://earth.google.com/web/@${lat},${lon},${distance}d`;
+        googleEarthLink.attr("href", googleEarthUrl);
+    }
 
     const d3DetailChart2Container = d3.select('body').select('#detailChart2Container').data([2]).join('div')
         .attr("id", "detailChart2Container")
@@ -218,6 +249,7 @@ function setupLayout() {
         }
     };
     layoutObject.handleVolumeRendererLabelChange = handleVolumeRendererLabelChange;
+    layoutObject.changeGoogleEarthLocation = changeGoogleEarthLocation;
     //Expose this
     // layoutObject.updateTextPositions = updateTextPositions;
     return layoutObject;

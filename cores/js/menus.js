@@ -15,6 +15,7 @@ function createMenuStructure(containerId, soilPackages, elementSelectionChange) 
 
 function createPackageDiv(containerId, packageId, packageLabel, packageColor, elementSelectionChange, detectedElements, notDetectedElements) {
     const container = document.getElementById(containerId);
+
     const childrenDivId = packageId + 'Children';
     const packageDivId = packageId + 'Div';
     // Create a div for the package
@@ -30,14 +31,20 @@ function createPackageDiv(containerId, packageId, packageLabel, packageColor, el
     childrenDiv.style.display = 'none';
     //Now add a label for toggling
     const packageLabelElm = document.createElement('label');
-    packageLabelElm.innerHTML = `<b>${packageLabel}</b>`;
+    packageLabelElm.innerHTML = `<b>${packageLabel} &#187;</b>`;
     packageLabelElm.style.color = packageColor;
     packageLabelElm.style.marginTop = '3px';
     packageLabelElm.style.marginBottom = '3px';
     packageLabelElm.style.marginLeft = '5px'
     packageLabelElm.style.marginRight = '5px'
-    packageLabelElm.onclick = function(){
-        childrenDiv.style.display = childrenDiv.style.display==='inline'?'none':'inline';
+    packageLabelElm.onclick = function () {
+        if (childrenDiv.style.display === 'inline') {
+            childrenDiv.style.display = 'none';
+            packageLabelElm.innerHTML = `<b>${packageLabel} &#187;</b>`;
+        } else {
+            childrenDiv.style.display = 'inline';
+            packageLabelElm.innerHTML = `<b>${packageLabel} &#171;</b>`;
+        }
     }
 
     packageDiv.appendChild(packageLabelElm);

@@ -17,6 +17,7 @@ function createProfileObject(horizCutY, profileName) {
     const cylinderRadius = 0.5;
     const topCapNorm = [0, 1, 0];
     const sideMat = new THREE.MeshBasicMaterial({color: 0x776552})
+
     //<editor-fold desc="The top Cap">
     const topCapPos = [];
     const topCapNorms = [];
@@ -66,6 +67,7 @@ function createProfileObject(horizCutY, profileName) {
 
     theObject.add(topCap);
     //</editor-fold>
+
     //<editor-fold desc="The horiz cut">
     const vertiCutPos = [];
     const vertiCutNorms = [];
@@ -111,6 +113,7 @@ function createProfileObject(horizCutY, profileName) {
     const vertiCut = new THREE.Mesh(vertiCutGeo, vertiCutMat);
     theObject.add(vertiCut);
     //</editor-fold>
+
     //<editor-fold desc="The horizontal cut">
     const horizCutPos = [];
     const horizCutNorms = [];
@@ -155,6 +158,7 @@ function createProfileObject(horizCutY, profileName) {
 
     theObject.add(horizCut);
     //</editor-fold>
+
     //<editor-fold desc="The back">
     let backHeight = 1;
     const backGeom = new THREE.CylinderGeometry(cylinderRadius, cylinderRadius, backHeight, topCapNumSides, 1, true, Math.PI / 2, Math.PI);
@@ -162,8 +166,8 @@ function createProfileObject(horizCutY, profileName) {
     const back = new THREE.Mesh(backGeom, backMat);
     theObject.add(back);
     //</editor-fold>
-    //<editor-fold desc="The front">
 
+    //<editor-fold desc="The front">
     //TODO: delcare these with lengths to improve performance
     const frontPos = [];
     const frontNorms = [];
@@ -231,6 +235,21 @@ function createProfileObject(horizCutY, profileName) {
     theObject.add(front);
 
     //</editor-fold>
+
+    // //<editor-fold desc="The Google earth icon">
+    // const geIconMat = new THREE.MeshLambertMaterial({
+    //     map: textureLoader.load('./data/images/googleearthicon.png'),
+    //     transparent: true,
+    //     depthWrite: false,
+    //     side: THREE.DoubleSide
+    // });
+    // const geIconGeo = new THREE.PlaneBufferGeometry(0.1, 0.1);
+    // const geIcon = new THREE.Mesh(geIconGeo, geIconMat);
+    // geIcon.position.y = 0.5 + 0.1 / 2;
+    // scene.add(geIcon);
+    // //</editor-fold>
+
+    //<editor-fold desc="Handlers">
     function handleHorizCutPosition(theHorizCutY, texture) {
         horizCutY = theHorizCutY;
         horizCut.position.y = horizCutY;
@@ -259,6 +278,8 @@ function createProfileObject(horizCutY, profileName) {
             vertiCut.material.map = texture;
             vertiCut.material.map.needsUpdate = true;
         }
+        //Do not rotate the google map
+        // geIcon.rotation.y = theVertiCutAngle;
 
     }
 
@@ -317,7 +338,9 @@ function createProfileObject(horizCutY, profileName) {
         vertiCut.visible = isVisible;
     }
 
-    // function handle
+    //</editor-fold>
+
+    // Expose handlers
     theObject.updateTopCapTexture = updateTopCapTexture;
     theObject.handleHorizCutPosition = handleHorizCutPosition;
     theObject.handleVertiCutAngle = handleVertiCutAngle;
