@@ -24,14 +24,14 @@ function setupLayout() {
     //Parallel coordinates
     const pcLeft = margin;
     const pcTop = margin;
-    const pcHeight = window.innerHeight - detailChartHeight - 4 * margin;
+    const pcHeight = window.innerHeight - detailChartHeight - 2 * margin;
     const pcWidth = window.innerWidth - 2 * pcLeft - pcHeight;
 
     //Volume render element
     const vrLeft = pcWidth;
     const vrTop = pcTop + 30;
     const vrWidth = pcHeight + 10;
-    const vrHeight = vrWidth - 40;
+    const vrHeight = vrWidth - 60;
 
 
     const legendRight = 20;
@@ -185,7 +185,7 @@ function setupLayout() {
     d3.select("#parcoordsChart")
         .style('position', 'absolute')
         .style('left', pcLeft + 'px')
-        .style('top', (pcTop + 10) + 'px')
+        .style('top', (pcTop-10) + 'px')
         .style('width', pcWidth + "px")
         .style('height', pcHeight + "px")
         .style('outline', 'none')

@@ -1,5 +1,5 @@
 function createVolumeRenderer(container, interpolatedData, width, height, horizontalInterpolatedSteps, verticalInterpolatedSteps, colorScale, gui) {
-    function createVolumeFromInterpolatedData(interpolatedData, valueRange=[0, 1]) {
+    function createVolumeFromInterpolatedData(interpolatedData, valueRange = [0, 1]) {
         const t = [...interpolatedData.t];
         const r = horizontalInterpolatedSteps / 2;
         for (let idx = 0; idx < interpolatedData.t.length; idx++) {
@@ -10,7 +10,7 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
                 t[idx] = 0;
             }
             //Take the values which is in the filtered value range
-            if((t[idx] < valueRange[0]) || t[idx] > valueRange[1]){
+            if ((t[idx] < valueRange[0]) || t[idx] > valueRange[1]) {
                 t[idx] = 0;
             }
         }
@@ -24,7 +24,7 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         return volume;
     }
 
-// Filter out the data which is not in the circle
+    // Filter out the data which is not in the circle
     const volume = createVolumeFromInterpolatedData(interpolatedData);
 
     //3D
@@ -44,7 +44,8 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         controls,
         material,
         volconfig,
-        cmtextures;
+        cmtextures,
+        locationFace;
 
     init();
 
@@ -84,11 +85,7 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         if (!gui) {
             gui = new GUI();
         }
-
         const texture = createTextureFromData(volume);
-
-        // Colormap textures
-        // const cmCanvas = createColorMapCanvas(colorScale);
         const cmCanvas = createContinuousColorMapCanvas(colorScale);
 
         cmtextures = {
@@ -113,7 +110,6 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
             vertexShader: shader.vertexShader,
             fragmentShader: shader.fragmentShader,
             side: THREE.BackSide // The volume shader uses the backface as its "reference point"
-            // side: THREE.FrontSide
         });
 
         // THREE.Mesh
@@ -121,6 +117,27 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         geometry.translate(volume.xLength / 2, volume.yLength / 2, volume.zLength / 2);
         const mesh = new THREE.Mesh(geometry, material);
         scene.add(mesh);
+
+        //Add the top face
+        const dummyCanvas = document.createElement('canvas');
+        dummyCanvas.width = volume.xLength;
+        dummyCanvas.height = volume.zLength;
+        const locationFaceMat = new THREE.MeshPhongMaterial({
+            map: new THREE.CanvasTexture(dummyCanvas), //Will be updated
+            transparent: true,
+            opacity: 0.99,
+            side: THREE.DoubleSide,
+            alphaTest: 0.1
+        });
+        const locationFaceGeo = new THREE.PlaneGeometry(volume.xLength, volume.zLength);
+        locationFaceGeo.translate(volume.xLength / 2, volume.yLength / 2, volume.zLength / 2);
+
+        locationFace = new THREE.Mesh(locationFaceGeo, locationFaceMat);
+        locationFace.rotation.y = Math.PI/2;
+        locationFace.position.x = volume.xLength/2;
+        locationFace.position.z = volume.zLength;
+        locationFace.material.map.rotation = Math.PI/2;
+        scene.add(locationFace);
 
         render();
 
@@ -154,14 +171,21 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         render();
     }
 
-    function changeRenderStyle(value){
+    function changeRenderStyle(value) {
         volconfig.renderstyle = value;
         updateUniforms();
+    }
+
+    function changeLocationFace(newTexture) {
+        locationFace.material.map = newTexture;
+        locationFace.material.map.rotation = Math.PI/2;
+        locationFace.material.map.needsUpdate = true;
     }
 
     //Exposing handlers
     this.handleDataChange = handleDataChange;
     this.changeRenderStyle = changeRenderStyle;
+    this.changeLocationFace = changeLocationFace;
 
     return this;
 }
@@ -180,6 +204,7 @@ function createColorMapCanvas(colorScale) {
     });
     return canvas;
 }
+
 function createContinuousColorMapCanvas(colorScale) {
     const width = 256;
     const height = 1;

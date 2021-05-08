@@ -108,6 +108,9 @@ async function handleProfileChange(profileName) {
     } else {
         vr.handleDataChange(ip.getInterpolatedData(selectedVolumeRenderedElement));
     }
+    //Update the face
+    const faceTx = new TextureHandler().createLocationTexture(systemConfigurations.profiles[profileName].locationNameMapping, 300);
+    vr.changeLocationFace(faceTx);
     //</editor-fold>
 
     //<editor-fold desc="Selection box change handler">
