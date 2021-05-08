@@ -73,6 +73,7 @@ class TextureHandler {
         });
     }
 
+
     createTextureWithLocations(data, locationMapping) {
         const canvas = this.createCanvas(data);
         this.addLocations2Canvas(canvas, locationMapping);
@@ -84,6 +85,14 @@ class TextureHandler {
 
     createTextureWithDepths(data) {
         const canvas = this.createCanvas(data);
+        this.addDepths2Canvas(canvas);
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.center.x = 0.5;
+        texture.center.y = 0.5;
+        return texture;
+    }
+
+    addDepths2Canvas(canvas) {
         const ctx = canvas.getContext('2d');
         const scaler = d3.scaleLinear().domain([0, 10]).range([0, canvas.height]);
         for (let i = 1; i < 10; i++) {
@@ -105,10 +114,6 @@ class TextureHandler {
             ctx.fillText(text, canvas.width, y);
             ctx.strokeText(text, canvas.width, y);
         }
-        const texture = new THREE.CanvasTexture(canvas);
-        texture.center.x = 0.5;
-        texture.center.y = 0.5;
-        return texture;
     }
 
     createLocationTexture(locationMapping, size) {
@@ -127,6 +132,40 @@ class TextureHandler {
         texture.center.y = 0.5;
         return texture;
     }
+
+    createDepthTexture(size) {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d');
+        canvas.width = size;
+        canvas.height = size;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // May use a rect or lines
+        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+        //Add three lines to the sides
+        //// left
+        // ctx.beginPath();
+        // ctx.moveTo(0, 0);
+        // ctx.lineTo(0, canvas.height);
+        //// right
+        // ctx.moveTo(canvas.width, 0);
+        // ctx.lineTo(canvas.width, canvas.height);
+        // ctx.stroke();
+
+        //center
+        ctx.moveTo(canvas.width / 2, 0);
+        ctx.lineTo(canvas.width / 2, canvas.height);
+
+
+        //Add depths
+        this.addDepths2Canvas(canvas);
+
+        //Make texture
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.center.x = 0.5;
+        texture.center.y = 0.5;
+        return texture;
+    }
+
 }
 
 //</editor-fold>
@@ -136,7 +175,7 @@ class VerticalCanvasTextureHandler extends TextureHandler {
     }
 
     getData(cutAngle) {
-        cutAngle = -cutAngle; //
+        // cutAngle = -cutAngle; //
         const sina = Math.sin(cutAngle);
         const cosa = Math.cos(cutAngle);
         const startX = 25 - 25 * cosa;

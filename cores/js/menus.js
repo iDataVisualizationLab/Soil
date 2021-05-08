@@ -51,7 +51,7 @@ function createPackageDiv(containerId, groupId, groupLabel, groupColor, elementS
     packageDiv.appendChild(packageLabelElm);
     packageDiv.appendChild(childrenDiv);
     // One option for all
-    createCheckBox(childrenDivId, 'All', groupId, true, function (d) {
+    createCheckBox(childrenDivId, '<b>All</b>', groupId, true, function (d) {
         enabledElements.forEach(elm => {
             const theElm = document.getElementById(`#${elm}elementSelectionId`);
             if (d.target.checked !== theElm.checked) {
@@ -67,24 +67,26 @@ function createPackageDiv(containerId, groupId, groupLabel, groupColor, elementS
     });
     //2. Not detected elements
     disabledElements.forEach(elm => {
-        let cbx = createCheckBox(childrenDivId, elm, elm, false, () => {
+        let cbx = createCheckBox(childrenDivId, `<sppan style="color:gray;">${elm}</span>`, elm, false, () => {
             //Do nothing for not detected elements
         });
         cbx.disabled = true;
         cbx.setAttribute('data-tooltip', 'Not detected');
     });
-    function collapseAGroup(groupId, groupLabel){
+
+    function collapseAGroup(groupId, groupLabel) {
         const childrenDiv = document.getElementById(groupId + 'Children');
-        const packageLabelElm = document. getElementById(groupId + 'Label');
+        const packageLabelElm = document.getElementById(groupId + 'Label');
 
         if (childrenDiv.style.display === 'inline') {
             childrenDiv.style.display = 'none';
             packageLabelElm.innerHTML = `<b>${groupLabel} &#187;</b>`;
         }
     }
-    function expandAGroup(groupId, groupLabel){
+
+    function expandAGroup(groupId, groupLabel) {
         const childrenDiv = document.getElementById(groupId + 'Children');
-        const packageLabelElm = document. getElementById(groupId + 'Label');
+        const packageLabelElm = document.getElementById(groupId + 'Label');
 
         if (childrenDiv.style.display === 'none') {
             childrenDiv.style.display = 'inline';

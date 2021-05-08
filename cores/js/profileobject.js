@@ -152,6 +152,7 @@ function createProfileObject(horizCutY, profileName) {
     horizCutTexture.center.y = 0.5;
     const horizCutMat = new THREE.MeshLambertMaterial({
         map: horizCutTexture,
+        side: THREE.DoubleSide
     });
     const horizCut = new THREE.Mesh(horizCutGeo, horizCutMat);
     horizCut.position.y = horizCutY;
@@ -267,10 +268,10 @@ function createProfileObject(horizCutY, profileName) {
 
     function handleVertiCutAngle(theVertiCutAngle, texture) {
         //We only remap the texture (rotate the texture).
-        topCap.material.map.rotation = theVertiCutAngle;
+        topCap.material.map.rotation = -theVertiCutAngle;
         topCap.material.needsUpdate = true;
 
-        horizCut.material.map.rotation = theVertiCutAngle;
+        horizCut.material.map.rotation = -theVertiCutAngle;
         horizCut.material.needsUpdate = true;
 
         //Update texture
@@ -278,9 +279,6 @@ function createProfileObject(horizCutY, profileName) {
             vertiCut.material.map = texture;
             vertiCut.material.map.needsUpdate = true;
         }
-        //Do not rotate the google map
-        // geIcon.rotation.y = theVertiCutAngle;
-
     }
 
     function updateTopCapTexture(profileName) {

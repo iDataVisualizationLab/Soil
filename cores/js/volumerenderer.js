@@ -1,4 +1,4 @@
-function createVolumeRenderer(container, interpolatedData, width, height, horizontalInterpolatedSteps, verticalInterpolatedSteps, colorScale, gui) {
+function createVolumeRenderer(container, interpolatedData, width, height, horizontalInterpolatedSteps, verticalInterpolatedSteps, colorScale, controlDom) {
     function createVolumeFromInterpolatedData(interpolatedData, valueRange = [0, 1]) {
         const t = [...interpolatedData.t];
         const r = horizontalInterpolatedSteps / 2;
@@ -28,8 +28,6 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
     const volume = createVolumeFromInterpolatedData(interpolatedData);
 
     //3D
-    const GUI = dat.GUI;
-    const OrbitControls = THREE.OrbitControls;
     const VolumeRenderShader1 = THREE.VolumeRenderShader1;
     const WEBGL = THREE.WEBGL;
 
@@ -41,15 +39,20 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
     let renderer,
         scene,
         camera,
-        controls,
+        orbitControls,
         material,
         volconfig,
         cmtextures,
-        locationFace;
+        locationFace,
+        depthFace,
+        locationHelper = new THREE.Object3D(),
+        self = this;
 
     init();
 
     function init() {
+
+        //<editor-fold desc="The volume renderer">
         scene = new THREE.Scene();
         // Create renderer
         renderer = new THREE.WebGLRenderer();
@@ -61,30 +64,17 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         // Create camera (The volume renderer does not work very well with perspective yet)
         const h = 64; // frustum height
         const aspect = width / height;
-        camera = new THREE.OrthographicCamera(-h * aspect / 2, h * aspect / 2, h / 2, -h / 2, 1, 1000);
-        camera.position.set(50, 42, -69);
-        camera.rotation.set(-2.921, 0.272, 1.571);
-
+        const paddingUnits = 5;
+        camera = new THREE.OrthographicCamera(-h * aspect / 2 - paddingUnits, h * aspect / 2 + paddingUnits, h / 2 + paddingUnits, -h / 2 - paddingUnits, 1, 1000);
+        // camera.position.set(50, 42, -69);
+        camera.position.set(80, 25, -150);
+        // camera.rotation.set(-2.921, 0.272, 1.571);
 
         camera.up.set(1, 0, 0); // In our data, x is up
 
-        // Create controls
-        controls = new OrbitControls(camera, renderer.domElement);
-        controls.addEventListener('change', render);
-        controls.target.set(volume.xLength / 2, volume.yLength / 2, volume.zLength / 2);
-        //
-        controls.enableZoom = false;
-        controls.enablePan = false;
-        //
-        controls.rotateSpeed = 0.3;
-
-        controls.update();
-
         // The gui for interaction
         volconfig = {clim1: 0, clim2: 1, renderstyle: 'iso', isothreshold: 0.0, colormap: 'custom'};
-        if (!gui) {
-            gui = new GUI();
-        }
+
         const texture = createTextureFromData(volume);
         const cmCanvas = createContinuousColorMapCanvas(colorScale);
 
@@ -117,7 +107,11 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         geometry.translate(volume.xLength / 2, volume.yLength / 2, volume.zLength / 2);
         const mesh = new THREE.Mesh(geometry, material);
         scene.add(mesh);
+        //</editor-fold>
 
+        //<editor-fold desc="For the location helper">
+        //TODO: If feeling confusing about translation/rotation, then just add all parts
+        // into the locationFace before rotating, locating them.
         //Add the top face
         const dummyCanvas = document.createElement('canvas');
         dummyCanvas.width = volume.xLength;
@@ -132,19 +126,57 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         const locationFaceGeo = new THREE.PlaneGeometry(volume.xLength, volume.zLength);
         locationFaceGeo.translate(volume.xLength / 2, volume.yLength / 2, volume.zLength / 2);
         locationFace = new THREE.Mesh(locationFaceGeo, locationFaceMat);
-        locationFace.rotation.y = Math.PI/2;
-        locationFace.position.x = volume.xLength/2;
+        locationFace.rotation.y = Math.PI / 2;
+        locationFace.position.x = volume.xLength / 2;
         locationFace.position.z = volume.zLength;
-        locationFace.material.map.rotation = Math.PI/2;
-        scene.add(locationFace);
+        locationFace.material.map.rotation = Math.PI / 2;
+        locationHelper.add(locationFace);
 
         const locationFaceBottom = locationFace.clone();
-        locationFaceBottom.position.x = -volume.xLength/2;
-        scene.add(locationFaceBottom);
+        locationFaceBottom.position.x = -volume.xLength / 2;
+        locationHelper.add(locationFaceBottom);
 
+        const depthFaceTex = new TextureHandler().createDepthTexture(300);
+        const depthFaceMat = new THREE.MeshPhongMaterial({
+            map: depthFaceTex,
+            transparent: true,
+            opacity: 0.99,
+            side: THREE.DoubleSide,
+            alphaTest: 0.1
+        });
+
+        const depthFaceGeo = new THREE.PlaneGeometry(volume.xLength, volume.yLength);
+        // depthFaceGeo.translate(volume.xLength / 2, volume.yLength / 2, volume.zLength / 2);
+        depthFace = new THREE.Mesh(depthFaceGeo, depthFaceMat);
+        depthFace.rotation.x = Math.PI;
+        depthFace.rotation.z = -Math.PI / 2;
+        depthFace.position.x = volume.xLength / 2;
+        depthFace.position.y = volume.yLength / 2;
+        depthFace.position.z = volume.zLength / 2;
+        locationHelper.add(depthFace);
+        scene.add(locationHelper);
+        //</editor-fold>
+
+        //<editor-fold desc="Orbit controls">
+        // Create controls
+        if (!controlDom) {
+            controlDom = renderer.domElement;
+        }
+        orbitControls = createOrbitControls(camera, controlDom);
+        orbitControls.addEventListener('change', () => {
+            //Do not rotate the depth plane
+            depthFace.rotation.x = orbitControls.getAzimuthalAngle();
+            render();
+        });
+        orbitControls.target.set(volume.xLength / 2, volume.yLength / 2, volume.zLength / 2);
+        //Expose it
+        self.orbitControls = orbitControls;
+
+        //
+        orbitControls.update();
+        //</editor-fold>
 
         render();
-
     }
 
     function createTextureFromData(volume) {
@@ -182,15 +214,20 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
 
     function changeLocationFace(newTexture) {
         locationFace.material.map = newTexture;
-        locationFace.material.map.rotation = Math.PI/2;
+        locationFace.material.map.rotation = Math.PI / 2;
         locationFace.material.map.needsUpdate = true;
+    }
+
+    function setLocationHelperVisiblity(isVisible) {
+        locationHelper.visible = isVisible;
+        render();
     }
 
     //Exposing handlers
     this.handleDataChange = handleDataChange;
     this.changeRenderStyle = changeRenderStyle;
     this.changeLocationFace = changeLocationFace;
-
+    this.setLocationHelperVisiblity = setLocationHelperVisiblity;
     return this;
 }
 

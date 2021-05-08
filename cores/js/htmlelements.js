@@ -58,7 +58,8 @@ function createCheckBox(containerId, label, name, isSelected, changeHandler, val
     // creating label for checkbox
     let cbxLabel = document.createElement('label');
     cbxLabel.htmlFor = name;
-    cbxLabel.appendChild(document.createTextNode(label));
+    cbxLabel.innerHTML = label;
+
     cbxLabel.style.paddingLeft = '0px';
 
     container.appendChild(checkbox);

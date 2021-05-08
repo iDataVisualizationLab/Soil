@@ -9,7 +9,7 @@ let gui;
 const layoutObject = setupLayout();
 
 function setupLayout() {
-    const width = window.innerWidth / 2, height = 2 * window.innerHeight / 3;
+    const width = window.innerWidth / 2, height = window.innerHeight / 2;
     const margin = 10;
 
     //Detail charts
@@ -104,25 +104,24 @@ function setupLayout() {
         .attr('id', 'googleEarthLinkDiv')
         .style('position', 'absolute')
         .style('right', '10px')
-        .style('bottom', '5px');
+        .style('bottom', '5px')
+        .style('text-align', 'center');
+
 
     const googleEarthLink = googleEarthLinkDiv.append('a')
         .attr("id", "googleEarthLink")
         .attr("href", "#")
         .attr('target', '_blank');
 
+
+    googleEarthLink.append('label').attr("for", 'googleEarthLink')
+        .text('View on Google Earth')
+        .style('decoration', 'none');
+
     googleEarthLink.append('img')
         .attr('src', 'data/images/googleearthlocation.png')
         .style('width', '2em')
-        .style('height', '2em')
-        .on('mousemove', (event, d) => {
-            if (systemConfigurations.helpEnabled) {
-                showTip(event, "View this profile location on Google Earth");
-            }
-        })
-        .on('mouseleave', (event, d) => {
-            hideTip();
-        })
+        .style('height', '2em');
 
     function changeGoogleEarthLocation(lat, lon, distance) {
         const googleEarthUrl = `https://earth.google.com/web/@${lat},${lon},${distance}d`;
@@ -185,7 +184,7 @@ function setupLayout() {
     d3.select("#parcoordsChart")
         .style('position', 'absolute')
         .style('left', pcLeft + 'px')
-        .style('top', (pcTop-10) + 'px')
+        .style('top', (pcTop - 10) + 'px')
         .style('width', pcWidth + "px")
         .style('height', pcHeight + "px")
         .style('outline', 'none')
@@ -199,24 +198,26 @@ function setupLayout() {
         .style('width', vrWidth + 'px')
         .style('height', vrHeight + 'px')
         .style('outline', 'none')
-        .style('border', '1px solid black');
-
-    //Create the selection box
-    d3.select('#volumeRenderStyle').data([1]).join('div')
-        .attr("id", 'volumeRenderStyle')
+        .style('border', '1px solid black')
+        .append('div') //Div for the view options
+        .attr("id", 'volumeRenderViewOptions')
         .style('position', 'absolute')
-        .style('right', margin + 'px')
-        .style('top', 20 + 'px');
+        .style('left', margin + 'px')
+        .style('bottom', 5 + 'px');
+
 
     const renderStyleOptions = [{label: 'iso', value: 'iso', id: 'isoRenderStyle'}, {
         label: 'mip',
         value: 'mip',
         id: 'mipRenderStyle'
     }];
-    createRadioButtons('volumeRenderStyle', renderStyleOptions, 'renderStyle', 'iso', (event) => {
+    createRadioButtons('volumeRenderViewOptions', renderStyleOptions, 'renderStyle', 'iso', (event) => {
         if (event.target.checked) {
             vr.changeRenderStyle(event.target.value);
         }
+    });
+    createCheckBox('volumeRenderViewOptions', 'Location helper', 'locationHelper', true, (event)=>{
+        vr.setLocationHelperVisiblity(event.target.checked);
     });
 
     handleVolumeRendererLabelChange('Current element');

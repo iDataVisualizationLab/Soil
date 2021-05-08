@@ -60,7 +60,7 @@ async function handleProfileChange(profileName) {
     layoutObject.changeGoogleEarthLocation(locationInfo.lat, locationInfo.long, locationInfo.distance);
     //</editor-fold>
 
-    //<editor-fold desc="menu">
+    //<editor-fold desc="Menu">
     let soilPackages = new SoilPackages(elements.map(d => d.split(' ')[0]));
     //Clean the menu
     document.getElementById('elementSelectionList').innerHTML = "";
@@ -103,7 +103,7 @@ async function handleProfileChange(profileName) {
             50,
             50,
             colorScale,
-            gui
+            document.getElementById('detailChart1')
         );
     } else {
         vr.handleDataChange(ip.getInterpolatedData(selectedVolumeRenderedElement));
@@ -233,19 +233,7 @@ async function handleProfileChange(profileName) {
                 elementInfo.orbitControls.enabled = false;
                 elementInfo.orbitControls.dispose();
             }
-            let orbitControls = new THREE.OrbitControls(elementInfo.camera, domElement);
-            orbitControls.enableZoom = false;
-            orbitControls.enablePan = false;
-
-            //
-            orbitControls.maxPolarAngle = Math.PI / 2;
-
-            //
-            orbitControls.minAzimuthAngle = -Math.PI / 2;
-            orbitControls.maxAzimuthAngle = Math.PI / 2;
-
-            //
-            orbitControls.rotateSpeed = 0.3;
+            let orbitControls = createOrbitControls(elementInfo.camera, domElement);
 
             //
             let prevAngle = 0;
@@ -257,7 +245,9 @@ async function handleProfileChange(profileName) {
                 const cutAngle = orbitControls.getAzimuthalAngle();
                 let texture = undefined;
                 elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
+                //This line avoid it to rotate
                 elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
+
             });
             orbitControls.addEventListener("end", function () {
                 handleCutAngleChange(orbitControls, squareTextureHandlers, idx, elementInfo);
@@ -295,6 +285,8 @@ async function handleProfileChange(profileName) {
                 elementInfos.forEach(elementInfo => {
                     elementInfo.orbitControls.enabled = false;
                 });
+                vr.orbitControls.enabled = false;
+                //Get the old position
                 horizCutPlaneX = event.object.position.x;
                 horizCutPlaneY = event.object.position.y;
                 horizCutPlaneZ = event.object.position.z;
@@ -323,6 +315,7 @@ async function handleProfileChange(profileName) {
                 elementInfos.forEach(elementInfo => {
                     elementInfo.orbitControls.enabled = true;
                 });
+                vr.orbitControls.enabled = true;
             });
             elementInfo.dragControls = dragControls;
         }
