@@ -131,13 +131,17 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         });
         const locationFaceGeo = new THREE.PlaneGeometry(volume.xLength, volume.zLength);
         locationFaceGeo.translate(volume.xLength / 2, volume.yLength / 2, volume.zLength / 2);
-
         locationFace = new THREE.Mesh(locationFaceGeo, locationFaceMat);
         locationFace.rotation.y = Math.PI/2;
         locationFace.position.x = volume.xLength/2;
         locationFace.position.z = volume.zLength;
         locationFace.material.map.rotation = Math.PI/2;
         scene.add(locationFace);
+
+        const locationFaceBottom = locationFace.clone();
+        locationFaceBottom.position.x = -volume.xLength/2;
+        scene.add(locationFaceBottom);
+
 
         render();
 

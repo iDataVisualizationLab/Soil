@@ -59,50 +59,12 @@ function createCheckBox(containerId, label, name, isSelected, changeHandler, val
     let cbxLabel = document.createElement('label');
     cbxLabel.htmlFor = name;
     cbxLabel.appendChild(document.createTextNode(label));
-    cbxLabel.style.paddingRight = '5px';
+    cbxLabel.style.paddingLeft = '0px';
 
     container.appendChild(checkbox);
     container.appendChild(cbxLabel);
     //Event handler
     checkbox.onchange = changeHandler;
-    return checkbox;
-}
-
-/**
- * Create a checkbox with label and event handler
- * To get the event use this:
- * event.target.checked
- * @param containerId
- * @param label
- * @param name
- * @param isSelected
- * @param changeHandler
- * @return {HTMLInputElement}
- */
-function createCheckBox(containerId, label, name, isSelected, changeHandler) {
-    const container = document.getElementById(containerId);
-    const checkbox = document.createElement("input");
-    checkbox.name = name;
-    checkbox.id = name;
-    checkbox.type = "checkbox";
-    checkbox.value = "value";
-    if (isSelected) {
-        checkbox.checked = true;
-    } else {
-        checkbox.checked = null;
-    }
-    // creating label for checkbox
-    let cbxLabel = document.createElement('label');
-    cbxLabel.htmlFor = name;
-
-    cbxLabel.appendChild(document.createTextNode(label));
-    cbxLabel.style.paddingRight = '5px';
-
-    container.appendChild(checkbox);
-    container.appendChild(cbxLabel);
-    //Event handler
-    checkbox.onchange = changeHandler;
-
     return checkbox;
 }
 
@@ -142,7 +104,7 @@ function createRadioButtons(containerId, data, name, selectedValue, changeHandle
                 elmLabel.htmlFor = d.id;
             }
             elmLabel.appendChild(document.createTextNode(label));
-            elmLabel.style.paddingRight = '5px';
+            elmLabel.style.paddingRight = '0px';
             container.appendChild(elmLabel);
         }
     }

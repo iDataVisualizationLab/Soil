@@ -1,26 +1,20 @@
 function createMenuStructure(containerId, soilPackages, elementSelectionChange) {
-    //Package Div for heavy metals
-    createPackageDiv(containerId, 'heavyMetals', soilPackages.heavyMetalsLabel, 'red', elementSelectionChange, soilPackages.detectedHeavyMetals, soilPackages.notDetectedHeavyMetals);
-    //Package div for plant essentials
-    createPackageDiv(containerId, 'plantEssentials', soilPackages.plantEssentialElementsLabel, 'green', elementSelectionChange, soilPackages.detectedPlantEssentialElements, soilPackages.notDetectedPlantEssentialElements);
-
-    //Add pedological features package
-    // soilPackages.pedologicalFeatures, soilPackages.pedologicalFeaturesLabel, elementSelectionChange, "blue"
-    // soilPackages.detectedPedologicalFeatures
-
-    //Others
-    // soilPackages.others
-    createPackageDiv(containerId, 'others', soilPackages.othersLabel, 'black', elementSelectionChange, soilPackages.others, []);
+    debugger
+    const allPackageIds = Object.keys(soilPackages);
+    allPackageIds.forEach(packageId => {
+        const pkgInfo = soilPackages[packageId];
+        createPackageDiv(containerId, packageId, pkgInfo.label, pkgInfo.color, elementSelectionChange, pkgInfo.detected, pkgInfo.notDetected, soilPackages);
+    });
 }
 
-function createPackageDiv(containerId, packageId, packageLabel, packageColor, elementSelectionChange, detectedElements, notDetectedElements) {
+function createPackageDiv(containerId, groupId, groupLabel, groupColor, elementSelectionChange, enabledElements, disabledElements, groups) {
+    const allGroupIds = Object.keys(groups);
     const container = document.getElementById(containerId);
-
-    const childrenDivId = packageId + 'Children';
-    const packageDivId = packageId + 'Div';
+    const childrenDivId = groupId + 'Children';
+    const packageDivId = groupId + 'Div';
     // Create a div for the package
     const packageDiv = document.createElement('div');
-    packageDiv.style.borderBottom = `1px solid ${packageColor}`;
+    packageDiv.style.borderBottom = `1px solid ${groupColor}`;
     packageDiv.style.paddingBottom = '3px';
     packageDiv.id = packageDivId;
     packageDiv.style.display = 'inline';
@@ -31,28 +25,34 @@ function createPackageDiv(containerId, packageId, packageLabel, packageColor, el
     childrenDiv.style.display = 'none';
     //Now add a label for toggling
     const packageLabelElm = document.createElement('label');
-    packageLabelElm.innerHTML = `<b>${packageLabel} &#187;</b>`;
-    packageLabelElm.style.color = packageColor;
+    packageLabelElm.id = groupId + 'Label';
+    packageLabelElm.innerHTML = `<b>${groupLabel} &#187;</b>`;
+    packageLabelElm.style.color = groupColor;
     packageLabelElm.style.marginTop = '3px';
     packageLabelElm.style.marginBottom = '3px';
     packageLabelElm.style.marginLeft = '5px'
     packageLabelElm.style.marginRight = '5px'
     packageLabelElm.onclick = function () {
         if (childrenDiv.style.display === 'inline') {
-            childrenDiv.style.display = 'none';
-            packageLabelElm.innerHTML = `<b>${packageLabel} &#187;</b>`;
+            collapseAGroup(groupId, groupLabel);
         } else {
-            childrenDiv.style.display = 'inline';
-            packageLabelElm.innerHTML = `<b>${packageLabel} &#171;</b>`;
+            expandAGroup(groupId, groupLabel);
+            //Collapse other packages
+            allGroupIds.forEach(otherGrpId => {
+                if (otherGrpId !== groupId) {
+                    //Collapse them
+                    const otherGrpLabel = groups[otherGrpId].label;
+                    collapseAGroup(otherGrpId, otherGrpLabel);
+                }
+            });
         }
     }
 
     packageDiv.appendChild(packageLabelElm);
     packageDiv.appendChild(childrenDiv);
     // One option for all
-    createCheckBox(childrenDivId, 'All', packageId, true, function (d) {
-
-        detectedElements.forEach(elm => {
+    createCheckBox(childrenDivId, 'All', groupId, true, function (d) {
+        enabledElements.forEach(elm => {
             const theElm = document.getElementById(`#${elm}elementSelectionId`);
             if (d.target.checked !== theElm.checked) {
                 theElm.click();
@@ -61,16 +61,35 @@ function createPackageDiv(containerId, packageId, packageLabel, packageColor, el
     });
 
     //1. Detected elements
-    detectedElements.forEach(elm => {
+    enabledElements.forEach(elm => {
         const cbx = createCheckBox(childrenDivId, elm, `#${elm}elementSelectionId`, true, elementSelectionChange, elm);
         cbx.value = elm;
     });
     //2. Not detected elements
-    notDetectedElements.forEach(elm => {
+    disabledElements.forEach(elm => {
         let cbx = createCheckBox(childrenDivId, elm, elm, false, () => {
             //Do nothing for not detected elements
         });
         cbx.disabled = true;
         cbx.setAttribute('data-tooltip', 'Not detected');
-    })
+    });
+    function collapseAGroup(groupId, groupLabel){
+        const childrenDiv = document.getElementById(groupId + 'Children');
+        const packageLabelElm = document. getElementById(groupId + 'Label');
+
+        if (childrenDiv.style.display === 'inline') {
+            childrenDiv.style.display = 'none';
+            packageLabelElm.innerHTML = `<b>${groupLabel} &#187;</b>`;
+        }
+    }
+    function expandAGroup(groupId, groupLabel){
+        const childrenDiv = document.getElementById(groupId + 'Children');
+        const packageLabelElm = document. getElementById(groupId + 'Label');
+
+        if (childrenDiv.style.display === 'none') {
+            childrenDiv.style.display = 'inline';
+            packageLabelElm.innerHTML = `<b>${groupLabel} &#171;</b>`;
+        }
+    }
+
 }
