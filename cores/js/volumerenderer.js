@@ -7,11 +7,11 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
             const x = interpolatedData.x[idx] + 1 - r;
             const z = interpolatedData.z[idx] + 1 - r;
             if ((x * x + z * z) > (r * r)) {
-                t[idx] = 0;
+                t[idx] = 0.0;
             }
             //Take the values which is in the filtered value range
             if ((t[idx] < valueRange[0]) || t[idx] > valueRange[1]) {
-                t[idx] = 0;
+                t[idx] = 0.0;
             }
         }
         //Data conversion
@@ -73,7 +73,7 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         camera.up.set(1, 0, 0); // In our data, x is up
 
         // The gui for interaction
-        volconfig = {clim1: 0, clim2: 1, renderstyle: 'iso', isothreshold: 0.0, colormap: 'custom'};
+        volconfig = {clim1: 0, clim2: 1, renderstyle: 'iso', isothreshold: 0.001, colormap: 'custom'};
 
         const texture = createTextureFromData(volume);
         const cmCanvas = createContinuousColorMapCanvas(colorScale);
@@ -99,11 +99,12 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
             uniforms: uniforms,
             vertexShader: shader.vertexShader,
             fragmentShader: shader.fragmentShader,
-            side: THREE.BackSide // The volume shader uses the backface as its "reference point"
+            side: THREE.BackSide, // The volume shader uses the backface as its "reference point"
         });
 
         // THREE.Mesh
         const geometry = new THREE.BoxGeometry(volume.xLength, volume.yLength, volume.zLength);
+
         geometry.translate(volume.xLength / 2, volume.yLength / 2, volume.zLength / 2);
         const mesh = new THREE.Mesh(geometry, material);
         scene.add(mesh);
@@ -132,11 +133,24 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         locationFace.material.map.rotation = Math.PI / 2;
         locationHelper.add(locationFace);
 
-        const locationFaceBottom = locationFace.clone();
+        const textureHandler = new TextureHandler();
+        const locationFaceBottomGeo = locationFaceGeo.clone();
+        const locationFaceBottomMat = new THREE.MeshPhongMaterial({
+            map: textureHandler.createLocationBottomTexture(300),
+            transparent: true,
+            opacity: 0.99,
+            side: THREE.DoubleSide,
+            alphaTest: 0.1
+        });
+        let locationFaceBottom = new THREE.Mesh(locationFaceBottomGeo, locationFaceBottomMat);
         locationFaceBottom.position.x = -volume.xLength / 2;
+        locationFaceBottom.rotation.y = Math.PI / 2;
+        locationFaceBottom.position.z = volume.zLength;
+
+
         locationHelper.add(locationFaceBottom);
 
-        const depthFaceTex = new TextureHandler().createDepthTexture(300);
+        const depthFaceTex = textureHandler.createDepthTexture(300);
         const depthFaceMat = new THREE.MeshPhongMaterial({
             map: depthFaceTex,
             transparent: true,

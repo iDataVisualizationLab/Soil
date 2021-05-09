@@ -10,7 +10,7 @@ const layoutObject = setupLayout();
 
 function setupLayout() {
     const width = window.innerWidth / 2, height = window.innerHeight / 2;
-    const margin = 10;
+    const margin = 15;
 
     //Detail charts
     const detailChartLeft1 = margin;
@@ -28,7 +28,7 @@ function setupLayout() {
     const pcWidth = window.innerWidth - 2 * pcLeft - pcHeight;
 
     //Volume render element
-    const vrLeft = pcWidth;
+    const vrLeft = pcWidth + 5;
     const vrTop = pcTop + 30;
     const vrWidth = pcHeight + 10;
     const vrHeight = vrWidth - 60;

@@ -1,5 +1,6 @@
 let profileDescriptions = {};
 let renderer;
+let clock = new THREE.Clock();
 const elementInfos = [];
 const selectedElements = ["Ca Concentration", "Rb Concentration"];
 let selectedVolumeRenderedElement = "Ca Concentration";
@@ -205,6 +206,7 @@ async function handleProfileChange(profileName) {
 
         setupDataFor3DScenes(squareTextureHandlers, circleTextureHandlers);
 
+
         render();
         hideLoader();
     }
@@ -217,6 +219,12 @@ async function handleProfileChange(profileName) {
         elementInfos.forEach(elementInfo => {
             threeDScences.renderSceneInfo(elementInfo);
         });
+        //For auto rotate
+        elementInfos.forEach(elementInfo => {
+            elementInfo.orbitControls.update();
+        });
+        vr.orbitControls.update();
+
         requestAnimationFrame(render);
     }
 
@@ -237,23 +245,32 @@ async function handleProfileChange(profileName) {
 
             //
             let prevAngle = 0;
+            let timePassed = 0;
             orbitControls.addEventListener("start", function () {
                 prevAngle = orbitControls.getAzimuthalAngle();
                 showLoader();
+                timePassed = 0;
             });
             orbitControls.addEventListener("change", function () {
+
                 const cutAngle = orbitControls.getAzimuthalAngle();
                 let texture = undefined;
                 elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
                 //This line avoid it to rotate
                 elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
 
+                //Everytime we change we check for the delta
+                timePassed += clock.getDelta();
+                if (timePassed > 1.0) {
+                    handleCutAngleChange(orbitControls, squareTextureHandlers, idx, elementInfo);
+                    timePassed = 0;
+                }
+
             });
             orbitControls.addEventListener("end", function () {
                 handleCutAngleChange(orbitControls, squareTextureHandlers, idx, elementInfo);
                 hideLoader();
             });
-            orbitControls.autoRotate = true;
             elementInfo.orbitControls = orbitControls;
         }
     }

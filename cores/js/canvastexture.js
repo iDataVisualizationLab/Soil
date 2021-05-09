@@ -132,6 +132,21 @@ class TextureHandler {
         texture.center.y = 0.5;
         return texture;
     }
+    createLocationBottomTexture(size) {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d');
+        canvas.width = size;
+        canvas.height = size;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        //Add a circle
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2, 0, 2 * Math.PI);
+        ctx.stroke();
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.center.x = 0.5;
+        texture.center.y = 0.5;
+        return texture;
+    }
 
     createDepthTexture(size) {
         const canvas = document.createElement('canvas')

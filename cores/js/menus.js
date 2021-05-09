@@ -19,6 +19,8 @@ function createPackageDiv(containerId, groupId, groupLabel, groupColor, elementS
     packageDiv.id = packageDivId;
     packageDiv.style.display = 'inline';
     container.appendChild(packageDiv);
+
+
     //Create the child div for its children
     const childrenDiv = document.createElement('div');
     childrenDiv.id = childrenDivId;
