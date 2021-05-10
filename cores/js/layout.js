@@ -228,7 +228,7 @@ function setupLayout() {
             vr.changeRenderStyle(event.target.value);
         }
     });
-    createCheckBox('volumeRenderViewOptions', 'Location helper', 'locationHelper', true, (event) => {
+    createCheckBox('volumeRenderViewOptions', 'Location helper', 'locationHelper', false, (event) => {
         vr.setLocationHelperVisiblity(event.target.checked);
     });
 

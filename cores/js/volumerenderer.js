@@ -74,16 +74,21 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         const aspect = width / height;
         const paddingUnits = 5;
         camera = new THREE.OrthographicCamera(-h * aspect / 2 - paddingUnits, h * aspect / 2 + paddingUnits, h / 2 + paddingUnits, -h / 2 - paddingUnits, 1, 1000);
-        // camera.position.set(50, 42, -69);
         camera.position.set(80, 25, -150);
-        // camera.rotation.set(-2.921, 0.272, 1.571);
 
         camera.up.set(1, 0, 0); // In our data, x is up
 
         // The gui for interaction
         //TODO: isothreshold
         // volconfig = {clim1: 0.0, clim2: 1, renderstyle: 'iso', isothreshold: volume.isothreshold, colormap: 'custom'};
-        volconfig = {clim1: 0.0, clim2: 1, renderstyle: 'iso', isothreshold: 0.0, colormap: 'custom'};
+        volconfig = {
+            clim1: 0.0,
+            clim2: 1,
+            renderstyle: 'iso',
+            isothreshold: 0.0,
+            colormap: 'custom',
+            locationHelperVisibility: false
+        };
 
         const texture = createTextureFromData(volume);
         const cmCanvas = createContinuousColorMapCanvas(colorScale);
@@ -178,6 +183,7 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         depthFace.position.y = volume.yLength / 2;
         depthFace.position.z = volume.zLength / 2;
         locationHelper.add(depthFace);
+        locationHelper.visible = volconfig.locationHelperVisibility;
         scene.add(locationHelper);
         //</editor-fold>
 
@@ -246,6 +252,7 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
     }
 
     function setLocationHelperVisiblity(isVisible) {
+        volconfig.locationHelperVisibility = isVisible;
         locationHelper.visible = isVisible;
         render();
     }
