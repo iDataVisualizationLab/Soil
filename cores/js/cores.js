@@ -70,17 +70,26 @@ async function handleProfileChange(profileName) {
     function elementSelectionChange(evt) {
         let elm = evt.target.value;
         //Current dims
-        const dims = pc.dimensions();
+        let dims = pc.dimensions();
         if (evt.target.checked) {
-            //Added dimension
-            dims[elm] = allDimensions[elm];
+            //The code is long here to keep the order
+            const selected = Object.keys(dims);
+            selected.push(elm);
+            dims = {};
+            Object.keys(allDimensions).forEach((key, i) => {
+                if (selected.indexOf(key) >= 0) {
+                    dims[key] = allDimensions[key];
+                    dims[key].index = i; //This index helps to reorder the dimensions
+                }
+            });
+
         } else {
             //Remove dimension
             delete dims[elm];
         }
         //Update
         pc.dimensions(dims);
-
+        pc.updateAxisTicks();
     };
     //</editor-fold>
 
@@ -90,7 +99,6 @@ async function handleProfileChange(profileName) {
         //save all dimensions for future use
         allDimensions = {...pc.dimensions()};
     });
-
     //</editor-fold>
 
     //<editor-fold desc="The volume renderer">

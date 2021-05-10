@@ -52,8 +52,7 @@ function SoilPackages(detectedElements) {
             packages[key].notDetected = notDetected;
         }
     });
-    //Exporting
-
+    //Ordering
     return packages;
 }
 

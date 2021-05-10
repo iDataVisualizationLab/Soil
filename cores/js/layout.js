@@ -98,6 +98,18 @@ function setupLayout() {
         systemConfigurations.isVertiCutVisible = event.target.checked;
         handleVertiCutVisibility(systemConfigurations.isVertiCutVisible);
     });
+    createCheckBox('viewOptions', 'Auto rotate', 'autoRotate', false, (event) => {
+        systemConfigurations.autoRotate = event.target.checked;
+        handleAutoRotationChange(systemConfigurations.autoRotate);
+    });
+
+    function handleAutoRotationChange(autoRotate) {
+        elementInfos.forEach(elementInfo => {
+            elementInfo.orbitControls.autoRotate = autoRotate;
+        });
+        vr.orbitControls.autoRotate = autoRotate;
+    }
+
     //for the Google Earth link
     const googleEarthLinkDiv = d3DetailChart1Container
         .append('div')
@@ -216,7 +228,7 @@ function setupLayout() {
             vr.changeRenderStyle(event.target.value);
         }
     });
-    createCheckBox('volumeRenderViewOptions', 'Location helper', 'locationHelper', true, (event)=>{
+    createCheckBox('volumeRenderViewOptions', 'Location helper', 'locationHelper', true, (event) => {
         vr.setLocationHelperVisiblity(event.target.checked);
     });
 

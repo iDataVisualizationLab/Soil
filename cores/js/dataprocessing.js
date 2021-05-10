@@ -121,6 +121,13 @@ class ProfileDescription {
         }
         const allLocations = await this.getLocations();
         const allElements = await this.getElements();
+
+        //Sort/order the elements by their max values
+        const scalers = await this.getElementScalers();
+        allElements.sort((a, b)=>{
+            return scalers[b].domain()[1] - scalers[a].domain()[1];
+        });
+
         const allDepths = await this.getDepths();
         const parcoordsData = [];
         //This is every element

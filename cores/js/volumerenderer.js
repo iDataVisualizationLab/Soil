@@ -7,10 +7,17 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
             const x = interpolatedData.x[idx] + 1 - r;
             const z = interpolatedData.z[idx] + 1 - r;
             if ((x * x + z * z) > (r * r)) {
-                t[idx] = 0.0;
+                t[idx] = 0;
             }
+
+            // //TODO: Only filter out the values which is greater,
+            // //The lower value we will use isothreshold
+            // //Take the values which is in the filtered value range
+            // if ((t[idx] > valueRange[1])) {
+            //     t[idx] = 0.0;
+            // }
             //Take the values which is in the filtered value range
-            if ((t[idx] < valueRange[0]) || t[idx] > valueRange[1]) {
+            if ((t[idx] < valueRange[0]) || (t[idx] > valueRange[1])) {
                 t[idx] = 0.0;
             }
         }
@@ -19,7 +26,8 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
             data: Float32Array.from(t),
             xLength: verticalInterpolatedSteps,
             yLength: horizontalInterpolatedSteps,
-            zLength: horizontalInterpolatedSteps
+            zLength: horizontalInterpolatedSteps,
+            // isothreshold: valueRange[0] //TODO: isothreshold
         }
         return volume;
     }
@@ -73,7 +81,9 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         camera.up.set(1, 0, 0); // In our data, x is up
 
         // The gui for interaction
-        volconfig = {clim1: 0, clim2: 1, renderstyle: 'iso', isothreshold: 0.001, colormap: 'custom'};
+        //TODO: isothreshold
+        // volconfig = {clim1: 0.0, clim2: 1, renderstyle: 'iso', isothreshold: volume.isothreshold, colormap: 'custom'};
+        volconfig = {clim1: 0.0, clim2: 1, renderstyle: 'iso', isothreshold: 0.0, colormap: 'custom'};
 
         const texture = createTextureFromData(volume);
         const cmCanvas = createContinuousColorMapCanvas(colorScale);
@@ -218,6 +228,9 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         const volume = createVolumeFromInterpolatedData(interpolatedData, valueRange);
         const texture = createTextureFromData(volume);
         material.uniforms['u_data'].value = texture;
+        // //TODO: These two lines are for the smooth rendering
+        // volconfig.isothreshold = volume.isothreshold;
+        // material.uniforms["u_renderthreshold"].value = volconfig.isothreshold; // For ISO renderstyle
         render();
     }
 

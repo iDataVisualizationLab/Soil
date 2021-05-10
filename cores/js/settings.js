@@ -2,6 +2,7 @@ let depthNames;
 let locationNameMapping;
 
 const systemConfigurations = {
+    autoRotate: false,
     helpEnabled: false,
     isOuterVisible: true,
     isHorizCutVisible: true,

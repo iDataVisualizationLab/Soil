@@ -32,13 +32,18 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
             hideTip();
         });
     //update axis ticks to reduce space
-    pc.svg.selectAll('.dimension').filter(d => (d !== 'Site' && d !== 'Depth')).selectAll('.tick').selectAll('text').text(d => {
-        if (d > 1000) {
-            return d / 1000 + 'K';
-        } else {
-            return d;
-        }
-    });
+    updateAxisTicks();
+
+    function updateAxisTicks() {
+        pc.svg.selectAll('.dimension').filter(d => (d !== 'Site' && d !== 'Depth')).selectAll('.tick').selectAll('text').text(d => {
+            if (d > 1000) {
+                return d / 1000 + 'K';
+            } else {
+                return d;
+            }
+        });
+    }
+
     //Brushing
     pc.on("brush", (d) => {
         brushChange();
@@ -62,21 +67,6 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
         vr.handleDataChange(ip.getInterpolatedData(selectedVolumeRenderedElement), valueRange);
     }
 
-    //Delete button
-    // d3.select("#parcoordsChart").selectAll('.dimension').each(function (d) {
-    //     const closeBtn = new d3CloseButton().size(15).x(-8).y(-32);
-    //     closeBtn.clickEvent(function (event) {
-    //         debugger
-    //         const dims = pc.dimensions();
-    //         delete dims[d];
-    //         pc.dimensions(dims);
-    //         //Prevent it to trigger the click event from the dimension
-    //         event.stopPropagation();
-    //     });
-    //     let dim = d3.select(this);
-    //     dim.call(closeBtn);
-    // });
-
     // update color
     function changeVolumeRenderElement(dimension) {
         if (dimension !== "Site" && dimension !== "Depth") {
@@ -96,5 +86,6 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
         }
     }
 
+    pc.updateAxisTicks = updateAxisTicks;
     return pc;
 }

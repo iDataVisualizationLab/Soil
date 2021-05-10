@@ -14,8 +14,9 @@ function createOrbitControls(camera, domElement) {
     orbitControls.rotateSpeed = 0.3;
 
     //For auto rotate
-    orbitControls.autoRotate = true;
     orbitControls.autoRotateSpeed = 1.0;
+    orbitControls.autoRotate = systemConfigurations.autoRotate;
     orbitControls.update();
+
     return orbitControls;
 }
