@@ -54,12 +54,17 @@ function createPackageDiv(containerId, groupId, groupLabel, groupColor, elementS
     packageDiv.appendChild(childrenDiv);
     // One option for all
     createCheckBox(childrenDivId, '<b>All</b>', groupId, true, function (d) {
-        enabledElements.forEach(elm => {
-            const theElm = document.getElementById(`#${elm}elementSelectionId`);
-            if (d.target.checked !== theElm.checked) {
-                theElm.click();
-            }
-        });
+        showLoader();
+        setTimeout(() => {
+            enabledElements.forEach(elm => {
+                const theElm = document.getElementById(`#${elm}elementSelectionId`);
+                if (d.target.checked !== theElm.checked) {
+                    theElm.click();
+                }
+            });
+            hideLoader();
+        }, 20);
+
     });
 
     //1. Detected elements

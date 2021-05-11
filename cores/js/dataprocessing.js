@@ -81,6 +81,7 @@ class ProfileDescription {
             const minVal = d3.min(elmValues);
             const maxVal = d3.max(elmValues);
             const domain = [minVal, maxVal];
+            // const domain = [0, maxVal];
             let range = [0, 1];
             if (minVal === 0 && maxVal == 0) {
                 range = [0, 0];

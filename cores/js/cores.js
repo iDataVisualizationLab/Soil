@@ -135,7 +135,7 @@ async function handleProfileChange(profileName) {
                 title: 'Quantiles',
                 tickSize: 0,
                 // tickFormat: ",.0f",
-                ticks: 10,
+                ticks: colorQuantiles.length,
                 width: 400
             });
         } else {
@@ -148,7 +148,7 @@ async function handleProfileChange(profileName) {
                 title: 'Parts Per Million (PPM)',
                 tickSize: 0,
                 tickFormat: ",.0f",
-                ticks: 10,
+                ticks: colorQuantiles.length,
                 width: 400
             });
         }

@@ -283,9 +283,10 @@ function createColorMapCanvas(colorScale, height = 1) {
     ctx.canvas.width = width;
     ctx.canvas.height = height;
     const widthScale = new d3.scaleLinear().domain([0, 1]).range([0, width]);
+    const step = colorScale.domain()[0];
     colorScale.domain().forEach(val => {
-        ctx.fillStyle = colorScale(val - 0.1);//The -0.1 here is because our rect start at 0 while the color scale has the value at the upper bound (threshold)
-        ctx.fillRect(widthScale(val - 0.1), 0, width / colorScale.domain().length, height);
+        ctx.fillStyle = colorScale(val - step);//The -step here is because our rect start at 0 while the color scale has the value at the upper bound (threshold)
+        ctx.fillRect(widthScale(val - step), 0, width / colorScale.domain().length, height);
     });
     return canvas;
 }
