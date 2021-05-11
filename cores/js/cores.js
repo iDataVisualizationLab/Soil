@@ -1,6 +1,6 @@
 let profileDescriptions = {};
 let renderer;
-let clock = new THREE.Clock();
+let clock = [new THREE.Clock(), new THREE.Clock()];
 const elementInfos = [];
 let circleTextureHandlers, squareTextureHandlers;
 const selectedElements = ["Ca Concentration", "Rb Concentration"];
@@ -9,6 +9,7 @@ let vr;
 let pc;
 let allDimensions;
 let theProfileHandler;
+let timePassed = [0, 0];
 showLoader();
 handleProfileChange('L').then(profileHandler => {
     hideLoader();
@@ -268,11 +269,11 @@ async function handleProfileChange(profileName) {
 
             //
             let prevAngle = 0;
-            let timePassed = 0;
+
             orbitControls.addEventListener("start", function () {
                 prevAngle = orbitControls.getAzimuthalAngle();
                 showLoader();
-                timePassed = 0;
+                timePassed[idx] = 0;
             });
             orbitControls.addEventListener("change", function () {
 
@@ -283,10 +284,10 @@ async function handleProfileChange(profileName) {
                 elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
 
                 //Everytime we change we check for the delta
-                timePassed += clock.getDelta();
-                if (timePassed > 1.0) {
+                timePassed[idx] += clock[idx].getDelta();
+                if (timePassed[idx] > 2.0) {
                     handleCutAngleChange(orbitControls, squareTextureHandlers, idx, elementInfo);
-                    timePassed = 0;
+                    timePassed[idx] = 0;
                 }
 
             });
