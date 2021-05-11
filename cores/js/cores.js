@@ -134,7 +134,7 @@ async function handleProfileChange(profileName) {
                 color: d3.scaleThreshold(colorScale.domain(), colorScale.range()),
                 title: 'Quantiles',
                 tickSize: 0,
-                // tickFormat: ",.0f",
+                tickFormat: ",.1f",
                 ticks: colorQuantiles.length,
                 width: 400
             });
