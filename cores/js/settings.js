@@ -2,6 +2,7 @@ let depthNames;
 let locationNameMapping;
 
 const systemConfigurations = {
+    quantiles: true,
     autoRotate: false,
     helpEnabled: false,
     isOuterVisible: true,

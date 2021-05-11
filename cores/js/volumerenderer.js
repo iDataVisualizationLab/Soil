@@ -86,15 +86,19 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
             clim2: 1,
             renderstyle: 'iso',
             isothreshold: 0.0,
-            colormap: 'custom',
+            colormap: systemConfigurations.quantiles ? 'quantiles' : 'continuous',
             locationHelperVisibility: false
         };
 
         const texture = createTextureFromData(volume);
-        const cmCanvas = createContinuousColorMapCanvas(colorScale);
+        // const cmCanvas = createContinuousColorMapCanvas(colorScale);
+        let cmContinuousCanvas = createContinuousColorMapCanvas(colorScale);
+        let cmQuantileCanvas = createColorMapCanvas(colorScale);
+
 
         cmtextures = {
-            custom: new THREE.CanvasTexture(cmCanvas),
+            continuous: new THREE.CanvasTexture(cmContinuousCanvas),
+            quantiles: new THREE.CanvasTexture(cmQuantileCanvas),
             gray: new THREE.TextureLoader().load('textures/cm_gray.png', render)
         };
 
@@ -257,33 +261,40 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         render();
     }
 
+    function changeColorType(colorMapType) {
+        volconfig.colormap = colorMapType;
+        updateUniforms();
+        render();
+    }
+
     //Exposing handlers
     this.handleDataChange = handleDataChange;
     this.changeRenderStyle = changeRenderStyle;
     this.changeLocationFace = changeLocationFace;
     this.setLocationHelperVisiblity = setLocationHelperVisiblity;
+    this.changeColorType = changeColorType;
     return this;
 }
 
-function createColorMapCanvas(colorScale) {
+function createColorMapCanvas(colorScale, height = 1) {
     const width = 256;
-    const height = 1;
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext('2d');
     ctx.canvas.width = width;
     ctx.canvas.height = height;
     const widthScale = new d3.scaleLinear().domain([0, 1]).range([0, width]);
     colorScale.domain().forEach(val => {
-        ctx.fillStyle = colorScale(val);
-        ctx.fillRect(widthScale(val), 0, width / colorScale.domain().length, 1);
+        ctx.fillStyle = colorScale(val - 0.1);//The -0.1 here is because our rect start at 0 while the color scale has the value at the upper bound (threshold)
+        ctx.fillRect(widthScale(val - 0.1), 0, width / colorScale.domain().length, height);
     });
     return canvas;
 }
 
-function createContinuousColorMapCanvas(colorScale) {
+function createContinuousColorMapCanvas(inputColorScale) {
     const width = 256;
     const height = 1;
     const canvas = document.createElement("canvas");
+    const colorScale = d3.scaleLinear().domain(inputColorScale.domain()).range(inputColorScale.range())
     const ctx = canvas.getContext('2d');
     ctx.canvas.width = width;
     ctx.canvas.height = height;

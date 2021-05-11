@@ -18,6 +18,7 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
         .on("click", changeVolumeRenderElement)
         .selectAll(".label")
         .style("font-size", "14px");
+
     d3.selectAll('.dimension')
         .on("mouseover", (event, d) => {
             if (systemConfigurations.helpEnabled) {
@@ -67,25 +68,45 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
         vr.handleDataChange(ip.getInterpolatedData(selectedVolumeRenderedElement), valueRange);
     }
 
-    // update color
+    // update the selected element
     function changeVolumeRenderElement(dimension) {
-        if (dimension !== "Site" && dimension !== "Depth") {
-            //Change the color
-            pc.svg.selectAll(".dimension")
-                .style("font-weight", "normal")
-                .filter(function (d) {
-                    return d == dimension;
-                })
-                .style("font-weight", "bold");
-            selectedVolumeRenderedElement = `${dimension} Concentration`;
-            pc.color(d => colorScale(elementScalers[selectedVolumeRenderedElement](d[dimension]))).render();
-            //Update the label on the volume renderer
-            layoutObject.handleVolumeRendererLabelChange(`Current element: <b>${dimension}</b>`);
-            //Handle the data change for the volume render
-            brushChange();
-        }
+        showLoader();
+        setTimeout(() => {
+            if (dimension !== "Site" && dimension !== "Depth") {
+                //Change the color
+                pc.svg.selectAll(".dimension")
+                    .selectAll('text')
+                    .style("font-weight", "normal")
+                    .filter(function (d) {
+                        return d == dimension;
+                    })
+                    .style("font-weight", "bold")
+                    .selectAll('text').style('font-weight', 'bold');
+
+                selectedVolumeRenderedElement = `${dimension} Concentration`;
+                pc.color(d => colorScale(elementScalers[selectedVolumeRenderedElement](d[dimension]))).render();
+                //Update the label on the volume renderer
+                layoutObject.handleVolumeRendererLabelChange(`Current element: <b>${dimension}</b>`);
+                //Handle the data change for the volume render
+                brushChange();
+            }
+            hideLoader();
+        }, 0);
     }
 
+    function changeColorScale(colorScale) {
+        setTimeout(() => {
+            const dimension = selectedVolumeRenderedElement.split(' ')[0];
+            if (dimension !== "Site" && dimension !== "Depth") {
+                //Change the color
+                pc.color(d => colorScale(elementScalers[selectedVolumeRenderedElement](d[dimension]))).render();
+            }
+            hideLoader();
+        }, 0);
+    }
+
+
     pc.updateAxisTicks = updateAxisTicks;
+    pc.changeColorScale = changeColorScale;
     return pc;
 }

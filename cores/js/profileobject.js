@@ -336,6 +336,9 @@ function createProfileObject(horizCutY, profileName) {
         vertiCut.visible = isVisible;
     }
 
+    function changeColorScale(colorScale){
+
+    }
     //</editor-fold>
 
     // Expose handlers

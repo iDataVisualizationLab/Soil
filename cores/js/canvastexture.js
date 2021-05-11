@@ -36,6 +36,10 @@ class TextureHandler {
         }
     }
 
+    changeColorScale(colorScale) {
+        this.colorScale = colorScale;
+    }
+
     createCanvas(data) {
         const canvasTexture = new CanvasTexture();
         let canvas = canvasTexture.createCanvas(data, 50, 50, this.colorScale);
@@ -72,7 +76,6 @@ class TextureHandler {
             ctx.strokeText(loc, x, y);
         });
     }
-
 
     createTextureWithLocations(data, locationMapping) {
         const canvas = this.createCanvas(data);
@@ -132,6 +135,7 @@ class TextureHandler {
         texture.center.y = 0.5;
         return texture;
     }
+
     createLocationBottomTexture(size) {
         const canvas = document.createElement('canvas')
         const ctx = canvas.getContext('2d');

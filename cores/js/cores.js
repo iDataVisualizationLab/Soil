@@ -2,14 +2,17 @@ let profileDescriptions = {};
 let renderer;
 let clock = new THREE.Clock();
 const elementInfos = [];
+let circleTextureHandlers, squareTextureHandlers;
 const selectedElements = ["Ca Concentration", "Rb Concentration"];
 let selectedVolumeRenderedElement = "Ca Concentration";
 let vr;
 let pc;
 let allDimensions;
+let theProfileHandler;
 showLoader();
-handleProfileChange('L').then(_ => {
+handleProfileChange('L').then(profileHandler => {
     hideLoader();
+    theProfileHandler = profileHandler;
 });
 
 async function handleProfileChange(profileName) {
@@ -38,13 +41,13 @@ async function handleProfileChange(profileName) {
 
     populateSelectors(elmSelectOptions, selectedElements, handleSelectionChange);
 
-    const colorScale = new d3.scaleLinear().domain([0., 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]).range(colors10);
-
+    //Color scale
+    let colorScale = systemConfigurations.quantiles ? quantileColorScale : continuousColorScale;
 
     //Preload the data for this element
-    let circleTextureHandlers = selectedElements.map(elm => new HorizontalCanvasTextureHandler(ip, elm, colorScale));
+    circleTextureHandlers = selectedElements.map(elm => new HorizontalCanvasTextureHandler(ip, elm, colorScale));
     circleTextureHandlers.name = profileName;
-    let squareTextureHandlers = selectedElements.map(elm => new VerticalCanvasTextureHandler(ip, elm, colorScale));
+    squareTextureHandlers = selectedElements.map(elm => new VerticalCanvasTextureHandler(ip, elm, colorScale));
     squareTextureHandlers.name = profileName;
 
     const elmScalers = await profileDescriptions[profileName].getElementScalers();
@@ -124,19 +127,31 @@ async function handleProfileChange(profileName) {
 
     //<editor-fold desc="Selection box change handler">
     function handleLegendChange(elm, i) {
-        const elmScaler = elmScalers[elm];
-        const legendDomain = colorScale.domain().map(d => elmScaler.invert(d));
-        const range = colorScale.range();
-        legend({
-            svgId: `detailElmText${i + 1}`,
-            color: d3.scaleThreshold(legendDomain, range),
-            title: 'Parts Per Million (PPM)',
-            tickSize: 0,
-            tickFormat: ",.0f",
-            ticks: 10,
-            width: 400
-        });
-        d3.select().text(elm);
+        if (systemConfigurations.quantiles) {
+            const range = colorScale.range();
+            legend({
+                svgId: `detailElmText${i + 1}`,
+                color: d3.scaleThreshold(colorScale.domain(), colorScale.range()),
+                title: 'Quantiles',
+                tickSize: 0,
+                // tickFormat: ",.0f",
+                ticks: 10,
+                width: 400
+            });
+        } else {
+            const elmScaler = elmScalers[elm];
+            const range = colorScale.range();
+            const domain = colorScale.domain().map(d => elmScaler.invert(d));
+            legend({
+                svgId: `detailElmText${i + 1}`,
+                color: d3.scaleLinear(domain, range),
+                title: 'Parts Per Million (PPM)',
+                tickSize: 0,
+                tickFormat: ",.0f",
+                ticks: 10,
+                width: 400
+            });
+        }
     }
 
     function handleSelectionChange(event) {
@@ -354,6 +369,11 @@ async function handleProfileChange(profileName) {
         hideLoader();
     }
     //</editor-fold>
+
+    //Exposing functionalities
+    this.handleCutChange = handleCutChange;
+    this.handleLegendChange = handleLegendChange;
+    return this;
 }
 
 function handleOuterVisibility(isVisible) {

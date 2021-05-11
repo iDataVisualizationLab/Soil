@@ -191,6 +191,32 @@ function setupLayout() {
             handleProfileChange(profileCodes[profiles.indexOf(value)]);
         });
     gui.add(systemConfigurations, "helpEnabled").name("Help enabled");
+    gui.add(systemConfigurations, "quantiles")
+        .name('Qualitative view')
+        .onChange(function (value) {
+            handleQualitativeViewChange(value);
+        });
+
+    function handleQualitativeViewChange(value) {
+        //Change VR color scheme
+        vr.changeColorType(value ? 'quantiles' : 'continuous');
+        //Change the profile color scheme
+        circleTextureHandlers.forEach(handler => {
+            handler.changeColorScale(value ? quantileColorScale : continuousColorScale);
+        });
+        squareTextureHandlers.forEach(handler => {
+            handler.changeColorScale(value ? quantileColorScale : continuousColorScale);
+        });
+        theProfileHandler.handleCutChange(elementInfos, 0, squareTextureHandlers, circleTextureHandlers);
+        theProfileHandler.handleCutChange(elementInfos, 1, squareTextureHandlers, circleTextureHandlers);
+        //Change the legend
+        selectedElements.forEach((elm, idx) => {
+            theProfileHandler.handleLegendChange(elm, idx);
+        });
+        //Change the parallel coordinate color scale
+        pc.changeColorScale(value ? quantileColorScale : continuousColorScale);
+
+    }
 
     //
     d3.select("#parcoordsChart")
