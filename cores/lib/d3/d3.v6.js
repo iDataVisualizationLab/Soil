@@ -3712,7 +3712,7 @@ function quantize$1(interpolator, n) {
 var frame = 0, // is an animation frame pending?
     timeout$1 = 0, // is a timeout pending?
     interval$1 = 0, // are any timers active?
-    pokeDelay = 1000, // how frequently we check for clock skew
+    pokeDelay = 1000, // how frequently we check for clocks skew
     taskHead,
     taskTail,
     clockLast = 0,

@@ -1,6 +1,7 @@
 let profileDescriptions = {};
 let renderer;
-let clock = [new THREE.Clock(), new THREE.Clock()];
+let clocks = [new THREE.Clock(), new THREE.Clock()];
+let horizCutTranslationClock = new THREE.Clock();
 const elementInfos = [];
 let circleTextureHandlers, squareTextureHandlers;
 const selectedElements = ["Ca Concentration", "Rb Concentration"];
@@ -187,6 +188,26 @@ async function handleProfileChange(profileName) {
         elementInfo.theProfile.handleHorizCutPosition(horizCutPlaneY, texture);
     }
 
+    function autoTranslateHorizCut() {
+        let timeLapse = horizCutTranslationClock.getDelta();
+        elementInfos.forEach((elementInfo, idx) => {
+            let horizCutY = elementInfo.theProfile.horizCut.position.y + systemConfigurations.autoTranslationDirection*(timeLapse)*systemConfigurations.autoTranslateSpeed*0.0025;
+            if(horizCutY > 0.5){
+                horizCutY = 0.5;
+                systemConfigurations.autoTranslationDirection = -systemConfigurations.autoTranslationDirection;
+            }
+            if(horizCutY < -0.5){
+                horizCutY = -0.5;
+                systemConfigurations.autoTranslationDirection = -systemConfigurations.autoTranslationDirection;
+            }
+            elementInfo.theProfile.horizCut.position.y = horizCutY;
+            handleHorizCutChange(elementInfo, idx, circleTextureHandlers);
+        });
+        if (systemConfigurations.autoRotate) {
+            requestAnimationFrame(autoTranslateHorizCut);
+        }
+    }
+
     function handleCutAngleChange(orbitControls, squareTextureHandlers, idx, elementInfo) {
         const cutAngle = orbitControls.getAzimuthalAngle();
         const texture = squareTextureHandlers[idx].getTexture(cutAngle);
@@ -284,7 +305,7 @@ async function handleProfileChange(profileName) {
                 elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
 
                 //Everytime we change we check for the delta
-                timePassed[idx] += clock[idx].getDelta();
+                timePassed[idx] += clocks[idx].getDelta();
                 if (timePassed[idx] > 2.0) {
                     handleCutAngleChange(orbitControls, squareTextureHandlers, idx, elementInfo);
                     timePassed[idx] = 0;
@@ -374,6 +395,7 @@ async function handleProfileChange(profileName) {
     //Exposing functionalities
     this.handleCutChange = handleCutChange;
     this.handleLegendChange = handleLegendChange;
+    this.autoTranslateHorizCut = autoTranslateHorizCut;
     return this;
 }
 

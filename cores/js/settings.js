@@ -4,6 +4,9 @@ let locationNameMapping;
 const systemConfigurations = {
     quantiles: false,
     autoRotate: false,
+    autoTranslationDirection: 1,
+    autoRotateSpeed: 20,
+    autoTranslateSpeed: 20,
     helpEnabled: false,
     isOuterVisible: true,
     isHorizCutVisible: true,

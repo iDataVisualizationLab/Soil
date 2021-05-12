@@ -14293,10 +14293,10 @@
             };
 
             /**
-             * angles are stored in radians from in [0, 2*PI], where 0 in 12 o'clock.
+             * angles are stored in radians from in [0, 2*PI], where 0 in 12 o'clocks.
              * However, one can only select lines from 0 to PI, so we compute the
-             * 'signed' angle, where 0 is the horizontal line (3 o'clock), and +/- PI/2
-             * are 12 and 6 o'clock respectively.
+             * 'signed' angle, where 0 is the horizontal line (3 o'clocks), and +/- PI/2
+             * are 12 and 6 o'clocks respectively.
              */
             function containmentTest(arc) {
                 var startAngle = signedAngle(arc.startAngle);

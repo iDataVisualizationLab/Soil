@@ -108,6 +108,10 @@ function setupLayout() {
             elementInfo.orbitControls.autoRotate = autoRotate;
         });
         vr.orbitControls.autoRotate = autoRotate;
+        //Change also the height
+        horizCutTranslationClock.getDelta();//Reset the time
+        theProfileHandler.autoTranslateHorizCut();
+
     }
 
     //for the Google Earth link
@@ -190,12 +194,24 @@ function setupLayout() {
             showLoader();
             handleProfileChange(profileCodes[profiles.indexOf(value)]);
         });
-    gui.add(systemConfigurations, "helpEnabled").name("Help enabled");
+
     gui.add(systemConfigurations, "quantiles")
         .name('Qualitative view')
         .onChange(function (value) {
             handleQualitativeViewChange(value);
         });
+
+    gui.add(systemConfigurations, "autoRotateSpeed", 1, 50).name("Rotation speed")
+        .onChange(function (value) {
+            systemConfigurations.autoRotateSpeed = value;
+            elementInfos.forEach(elementInfo => {
+                elementInfo.orbitControls.autoRotateSpeed = value;
+            });
+            vr.orbitControls.autoRotateSpeed = value;
+        });
+    gui.add(systemConfigurations, "autoTranslateSpeed", 1, 50).name("Translation speed");
+
+    gui.add(systemConfigurations, "helpEnabled").name("Help enabled");
 
     function handleQualitativeViewChange(value) {
         //Change VR color scheme
