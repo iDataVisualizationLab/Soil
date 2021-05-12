@@ -13,27 +13,38 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
 
     changeVolumeRenderElement('Ca');
 
-    // click label to activate coloring
-    pc.svg.selectAll(".dimension")
-        .on("click", changeVolumeRenderElement)
-        .selectAll(".label")
-        .style("font-size", "14px");
+    setupDimensions();
+    //Brushing
+    pc.on("brush", (d) => {
+        brushChange();
+    });
 
-    d3.selectAll('.dimension')
-        .on("mouseover", (event, d) => {
-            if (systemConfigurations.helpEnabled) {
-                const msg = `Click ${d} label to color by ${d} values
+
+    function setupDimensions() {
+        // click label to activate coloring
+        pc.svg.selectAll(".dimension")
+            .on("click", changeVolumeRenderElement)
+            .selectAll(".label")
+            .style("font-size", "14px");
+
+        d3.selectAll('.dimension')
+            .on("mouseover", (event, d) => {
+                if (systemConfigurations.helpEnabled) {
+                    const msg = `Click ${d} label to color by ${d} values
                                 <br/>Drag ${d} label to reorder ${d} axis
                                 <br/>Brush on the ${d} axis to filter by ${d} values
                                 <br/>Double click on the ${d} label to reverse value order`;
-                showTip(event, msg);
-            }
-        })
-        .on("mouseout", () => {
-            hideTip();
-        });
-    //update axis ticks to reduce space
-    updateAxisTicks();
+                    showTip(event, msg);
+                }
+            })
+            .on("mouseout", () => {
+                hideTip();
+            });
+
+        //update axis ticks to reduce space
+        updateAxisTicks();
+    }
+
 
     function updateAxisTicks() {
         pc.svg.selectAll('.dimension').filter(d => (d !== 'Site' && d !== 'Depth')).selectAll('.tick').selectAll('text').text(d => {
@@ -45,10 +56,6 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
         });
     }
 
-    //Brushing
-    pc.on("brush", (d) => {
-        brushChange();
-    });
 
     function brushChange() {
         //Get the extend of the selected element
@@ -108,5 +115,6 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
 
     pc.updateAxisTicks = updateAxisTicks;
     pc.changeColorScale = changeColorScale;
+    pc.setupDimensions = setupDimensions;
     return pc;
 }

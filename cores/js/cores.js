@@ -94,7 +94,9 @@ async function handleProfileChange(profileName) {
         }
         //Update
         pc.dimensions(dims);
-        pc.updateAxisTicks();
+        //Re-setup dimensions (events and ticks etc).
+        pc.setupDimensions();
+
     };
     //</editor-fold>
 
