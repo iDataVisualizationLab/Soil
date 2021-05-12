@@ -58,11 +58,9 @@ class TextureHandler {
         const ctx = canvas.getContext('2d');
         const step = 50 / 5;
         const halfStep = step / 2;
-        ctx.strokeStyle = 'white';
         ctx.fillStyle = 'black';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.lineWidth = 0.2;
         ctx.font = '20px serif';
 
         const scaler = d3.scaleLinear().domain([0, 50]).range([0, canvas.width]);
@@ -73,7 +71,6 @@ class TextureHandler {
             const x = scaler(pos[0] * step + halfStep);
             const y = scaler(50 - (pos[1] * (step) + halfStep));
             ctx.fillText(loc, x, y);
-            ctx.strokeText(loc, x, y);
         });
     }
 
@@ -98,24 +95,21 @@ class TextureHandler {
     addDepths2Canvas(canvas) {
         const ctx = canvas.getContext('2d');
         const scaler = d3.scaleLinear().domain([0, 10]).range([0, canvas.height]);
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 0.2;
         for (let i = 1; i < 10; i++) {
             const y = scaler(i);
             //The line
             ctx.beginPath();
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 0.2;
             ctx.moveTo(0, y);
             ctx.lineTo(canvas.width, y);
             ctx.stroke();
             //The text
             const text = `${i * 10} cm`;
-            ctx.strokeStyle = 'white';
             ctx.fillStyle = 'black';
-            ctx.lineWidth = 0.2;
-            ctx.font = '15px serif';
+            ctx.font = '18px serif';
             ctx.textAlign = 'right';
             ctx.fillText(text, canvas.width, y);
-            ctx.strokeText(text, canvas.width, y);
         }
     }
 
