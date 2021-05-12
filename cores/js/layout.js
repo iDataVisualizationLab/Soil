@@ -131,7 +131,7 @@ function setupLayout() {
 
 
     googleEarthLink.append('label').attr("for", 'googleEarthLink')
-        .text('View on Google Earth')
+        .text('Google Earth')
         .style('decoration', 'none');
 
     googleEarthLink.append('img')
