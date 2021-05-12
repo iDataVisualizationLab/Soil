@@ -27,7 +27,7 @@ class ProfileDescription {
     async loadCsvContent() {
         this.csvContent = await d3.csv(this.csvFile);
         const elements = Object.keys(this.csvContent[0]).filter(d => d.indexOf("Concentration") > 0);
-        const detectedElements = [];
+        let detectedElements = [];
         elements.forEach(elm => {
             let detected = false;
             for (let i = 0; i < this.csvContent.length; i++) {
@@ -40,6 +40,13 @@ class ProfileDescription {
                 detectedElements.push(elm);
             }
         });
+
+        //Add data for the three formulas
+        const addedData = cleanAndAddPedologicalFeatures(this.csvContent, ['Location', 'Sample ID'].concat(detectedElements));
+        //Update data
+        this.csvContent = addedData.rows;
+        //Update detected elements
+        detectedElements = detectedElements.concat(addedData.addedElements);
         this.detectedElements = detectedElements;
         //Also convert concentrations into numbers
         this.csvContent.forEach(row => {
@@ -47,6 +54,8 @@ class ProfileDescription {
                 row[element] = +row[element];
             });
         });
+        debugger
+
     }
 
     async getElements() {
@@ -125,7 +134,7 @@ class ProfileDescription {
 
         //Sort/order the elements by their max values
         const scalers = await this.getElementScalers();
-        allElements.sort((a, b)=>{
+        allElements.sort((a, b) => {
             return scalers[b].domain()[1] - scalers[a].domain()[1];
         });
 
@@ -214,7 +223,7 @@ class Interpolator {
                 interpolatedData.x.push(xValIdx);
                 interpolatedData.z.push(zValIdx);
                 let predictedVal = kriging.predict(xValIdx, zValIdx, variogram);
-                if(predictedVal < 0) predictedVal = 0;
+                if (predictedVal < 0) predictedVal = 0;
                 interpolatedData.t.push(predictedVal);
             }
         }
@@ -272,8 +281,8 @@ class Interpolator {
                         this.interpolatedData[element].z.push(zValIdx);
                         let predictedVal = kriging.predict(xValIdx, yValIdx, variogram);
                         predictedVal = this.elementScalers[element](predictedVal)
-                        if(predictedVal<0) predictedVal = 0;
-                        if(predictedVal>1) predictedVal = 1;
+                        if (predictedVal < 0) predictedVal = 0;
+                        if (predictedVal > 1) predictedVal = 1;
                         this.interpolatedData[element].t.push(predictedVal);
                     }
                 }
