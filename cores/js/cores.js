@@ -196,16 +196,17 @@ async function handleProfileChange(profileName) {
 
     function autoTranslateHorizCut() {
         let timeLapse = horizCutTranslationClock.getDelta();
+        //Take one y position (that of the first one) to assure sync
+        let elementInfo = elementInfos[0];
+        let horizCutY = elementInfo.theProfile.horizCut.position.y + systemConfigurations.autoTranslationDirection*(timeLapse)*systemConfigurations.autoTranslateSpeed*0.0025;
+        if(horizCutY > 0.5){
+            horizCutY = 0.5;
+            systemConfigurations.autoTranslationDirection = -systemConfigurations.autoTranslationDirection;
+        } else if(horizCutY < -0.5){
+            horizCutY = -0.5;
+            systemConfigurations.autoTranslationDirection = -systemConfigurations.autoTranslationDirection;
+        }
         elementInfos.forEach((elementInfo, idx) => {
-            let horizCutY = elementInfo.theProfile.horizCut.position.y + systemConfigurations.autoTranslationDirection*(timeLapse)*systemConfigurations.autoTranslateSpeed*0.0025;
-            if(horizCutY > 0.5){
-                horizCutY = 0.5;
-                systemConfigurations.autoTranslationDirection = -systemConfigurations.autoTranslationDirection;
-            }
-            if(horizCutY < -0.5){
-                horizCutY = -0.5;
-                systemConfigurations.autoTranslationDirection = -systemConfigurations.autoTranslationDirection;
-            }
             elementInfo.theProfile.horizCut.position.y = horizCutY;
             handleHorizCutChange(elementInfo, idx, circleTextureHandlers);
         });
