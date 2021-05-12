@@ -23,8 +23,8 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
     function setupDimensions() {
         // click label to activate coloring
         pc.svg.selectAll(".dimension")
-            .on("click", changeVolumeRenderElement)
             .selectAll(".label")
+            .on("click", changeVolumeRenderElement)
             .style("font-size", "14px");
 
         d3.selectAll('.dimension')

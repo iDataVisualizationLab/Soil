@@ -154,20 +154,11 @@ class TextureHandler {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         // May use a rect or lines
         ctx.strokeRect(0, 0, canvas.width, canvas.height);
-        //Add three lines to the sides
-        //// left
-        // ctx.beginPath();
-        // ctx.moveTo(0, 0);
-        // ctx.lineTo(0, canvas.height);
-        //// right
-        // ctx.moveTo(canvas.width, 0);
-        // ctx.lineTo(canvas.width, canvas.height);
-        // ctx.stroke();
-
-        //center
+        //Add a line to the center
+        ctx.beginPath();
         ctx.moveTo(canvas.width / 2, 0);
         ctx.lineTo(canvas.width / 2, canvas.height);
-
+        ctx.stroke();
 
         //Add depths
         this.addDepths2Canvas(canvas);

@@ -107,7 +107,7 @@ async function handleProfileChange(profileName) {
         allDimensions = {...pc.dimensions()};
         //Remove the others package by default
         let dims = pc.dimensions();
-        soilPackages.others.elements.forEach(elm=>{
+        soilPackages.others.elements.forEach(elm => {
             delete dims[elm];
         });
         pc.dimensions(dims);
@@ -200,11 +200,11 @@ async function handleProfileChange(profileName) {
         let timeLapse = horizCutTranslationClock.getDelta();
         //Take one y position (that of the first one) to assure sync
         let elementInfo = elementInfos[0];
-        let horizCutY = elementInfo.theProfile.horizCut.position.y + systemConfigurations.autoTranslationDirection*(timeLapse)*systemConfigurations.autoTranslateSpeed*0.0025;
-        if(horizCutY > 0.5){
+        let horizCutY = elementInfo.theProfile.horizCut.position.y + systemConfigurations.autoTranslationDirection * (timeLapse) * systemConfigurations.autoTranslateSpeed * 0.0025;
+        if (horizCutY > 0.5) {
             horizCutY = 0.5;
             systemConfigurations.autoTranslationDirection = -systemConfigurations.autoTranslationDirection;
-        } else if(horizCutY < -0.5){
+        } else if (horizCutY < -0.5) {
             horizCutY = -0.5;
             systemConfigurations.autoTranslationDirection = -systemConfigurations.autoTranslationDirection;
         }
