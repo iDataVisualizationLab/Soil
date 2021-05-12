@@ -4,24 +4,28 @@ function SoilPackages(detectedElements) {
             label: "RCRA 8 metals", //https://www.heritage-enviro.com/what-are-the-rcra-8-metals/
             elements: ['As', 'Ba', 'Cd', 'Cr', 'Pb', 'Hg', 'Se', 'Ag'],
             color: 'red',
+            selected: true,
             //Need to calculate detected and not detected elements and add here
         },
         plantEssentialElements: {
             label: "Plant essentials",
             elements: ['Ca', 'Cu', 'Fe', 'K', 'Mn', 'S', 'Zn'],
             color: 'green',
+            selected: true,
             //Need to calculate detected and not detected elements and add here
         },
         pedology: {
             label: "Pedology",
             elements: ['RI', 'DI', 'SR'],
             color: 'blue',
+            selected: true,
         },
         others: {
             label: 'Others',
             elements: [], //need to calculate these
             color: 'black',
             notDetected: [],
+            selected: false,
         }
     }
     const allKeys = Object.keys(packages);

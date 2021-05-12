@@ -3,11 +3,11 @@ function createMenuStructure(containerId, soilPackages, elementSelectionChange) 
     const allPackageIds = Object.keys(soilPackages);
     allPackageIds.forEach(packageId => {
         const pkgInfo = soilPackages[packageId];
-        createPackageDiv(containerId, packageId, pkgInfo.label, pkgInfo.color, elementSelectionChange, pkgInfo.detected, pkgInfo.notDetected, soilPackages);
+        createPackageDiv(containerId, packageId, pkgInfo.label, pkgInfo.color, pkgInfo.selected, elementSelectionChange, pkgInfo.detected, pkgInfo.notDetected, soilPackages);
     });
 }
 
-function createPackageDiv(containerId, groupId, groupLabel, groupColor, elementSelectionChange, enabledElements, disabledElements, groups) {
+function createPackageDiv(containerId, groupId, groupLabel, groupColor, groupSelection, elementSelectionChange, enabledElements, disabledElements, groups) {
     const allGroupIds = Object.keys(groups);
     const container = document.getElementById(containerId);
     const childrenDivId = groupId + 'Children';
@@ -53,7 +53,7 @@ function createPackageDiv(containerId, groupId, groupLabel, groupColor, elementS
     packageDiv.appendChild(packageLabelElm);
     packageDiv.appendChild(childrenDiv);
     // One option for all
-    createCheckBox(childrenDivId, '<b>All</b>', groupId, true, function (d) {
+    createCheckBox(childrenDivId, '<b>All</b>', groupId, groupSelection, function (d) {
         showLoader();
         setTimeout(() => {
             enabledElements.forEach(elm => {
@@ -69,7 +69,7 @@ function createPackageDiv(containerId, groupId, groupLabel, groupColor, elementS
 
     //1. Detected elements
     enabledElements.forEach(elm => {
-        const cbx = createCheckBox(childrenDivId, elm, `#${elm}elementSelectionId`, true, elementSelectionChange, elm);
+        const cbx = createCheckBox(childrenDivId, elm, `#${elm}elementSelectionId`, groupSelection, elementSelectionChange, elm);
         cbx.value = elm;
     });
     //2. Not detected elements

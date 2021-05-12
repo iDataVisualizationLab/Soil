@@ -103,6 +103,12 @@ async function handleProfileChange(profileName) {
         pc = createCoresParcoords(data, elementScalers, ip, colorScale);
         //save all dimensions for future use
         allDimensions = {...pc.dimensions()};
+        //Remove the others package by default
+        let dims = pc.dimensions();
+        soilPackages.others.elements.forEach(elm=>{
+            delete dims[elm];
+        });
+        pc.dimensions(dims);
     });
     //</editor-fold>
 
