@@ -54,8 +54,6 @@ class ProfileDescription {
                 row[element] = +row[element];
             });
         });
-        debugger
-
     }
 
     async getElements() {
@@ -292,4 +290,3 @@ class Interpolator {
     }
 
 }
-

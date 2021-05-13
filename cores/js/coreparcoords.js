@@ -61,18 +61,47 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
         //Get the extend of the selected element
         let valueRange;
         const brushExtents = pc.brushExtents();
-        const pcDimension = selectedVolumeRenderedElement.split(' ')[0];
-
-        //If the element itself is not brushed take its value ranges from selected data items (might be selected due to other brushes)
-        if (pc.brushed()) {
-            valueRange = d3.extent(pc.brushed().map(item => item[pcDimension]));
-        } else {
-            valueRange = elementScalers[selectedVolumeRenderedElement].domain();
+        const vrDim = selectedVolumeRenderedElement.split(' ')[0];
+        const vrData = ip.getInterpolatedData(selectedVolumeRenderedElement);
+        //Initialize the filtered data
+        const filteredData = {
+            x: [...vrData.x],
+            y: [...vrData.y],
+            z: [...vrData.z],
+            t: [...vrData.t],
         }
-        //Scale that element range down to 0 to 1
-        valueRange = valueRange.map(v => elementScalers[selectedVolumeRenderedElement](v));
+        //Preload the data for each of the brushed element
+        const brushedDims = Object.keys(brushExtents);
+        if (brushedDims.length > 0) {
+            const interpolatedData = {};
+            interpolatedData[vrDim] = vrData;
+
+            brushedDims.forEach(dim => {
+                const elm = dim + ' Concentration';
+                if (dim !== vrDim) {
+                    interpolatedData[dim] = ip.getInterpolatedData(elm);
+                }
+                //Scale down the brushExtents
+                brushExtents[dim] = brushExtents[dim].map(elementScalers[elm]);
+            });
+            debugger
+            //Filter each t
+            for (let tIdx = 0; tIdx < filteredData.t.length; tIdx++) {
+                //Check the range for each brushed dimension
+                for (let i = 0; i < brushedDims.length; i++) {
+                    let dim = brushedDims[i];
+                    //If one of the condition
+                    if ((interpolatedData[dim].t[tIdx] < brushExtents[dim][0]) || (interpolatedData[dim].t[tIdx] > brushExtents[dim][1])) {
+                        //Out of range => set this data point to zero
+                        filteredData.t[tIdx] = 0;
+                        break;//Only one is enough so break it.
+                    }
+                }
+            }
+        }
+        console.log(filteredData);
         //Now handle the change
-        vr.handleDataChange(ip.getInterpolatedData(selectedVolumeRenderedElement), valueRange);
+        vr.handleDataChange(filteredData);
     }
 
     // update the selected element

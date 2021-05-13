@@ -1,5 +1,5 @@
 function createMenuStructure(containerId, soilPackages, elementSelectionChange) {
-    debugger
+
     const allPackageIds = Object.keys(soilPackages);
     allPackageIds.forEach(packageId => {
         const pkgInfo = soilPackages[packageId];

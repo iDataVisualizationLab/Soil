@@ -1,5 +1,5 @@
 function createVolumeRenderer(container, interpolatedData, width, height, horizontalInterpolatedSteps, verticalInterpolatedSteps, colorScale, controlDom) {
-    function createVolumeFromInterpolatedData(interpolatedData, valueRange = [0, 1]) {
+    function createVolumeFromInterpolatedData(interpolatedData, valueRange = [-10, 10]) {
         const t = [...interpolatedData.t];
         const r = horizontalInterpolatedSteps / 2;
         for (let idx = 0; idx < interpolatedData.t.length; idx++) {
@@ -17,7 +17,8 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
             //     t[idx] = 0.0;
             // }
             //Take the values which is in the filtered value range
-            if ((t[idx] < valueRange[0]) || (t[idx] > valueRange[1])) {
+
+            if (valueRange && ((t[idx] < valueRange[0]) || (t[idx] > valueRange[1]))) {
                 t[idx] = 0.0;
             }
         }
@@ -72,7 +73,7 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         // Create camera (The volume renderer does not work very well with perspective yet)
         const h = 64; // frustum height
         const aspect = width / height;
-        const paddingUnits = 5;
+        const paddingUnits = 10;
         camera = new THREE.OrthographicCamera(-h * aspect / 2 - paddingUnits, h * aspect / 2 + paddingUnits, h / 2 + paddingUnits, -h / 2 - paddingUnits, 1, 1000);
         camera.position.set(80, 25, -150);
 

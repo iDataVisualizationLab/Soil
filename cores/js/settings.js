@@ -44,7 +44,10 @@ const systemConfigurations = {
                 lat: 33.747547370160966,
                 long: -101.913188856191468,
                 distance: 50000,
-            }
+            },
+            cachedInterpolators:{
+
+            },
         },
         "R": {
             locationNameMapping: {
@@ -66,7 +69,10 @@ const systemConfigurations = {
                 lat: 33.83461039087063,
                 long: -102.4674384046790868,
                 distance: 50000,
-            }
+            },
+            cachedInterpolators:{
+
+            },
         },
         "S": {
             locationNameMapping: {
@@ -89,7 +95,10 @@ const systemConfigurations = {
                 long: -101.916557538506922,
                 distance: 25000,
 
-            }
+            },
+            cachedInterpolators:{
+
+            },
         }
     }
 }

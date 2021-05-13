@@ -11,6 +11,7 @@ let pc;
 let allDimensions;
 let theProfileHandler;
 let timePassed = [0, 0];
+
 showLoader();
 handleProfileChange('L').then(profileHandler => {
     hideLoader();
