@@ -71,7 +71,13 @@ async function handleProfileChange(profileName) {
     let soilPackages = new SoilPackages(elements.map(d => d.split(' ')[0]));
     //Clean the menu
     document.getElementById('elementSelectionList').innerHTML = "";
-    createMenuStructure('elementSelectionList', soilPackages, elementSelectionChange);
+    const menuObj = createMenuStructure('elementSelectionList', soilPackages, elementSelectionChange);
+    menuObj.mouseoverLabelHandler = function(elements, color){
+        pc.svg.selectAll('.dimension').filter(d=>elements.indexOf(d)>=0).selectAll('text').attr('fill', color);
+    };
+    menuObj.mouseleaveLabelHandler = function(elements, color){
+        pc.svg.selectAll('.dimension').filter(d=>elements.indexOf(d)>=0).selectAll('text').attr('fill', color);
+    };
 
     function elementSelectionChange(evt) {
         let elm = evt.target.value;

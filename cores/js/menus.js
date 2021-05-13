@@ -1,10 +1,46 @@
 function createMenuStructure(containerId, soilPackages, elementSelectionChange) {
-
     const allPackageIds = Object.keys(soilPackages);
+    //Setup mouseover
+    this.mouseoverLabelHandler = undefined;
+    this.mouseleaveLabelHandler = undefined;
     allPackageIds.forEach(packageId => {
         const pkgInfo = soilPackages[packageId];
-        createPackageDiv(containerId, packageId, pkgInfo.label, pkgInfo.color, pkgInfo.selected, elementSelectionChange, pkgInfo.detected, pkgInfo.notDetected, soilPackages);
+        createPackageDiv(containerId, packageId, pkgInfo.label, pkgInfo.color, pkgInfo.selected, (evt) => {
+            elementSelectionChange(evt);
+            updateGroupLabelColor();
+        }, pkgInfo.detected, pkgInfo.notDetected, soilPackages);
+        document.getElementById(packageId + 'Label').onmouseover = (evt) => {
+            //Call to the mouseover handler giving the detected elements
+            if (this.mouseoverLabelHandler) {
+                this.mouseoverLabelHandler(pkgInfo.detected, pkgInfo.color);
+            }
+
+        };
+        document.getElementById(packageId + 'Label').onmouseleave = (evt) => {
+            //Call to the mouseleave handler giving the detected elements
+            if (this.mouseleaveLabelHandler) {
+                this.mouseleaveLabelHandler(pkgInfo.detected, 'black');
+            }
+
+        };
+
     });
+
+    function updateGroupLabelColor() {
+        allPackageIds.forEach(packageId => {
+            const pkgInfo = soilPackages[packageId];
+            let color = 'gray';
+            for (let i = 0; i < pkgInfo.detected.length; i++) {
+                const elm = pkgInfo.detected[i];
+                if (document.getElementById(`${elm}elementSelectionId`).checked) {
+                    color = pkgInfo.color;
+                }
+            }
+            document.getElementById(packageId + 'Label').style.color = color;
+        });
+    }
+
+    return this;
 }
 
 function createPackageDiv(containerId, groupId, groupLabel, groupColor, groupSelection, elementSelectionChange, enabledElements, disabledElements, groups) {
@@ -29,7 +65,7 @@ function createPackageDiv(containerId, groupId, groupLabel, groupColor, groupSel
     const packageLabelElm = document.createElement('label');
     packageLabelElm.id = groupId + 'Label';
     packageLabelElm.innerHTML = `<b>${groupLabel} &#187;</b>`;
-    packageLabelElm.style.color = groupColor;
+    packageLabelElm.style.color = groupSelection ? groupColor : 'gray';
     packageLabelElm.style.marginTop = '3px';
     packageLabelElm.style.marginBottom = '3px';
     packageLabelElm.style.marginLeft = '5px'
@@ -50,6 +86,7 @@ function createPackageDiv(containerId, groupId, groupLabel, groupColor, groupSel
         }
     }
 
+
     packageDiv.appendChild(packageLabelElm);
     packageDiv.appendChild(childrenDiv);
     // One option for all
@@ -57,7 +94,7 @@ function createPackageDiv(containerId, groupId, groupLabel, groupColor, groupSel
         showLoader();
         setTimeout(() => {
             enabledElements.forEach(elm => {
-                const theElm = document.getElementById(`#${elm}elementSelectionId`);
+                const theElm = document.getElementById(`${elm}elementSelectionId`);
                 if (d.target.checked !== theElm.checked) {
                     theElm.click();
                 }
@@ -69,7 +106,7 @@ function createPackageDiv(containerId, groupId, groupLabel, groupColor, groupSel
 
     //1. Detected elements
     enabledElements.forEach(elm => {
-        const cbx = createCheckBox(childrenDivId, elm, `#${elm}elementSelectionId`, groupSelection, elementSelectionChange, elm);
+        const cbx = createCheckBox(childrenDivId, elm, `${elm}elementSelectionId`, groupSelection, elementSelectionChange, elm);
         cbx.value = elm;
     });
     //2. Not detected elements

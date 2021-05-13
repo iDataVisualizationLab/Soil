@@ -84,7 +84,6 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
                 //Scale down the brushExtents
                 brushExtents[dim] = brushExtents[dim].map(elementScalers[elm]);
             });
-            debugger
             //Filter each t
             for (let tIdx = 0; tIdx < filteredData.t.length; tIdx++) {
                 //Check the range for each brushed dimension
