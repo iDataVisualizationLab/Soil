@@ -16,7 +16,7 @@ function SoilPackages(detectedElements) {
         },
         pedology: {
             label: "Pedology",
-            elements: ['RI', 'DI', 'SR'],
+            elements: ['RI', 'DI', 'SR', 'Rb'],
             color: 'blue',
             selected: true,
         },
