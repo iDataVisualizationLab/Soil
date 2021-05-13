@@ -42,7 +42,7 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
 
 
     if (WEBGL.isWebGL2Available() === false) {
-        container.appendChild(WEBGL.getWebGL2ErrorMessage());
+        container.appendChild("This needs WebGL2");
     }
 
     let renderer,

@@ -4,7 +4,7 @@ function createOrbitControls(camera, domElement) {
     orbitControls.enablePan = false;
 
     //
-    // orbitControls.maxPolarAngle = Math.PI / 2;
+    orbitControls.maxPolarAngle = Math.PI / 2;
 
     //
     // orbitControls.minAzimuthAngle = -Math.PI / 2;

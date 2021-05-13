@@ -148,7 +148,7 @@ async function handleProfileChange(profileName) {
             const range = colorScale.range();
             legend({
                 svgId: `detailElmText${i + 1}`,
-                color: d3.scaleThreshold(colorScale.domain(), colorScale.range()),
+                color: quantileColorScale,
                 title: 'Quantiles',
                 tickSize: 0,
                 tickFormat: ",.1f",

@@ -1,5 +1,3 @@
-// importScripts(['../lib/d3/d3.v6.js']);
-
 /**
  *
  * @param e
