@@ -72,11 +72,11 @@ async function handleProfileChange(profileName) {
     //Clean the menu
     document.getElementById('elementSelectionList').innerHTML = "";
     const menuObj = createMenuStructure('elementSelectionList', soilPackages, elementSelectionChange);
-    menuObj.mouseoverLabelHandler = function(elements, color){
-        pc.svg.selectAll('.dimension').filter(d=>elements.indexOf(d)>=0).selectAll('text').attr('fill', color);
+    menuObj.mouseoverLabelHandler = function (elements, color) {
+        pc.svg.selectAll('.dimension').filter(d => elements.indexOf(d) >= 0).selectAll('text').attr('fill', color);
     };
-    menuObj.mouseleaveLabelHandler = function(elements, color){
-        pc.svg.selectAll('.dimension').filter(d=>elements.indexOf(d)>=0).selectAll('text').attr('fill', color);
+    menuObj.mouseleaveLabelHandler = function (elements, color) {
+        pc.svg.selectAll('.dimension').filter(d => elements.indexOf(d) >= 0).selectAll('text').attr('fill', color);
     };
 
     function elementSelectionChange(evt) {
@@ -353,10 +353,10 @@ async function handleProfileChange(profileName) {
             const dragControls = new THREE.DragControls(draggableObjects, elementInfo.camera, domElement);
             //Remove the previous controls on domElement
             dragControls.addEventListener('hoveron', function (event) {
-                event.object.material.emissive.set(0xaa0000);
+                elementInfos[idx].theProfile.setHighlightRingVisibility(true);
             });
             dragControls.addEventListener('hoveroff', function (event) {
-                event.object.material.emissive.set(0x000000);
+                elementInfos[idx].theProfile.setHighlightRingVisibility(false);
             });
             dragControls.addEventListener("dragstart", function (event) {
                 //Disable orbit

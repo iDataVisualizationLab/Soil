@@ -68,7 +68,7 @@ function createProfileObject(horizCutY, profileName) {
     theObject.add(topCap);
     //</editor-fold>
 
-    //<editor-fold desc="The horiz cut">
+    //<editor-fold desc="The vertical cut">
     const vertiCutPos = [];
     const vertiCutNorms = [];
     const vertiCutUvs = [];
@@ -158,6 +158,18 @@ function createProfileObject(horizCutY, profileName) {
     horizCut.position.y = horizCutY;
 
     theObject.add(horizCut);
+
+    //Add the border for the mouseover/drag
+    const highlightRingGeo = new THREE.RingGeometry(0.5, 0.51, 100);
+    const highlightRingMat = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide});
+    const highlightRing = new THREE.Mesh(highlightRingGeo, highlightRingMat);
+    highlightRing.position.y = horizCutY;
+    highlightRing.rotation.x = Math.PI/2;
+    highlightRing.visible = false;
+    theObject.add(highlightRing);
+    function setHighlightRingVisibility(isVisible){
+        highlightRing.visible = isVisible;
+    }
     //</editor-fold>
 
     //<editor-fold desc="The back">
@@ -254,6 +266,7 @@ function createProfileObject(horizCutY, profileName) {
     function handleHorizCutPosition(theHorizCutY, texture) {
         horizCutY = theHorizCutY;
         horizCut.position.y = horizCutY;
+        highlightRing.position.y = horizCutY;
         frontTopVertices.forEach(idx => {
             front.geometry.attributes.position.array[idx * 3 + 1] = horizCutY;
             front.geometry.attributes.position.needsUpdate = true;
@@ -336,9 +349,10 @@ function createProfileObject(horizCutY, profileName) {
         vertiCut.visible = isVisible;
     }
 
-    function changeColorScale(colorScale){
+    function changeColorScale(colorScale) {
 
     }
+
     //</editor-fold>
 
     // Expose handlers
@@ -349,7 +363,9 @@ function createProfileObject(horizCutY, profileName) {
     theObject.setOuterVisibility = setOuterVisibility;
     theObject.setHorizCutVisibility = setHorizCutVisibility;
     theObject.setVertiCutVisibility = setVertiCutVisibility;
+
     // expose this object to setup draggable
     theObject.horizCut = horizCut;
+    theObject.setHighlightRingVisibility = setHighlightRingVisibility;
     return theObject;
 }
