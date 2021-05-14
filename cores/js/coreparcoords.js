@@ -71,11 +71,12 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
             t: [...vrData.t],
         }
         //Preload the data for each of the brushed element
-        const brushedDims = Object.keys(brushExtents);
+        let brushedDims = Object.keys(brushExtents);
+
         if (brushedDims.length > 0) {
             const interpolatedData = {};
             interpolatedData[vrDim] = vrData;
-
+            brushedDims = brushedDims.filter(d => (d !== 'Site' && d !== 'Depth'));
             brushedDims.forEach(dim => {
                 const elm = dim + ' Concentration';
                 if (dim !== vrDim) {
@@ -98,6 +99,8 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
                 }
             }
         }
+
+
         //Now handle the change
         vr.handleDataChange(filteredData);
     }

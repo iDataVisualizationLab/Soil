@@ -106,6 +106,7 @@ async function handleProfileChange(profileName) {
         pc.setupDimensions();
         //Also reset the brush
         pc.brushChange();
+
     };
     //</editor-fold>
 
