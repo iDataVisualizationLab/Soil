@@ -30,10 +30,15 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
         d3.selectAll('.dimension')
             .on("mouseover", (event, d) => {
                 if (systemConfigurations.helpEnabled) {
-                    const msg = `Click ${d} label to color by ${d} values
-                                <br/>Drag ${d} label to reorder ${d} axis
+                    let msg = `Drag ${d} label (left/right) to reorder ${d} axis
                                 <br/>Brush on the ${d} axis to filter by ${d} values
+                                <br/>Click on the ${d} axis to release brushed range
                                 <br/>Double click on the ${d} label to reverse value order`;
+
+                    if(['Site', 'Depth'].indexOf(d)<0){
+                        msg += `<br/>Click ${d} label to color by ${d} values and change volume rendering element on the right.`
+                    }
+
                     showTip(event, msg);
                 }
             })
