@@ -99,11 +99,13 @@ async function handleProfileChange(profileName) {
             //Remove dimension
             delete dims[elm];
         }
+
         //Update
         pc.dimensions(dims);
         //Re-setup dimensions (events and ticks etc).
         pc.setupDimensions();
-
+        //Also reset the brush
+        pc.brushChange();
     };
     //</editor-fold>
 

@@ -98,7 +98,6 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
                 }
             }
         }
-        console.log(filteredData);
         //Now handle the change
         vr.handleDataChange(filteredData);
     }
@@ -144,5 +143,6 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
     pc.updateAxisTicks = updateAxisTicks;
     pc.changeColorScale = changeColorScale;
     pc.setupDimensions = setupDimensions;
+    pc.brushChange = brushChange;
     return pc;
 }

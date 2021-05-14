@@ -244,7 +244,7 @@ function setupLayout() {
         .style('outline', 'none')
         .classed("parcoords", true);
     //The volume renderer
-    d3.select('#volumeRenderer').data([1]).join('div')
+    const volumeRendererDiv = d3.select('#volumeRenderer').data([1]).join('div')
         .attr('id', 'volumeRenderer')
         .style('position', 'absolute')
         .style('left', vrLeft + 'px')
@@ -252,8 +252,17 @@ function setupLayout() {
         .style('width', vrWidth + 'px')
         .style('height', vrHeight + 'px')
         .style('outline', 'none')
-        .style('border', '1px solid black')
-        .append('div') //Div for the view options
+        .style('border', '1px solid black').on("mousemove", (event, d) => {
+            if (systemConfigurations.helpEnabled) {
+                const msg = `The drag and orbit controls are on the bottom-left panel.`;
+                showTip(event, msg);
+            }
+        })
+        .on("mouseout", () => {
+            hideTip();
+        });
+
+    volumeRendererDiv.append('div') //Div for the view options
         .attr("id", 'volumeRenderViewOptions')
         .style('position', 'absolute')
         .style('left', margin + 'px')
