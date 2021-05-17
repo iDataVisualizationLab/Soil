@@ -13,7 +13,7 @@ let theProfileHandler;
 let timePassed = [0, 0];
 
 showLoader();
-handleProfileChange('L').then(profileHandler => {
+handleProfileChange('R').then(profileHandler => {
     hideLoader();
     theProfileHandler = profileHandler;
 });
