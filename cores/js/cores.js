@@ -13,7 +13,7 @@ let theProfileHandler;
 let timePassed = [0, 0];
 
 showLoader();
-handleProfileChange('R').then(profileHandler => {
+handleProfileChange(profileCodes[profiles.indexOf(defaultProfile)]).then(profileHandler => {
     hideLoader();
     theProfileHandler = profileHandler;
 });
@@ -50,7 +50,7 @@ async function handleProfileChange(profileName) {
     //Preload the data for this element
     circleTextureHandlers = selectedElements.map(elm => new HorizontalCanvasTextureHandler(ip, elm, colorScale));
     circleTextureHandlers.name = profileName;
-    squareTextureHandlers = selectedElements.map(elm => new VerticalCanvasTextureHandler(ip, elm, colorScale));
+    squareTextureHandlers = selectedElements.map(elm => new VerticalCanvasTextureHandler(ip, elm, colorScale, systemConfigurations.profiles[profileName].locationInfo.stepDistance));
     squareTextureHandlers.name = profileName;
 
     const elmScalers = await profileDescriptions[profileName].getElementScalers();
@@ -141,8 +141,10 @@ async function handleProfileChange(profileName) {
         vr.handleDataChange(ip.getInterpolatedData(selectedVolumeRenderedElement));
     }
     //Update the face
-    const faceTx = new TextureHandler().createLocationTexture(systemConfigurations.profiles[profileName].locationNameMapping, 300);
-    vr.changeLocationFace(faceTx);
+    const locFaceTx = new TextureHandler().createLocationTexture(systemConfigurations.profiles[profileName].locationNameMapping, 300);
+    vr.changeLocationFace(locFaceTx);
+    const depthFaceTx = new TextureHandler(undefined, undefined, undefined, systemConfigurations.profiles[profileName].locationInfo.stepDistance).createDepthTexture(300);
+    vr.changeDepthFace(depthFaceTx);
     //</editor-fold>
 
     //<editor-fold desc="Selection box change handler">
@@ -181,7 +183,7 @@ async function handleProfileChange(profileName) {
         selectedElements[optionIdx] = elm;
         //Update the texture
         circleTextureHandlers[optionIdx] = new HorizontalCanvasTextureHandler(ip, elm, colorScale);
-        squareTextureHandlers[optionIdx] = new VerticalCanvasTextureHandler(ip, elm, colorScale);
+        squareTextureHandlers[optionIdx] = new VerticalCanvasTextureHandler(ip, elm, colorScale, systemConfigurations.profiles[profileName].locationInfo.stepDistance);
         //handle the cutChange
         handleCutChange(elementInfos, optionIdx, squareTextureHandlers, circleTextureHandlers);
         handleLegendChange(elm, optionIdx);

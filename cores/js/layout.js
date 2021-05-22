@@ -1,7 +1,7 @@
 //<editor-fold desc="setup the sizes for the layout">
 let profiles = ['Large', 'Small', 'Range'];
 let profileCodes = ['L', 'S', 'R'];
-let defaultProfile = 'Large';
+let defaultProfile = 'Range';
 let profileOptions = {
     profileOptionText: defaultProfile
 }

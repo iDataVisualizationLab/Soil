@@ -256,6 +256,11 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         locationFace.material.map.needsUpdate = true;
     }
 
+    function changeDepthFace(newTexture) {
+        depthFace.material.map = newTexture;
+        depthFace.material.map.needsUpdate = true;
+    }
+
     function setLocationHelperVisiblity(isVisible) {
         volconfig.locationHelperVisibility = isVisible;
         locationHelper.visible = isVisible;
@@ -272,6 +277,7 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
     this.handleDataChange = handleDataChange;
     this.changeRenderStyle = changeRenderStyle;
     this.changeLocationFace = changeLocationFace;
+    this.changeDepthFace = changeDepthFace;
     this.setLocationHelperVisiblity = setLocationHelperVisiblity;
     this.changeColorType = changeColorType;
     return this;

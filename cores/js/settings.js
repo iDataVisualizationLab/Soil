@@ -44,6 +44,7 @@ const systemConfigurations = {
                 lat: 33.747547370160966,
                 long: -101.913188856191468,
                 distance: 50000,
+                stepDistance: 200,
             },
             cachedInterpolators:{
 
@@ -69,6 +70,7 @@ const systemConfigurations = {
                 lat: 33.83461039087063,
                 long: -102.4674384046790868,
                 distance: 50000,
+                stepDistance: 100,
             },
             cachedInterpolators:{
 
@@ -94,7 +96,7 @@ const systemConfigurations = {
                 lat: 33.744746287327004,
                 long: -101.916557538506922,
                 distance: 25000,
-
+                stepDistance: 100,
             },
             cachedInterpolators:{
 

@@ -242,25 +242,11 @@ function createProfileObject(horizCutY, profileName) {
     frontGeo.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(frontNorms), normalNumComponents));
     frontGeo.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(frontUvs), uvNumComponents));
 
-
     const frontMat = sideMat;
     const front = new THREE.Mesh(frontGeo, frontMat);
     theObject.add(front);
 
     //</editor-fold>
-
-    // //<editor-fold desc="The Google earth icon">
-    // const geIconMat = new THREE.MeshLambertMaterial({
-    //     map: textureLoader.load('./data/images/googleearthicon.png'),
-    //     transparent: true,
-    //     depthWrite: false,
-    //     side: THREE.DoubleSide
-    // });
-    // const geIconGeo = new THREE.PlaneBufferGeometry(0.1, 0.1);
-    // const geIcon = new THREE.Mesh(geIconGeo, geIconMat);
-    // geIcon.position.y = 0.5 + 0.1 / 2;
-    // scene.add(geIcon);
-    // //</editor-fold>
 
     //<editor-fold desc="Handlers">
     function handleHorizCutPosition(theHorizCutY, texture) {
@@ -300,39 +286,6 @@ function createProfileObject(horizCutY, profileName) {
         topCapTexture.center.y = 0.5;
         topCapTexture.rotation = topCap.material.map.rotation;
         topCap.material.map = topCapTexture;
-        // topCap.material.map.needsUpdate = true;
-    }
-
-    function profile2TextCoordinate(camera, cameraViewWidth, cameraViewHeight, locationNameMapping) {
-        try {
-            const projectedLocations = {}
-            Object.keys(locationNameMapping).forEach(loc => {
-                let pos = new THREE.Vector3();
-                pos = pos.setFromMatrixPosition(theObject.matrixWorld);
-                pos.x = pos.x + (locationNameMapping[loc][0] - 2) * .2;
-                pos.z = pos.z + (locationNameMapping[loc][1] - 2) * .2;
-                if (pos.z >= 0) {
-                    pos.y = 0.5;
-                } else {
-                    pos.y = -0.5;
-                }
-
-                //Project to camera coordiante
-                pos = pos.project(camera);
-
-                let widthHalf = cameraViewWidth / 2;
-                let heightHalf = cameraViewHeight / 2;
-
-                pos.x = (pos.x * widthHalf) + widthHalf;
-                pos.y = (pos.y * heightHalf) + heightHalf;
-                pos.z = 0;
-                projectedLocations[loc] = {x: pos.x, y: pos.y};
-            });
-            return projectedLocations;
-        } catch (e) {
-            //TODO: this is only a quick fix. The text doesn't exist, just hide them
-            return {x: -100, y: -100}
-        }
     }
 
     function setOuterVisibility(isVisible) {
@@ -349,17 +302,12 @@ function createProfileObject(horizCutY, profileName) {
         vertiCut.visible = isVisible;
     }
 
-    function changeColorScale(colorScale) {
-
-    }
-
     //</editor-fold>
 
     // Expose handlers
     theObject.updateTopCapTexture = updateTopCapTexture;
     theObject.handleHorizCutPosition = handleHorizCutPosition;
     theObject.handleVertiCutAngle = handleVertiCutAngle;
-    theObject.profile2TextCoordinate = profile2TextCoordinate;
     theObject.setOuterVisibility = setOuterVisibility;
     theObject.setHorizCutVisibility = setHorizCutVisibility;
     theObject.setVertiCutVisibility = setVertiCutVisibility;

@@ -29,12 +29,16 @@ class CanvasTexture {
 }
 
 class TextureHandler {
-    constructor(interpolator, element, colorScale) {
+    constructor(interpolator, element, colorScale, stepDistance) {
         if (interpolator && element && colorScale) {
             this.elementalIPD = interpolator.getInterpolatedData(element);
             this.colorScale = colorScale;
         }
+        if (stepDistance) {
+            this.stepDistance = stepDistance;
+        }
     }
+
 
     changeColorScale(colorScale) {
         this.colorScale = colorScale;
@@ -85,17 +89,41 @@ class TextureHandler {
 
     createTextureWithDepths(data) {
         const canvas = this.createCanvas(data);
-        this.addDepths2Canvas(canvas);
+        this.addDistances2Canvas(canvas);
         const texture = new THREE.CanvasTexture(canvas);
         texture.center.x = 0.5;
         texture.center.y = 0.5;
         return texture;
     }
 
-    addDepths2Canvas(canvas) {
+    addDistances2Canvas(canvas) {
         const ctx = canvas.getContext('2d');
         const scaler = d3.scaleLinear().domain([0, 10]).range([0, canvas.height]);
-        ctx.strokeStyle = 'black';
+        const fontSize = 18;
+        const strokeColor = 'black';
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.0;
+        //Add the horizontal distance ratio
+        const x1 = scaler(0.5);
+        const x2 = scaler(2.5);
+        const y1 = scaler(1);
+        const y2 = y1;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.moveTo(x1, y1 - 5);
+        ctx.lineTo(x1, y1 + 5);
+        ctx.moveTo(x2, y2 - 5);
+        ctx.lineTo(x2, y2 + 5);
+        ctx.stroke();
+        //Fill the text for the horizontal distance
+        ctx.fillStyle = strokeColor;
+        ctx.font = `${fontSize}px serif`;
+        ctx.textAlign = 'center';
+        // ctx.textBaseline = 'center';
+        ctx.fillText(`${this.stepDistance} m`, (x1 + x2) / 2, y1 - 5);
+
+        //Adding the depth labels
         ctx.lineWidth = 0.2;
         for (let i = 1; i < 10; i++) {
             const y = scaler(i);
@@ -106,8 +134,8 @@ class TextureHandler {
             ctx.stroke();
             //The text
             const text = `${i * 10} cm`;
-            ctx.fillStyle = 'black';
-            ctx.font = '18px serif';
+            ctx.fillStyle = strokeColor;
+            ctx.font = `${fontSize}px serif`;
             ctx.textAlign = 'right';
             ctx.fillText(text, canvas.width, y);
         }
@@ -161,7 +189,7 @@ class TextureHandler {
         ctx.stroke();
 
         //Add depths
-        this.addDepths2Canvas(canvas);
+        this.addDistances2Canvas(canvas);
 
         //Make texture
         const texture = new THREE.CanvasTexture(canvas);
@@ -174,8 +202,8 @@ class TextureHandler {
 
 //</editor-fold>
 class VerticalCanvasTextureHandler extends TextureHandler {
-    constructor(interpolator, element, colorScale) {
-        super(interpolator, element, colorScale);
+    constructor(interpolator, element, colorScale, stepDistance) {
+        super(interpolator, element, colorScale, stepDistance);
     }
 
     getData(cutAngle) {
