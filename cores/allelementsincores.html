@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>3D Cores</title>
+    <!--D3-->
+    <script src="lib/d3/d3.v6.js"></script>
+    <!--Close button-->
+    <script src="js/d3closebutton.js"></script>
+    <!--3D-->
+    <script src="lib/threejs/three.js"></script>
+    <script src="lib/threejs/OrbitControls.js"></script>
+    <script src="lib/threejs/DragControls.js"></script>
+    <script src="lib/threejs/dat.gui.min.js"></script>
+    <script src="js/createOrbitControls.js"></script>
+    <script src="js/profileobject.js"></script>
+    <script src="js/cores3dscenes.js"></script>
+
+    <!-- Dropdown -->
+    <script src="js/htmlelements.js"></script>
+    <style>
+        select {
+            font-size: .9rem;
+            padding: 2px 5px;
+        }
+    </style>
+    <!--Data-->
+    <script src="js/colorschemes.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/computeelements.js"></script>
+    <script src="js/dataprocessing.js"></script>
+    <script src="lib/kriging.js"></script>
+    <script src="js/canvastexture.js"></script>
+    <script src="lib/legend/legend.js"></script>
+
+    <!--Soil Packages and Menu-->
+    <script src="js/soilpackages.js"></script>
+    <script src="js/menus.js"></script>
+    <!--Parallel Coordinates-->
+    <script src="js/parcoords/parcoords.js"></script>
+    <script src="js/coreparcoords.js"></script>
+    <style>
+        /*Simple tooltip for element*/
+        @import "js/tooltip/datatooltip.css";
+        @import "js/tooltip/tooltip.css";
+        @import "js/loader/loader.css";
+        @import "js/parcoords/parcoords.css";
+        @import "css/cores.css";
+
+    </style>
+    <!-- Volume Renderer-->
+    <script src="lib/threejs/shaders/VolumeShader.js"></script>
+    <script src="lib/threejs/WebGL.js"></script>
+    <script src="js/volumerenderer.js"></script>
+    <script src="js/webworker.js"></script>
+    <style>
+        .tab {
+            background: #aaaaaa;
+            padding: 3px;
+            border-bottom: 1px solid #aaaaaa;
+        }
+        .tab:before{
+            background: #aaaaaa;
+            content: '';
+            position: absolute;
+            top: 0px; right: -1em;
+            border-top: calc(1rem + 9px) solid white;
+            border-left: calc(1rem) solid #aaaaaa;
+            width: 0px;
+        }
+    </style>
+</head>
+<body>
+<!--loader-->
+<script src="js/loader/loader.js"></script>
+<div id="elementSelectionList" style="top: -2px; z-index: 999; position:absolute; left:260px;"></div>
+<div id="parcoordsChart" class="parcoords" style="overflow: visible;"></div>
+<div id="volumeRendererLabel" class="tab"></div>
+<!--setup the layout-->
+<script src="js/layout.js"></script>
+<script src="js/cores.js"></script>
+<!--tooltip-->
+<script src="js/tooltip/tooltip.js"></script>
+
+</body>
+</html>

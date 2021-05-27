@@ -36,7 +36,7 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
                                 <br/>Double click on the ${d} label to reverse value order`;
 
                     if(['Site', 'Depth'].indexOf(d)<0){
-                        msg += `<br/>Click ${d} label to color by ${d} values and change volume rendering element on the right.`
+                        msg += `<br/>Click ${d} label to color by ${d} values & change volume rendering element.`
                     }
 
                     showTip(event, msg);
@@ -56,7 +56,7 @@ function createCoresParcoords(data, elementScalers, ip, colorScale) {
             if (d > 1000) {
                 return d / 1000 + 'K';
             } else {
-                return d;
+                return d.toFixed(1);
             }
         });
     }
