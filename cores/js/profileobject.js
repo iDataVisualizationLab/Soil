@@ -10,6 +10,7 @@ function createHorizontalCutPlane(horizCutY) {
 function createProfileObject(horizCutY, profileName) {
     const textureLoader = new THREE.TextureLoader();
     const theObject = new THREE.Object3D();
+    const the3Cuts = new THREE.Object3D();
     //Common constants
     const positionNumComponents = 3;
     const normalNumComponents = 3;
@@ -156,7 +157,7 @@ function createProfileObject(horizCutY, profileName) {
     });
     const horizCut = new THREE.Mesh(horizCutGeo, horizCutMat);
     horizCut.position.y = horizCutY;
-
+    horizCut.name = 'horizCut';
     theObject.add(horizCut);
 
     //Add the border for the mouseover/drag
@@ -164,12 +165,14 @@ function createProfileObject(horizCutY, profileName) {
     const highlightRingMat = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide});
     const highlightRing = new THREE.Mesh(highlightRingGeo, highlightRingMat);
     highlightRing.position.y = horizCutY;
-    highlightRing.rotation.x = Math.PI/2;
+    highlightRing.rotation.x = Math.PI / 2;
     highlightRing.visible = false;
     theObject.add(highlightRing);
-    function setHighlightRingVisibility(isVisible){
+
+    function setHighlightRingVisibility(isVisible) {
         highlightRing.visible = isVisible;
     }
+
     //</editor-fold>
 
     //<editor-fold desc="The back">
@@ -248,6 +251,54 @@ function createProfileObject(horizCutY, profileName) {
 
     //</editor-fold>
 
+    //<editor-fold desc="The 3 cuts">
+    // xCut
+    const cutX = 0.0;
+    const xCutTexture = textureLoader.load('./data/images/L.jpg');
+    xCutTexture.center.x = 0.5;
+    xCutTexture.center.y = 0.5;
+    const xCutMat = new THREE.MeshLambertMaterial({
+        map: xCutTexture,
+        side: THREE.DoubleSide
+    });
+    const xCutGeo = new THREE.PlaneGeometry(1, 1);
+    const xCut = new THREE.Mesh(xCutGeo, xCutMat);
+    xCut.name = "xCut";
+    xCut.position.x = cutX;
+    xCut.rotation.y = Math.PI / 2;
+    the3Cuts.add(xCut);
+    //yCut
+    const cutY = 0.0;
+    const yCutTexture = textureLoader.load('./data/images/L.jpg');
+    yCutTexture.center.x = 0.5;
+    yCutTexture.center.y = 0.5;
+    const yCutMat = new THREE.MeshLambertMaterial({
+        map: yCutTexture,
+        side: THREE.DoubleSide
+    });
+    const yCutGeo = new THREE.PlaneGeometry(1, 1);
+    const yCut = new THREE.Mesh(yCutGeo, yCutMat);
+    yCut.name = "yCut";
+    yCut.position.y = cutY;
+    yCut.rotation.x = -Math.PI / 2;
+    the3Cuts.add(yCut);
+    //zCut
+    const cutZ = 0.0;
+    const zCutTexture = textureLoader.load('./data/images/L.jpg');
+    zCutTexture.center.x = 0.5;
+    zCutTexture.center.y = 0.5;
+    const zCutMat = new THREE.MeshLambertMaterial({
+        map: zCutTexture,
+        side: THREE.DoubleSide
+    });
+    const zCutGeo = new THREE.PlaneGeometry(1, 1);
+    const zCut = new THREE.Mesh(zCutGeo, zCutMat);
+    zCut.name = "zCut";
+    zCut.position.z = cutZ;
+    the3Cuts.add(zCut);
+
+    //</editor-fold>
+
     //<editor-fold desc="Handlers">
     function handleHorizCutPosition(theHorizCutY, texture) {
         horizCutY = theHorizCutY;
@@ -291,6 +342,7 @@ function createProfileObject(horizCutY, profileName) {
     function setOuterVisibility(isVisible) {
         topCap.visible = isVisible;
         front.visible = isVisible;
+        back.visible = isVisible;
     }
 
     function setHorizCutVisibility(isVisible) {
@@ -302,6 +354,27 @@ function createProfileObject(horizCutY, profileName) {
         vertiCut.visible = isVisible;
     }
 
+    function handleXCutPosition(theCutX, texture) {
+        if (texture) {
+            xCut.material.map = texture;
+            xCut.material.map.needsUpdate = true;
+        }
+    }
+
+    function handleYCutPosition(theCutY, texture) {
+        if (texture) {
+            yCut.material.map = texture;
+            yCut.material.map.needsUpdate = true;
+        }
+    }
+
+    function handleZCutPosition(theCutZ, texture) {
+        if (texture) {
+            zCut.material.map = texture;
+            zCut.material.map.needsUpdate = true;
+        }
+    }
+
     //</editor-fold>
 
     // Expose handlers
@@ -311,9 +384,16 @@ function createProfileObject(horizCutY, profileName) {
     theObject.setOuterVisibility = setOuterVisibility;
     theObject.setHorizCutVisibility = setHorizCutVisibility;
     theObject.setVertiCutVisibility = setVertiCutVisibility;
-
     // expose this object to setup draggable
     theObject.horizCut = horizCut;
     theObject.setHighlightRingVisibility = setHighlightRingVisibility;
-    return theObject;
+
+    the3Cuts.handleXCutPosition = handleXCutPosition;
+    the3Cuts.handleYCutPosition = handleYCutPosition;
+    the3Cuts.handleZCutPosition = handleZCutPosition;
+    the3Cuts.xCut = xCut;
+    the3Cuts.yCut = yCut;
+    the3Cuts.zCut = zCut;
+
+    return {theObject: theObject, the3Cuts: the3Cuts};
 }

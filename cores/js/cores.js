@@ -20,6 +20,9 @@ handleProfileChange(profileCodes[profiles.indexOf(defaultProfile)]).then(profile
 
 async function handleProfileChange(profileName) {
     const profileToCanvasScale = d3.scaleLinear().domain([-0.5, 0.5]).range([0, 49]);
+    const profileToXCutCanvasScale = d3.scaleLinear().domain([-0.5, 0.5]).range([0, 49]);
+    const profileToYCutCanvasScale = profileToCanvasScale;
+    const profileToZCutCanvasScale = d3.scaleLinear().domain([-0.5, 0.5]).range([49, 0]);
 
     //<editor-fold desc="Setting up data">
     //Setup data
@@ -48,7 +51,7 @@ async function handleProfileChange(profileName) {
     let colorScale = systemConfigurations.quantiles ? quantileColorScale : continuousColorScale;
 
     //Preload the data for this element
-    circleTextureHandlers = selectedElements.map(elm => new HorizontalCanvasTextureHandler(ip, elm, colorScale));
+    circleTextureHandlers = selectedElements.map(elm => new HorizontalCanvasTextureHandler(ip, elm, colorScale, systemConfigurations.profiles[profileName].locationInfo.stepDistance));
     circleTextureHandlers.name = profileName;
     squareTextureHandlers = selectedElements.map(elm => new VerticalCanvasTextureHandler(ip, elm, colorScale, systemConfigurations.profiles[profileName].locationInfo.stepDistance));
     squareTextureHandlers.name = profileName;
@@ -208,25 +211,76 @@ async function handleProfileChange(profileName) {
         elementInfo.theProfile.handleHorizCutPosition(horizCutPlaneY, texture);
     }
 
+    function handleXCutChange(elementInfo, idx, textureHandlers) {
+        const pos = elementInfo.the3Cuts.xCut.position.x;
+        const posCanvas = Math.round(profileToXCutCanvasScale(pos));
+        const texture = textureHandlers[idx].getXTexture(posCanvas);
+        elementInfo.the3Cuts.handleXCutPosition(posCanvas, texture);
+    }
+
+    function handleYCutChange(elementInfo, idx, textureHandlers) {
+        const pos = elementInfo.the3Cuts.yCut.position.y;
+        const posCanvas = Math.round(profileToYCutCanvasScale(pos));
+        const texture = textureHandlers[idx].getYTexture(posCanvas, systemConfigurations.profiles[profileName].locationNameMapping);
+        elementInfo.the3Cuts.handleYCutPosition(posCanvas, texture);
+    }
+
+    function handleZCutChange(elementInfo, idx, textureHandlers) {
+        const pos = elementInfo.the3Cuts.zCut.position.z;
+        const posCanvas = Math.round(profileToZCutCanvasScale(pos));
+        const texture = textureHandlers[idx].getZTexture(posCanvas);
+        elementInfo.the3Cuts.handleZCutPosition(posCanvas, texture);
+    }
+
+    function getCutPosition(theObj, direction, timeLapse) {
+        //Take one y position (that of the first one) to assure sync
+        let cutPos = theObj.position[direction] + systemConfigurations.autoTranslationDirection[direction] * (timeLapse) * systemConfigurations.autoTranslateSpeed * 0.0025;
+
+        if (cutPos > 0.5) {
+            cutPos = 0.5;
+            systemConfigurations.autoTranslationDirection[direction] = -systemConfigurations.autoTranslationDirection[direction];
+        } else if (cutPos < -0.5) {
+            cutPos = -0.5;
+            systemConfigurations.autoTranslationDirection[direction] = -systemConfigurations.autoTranslationDirection[direction];
+        }
+        return cutPos;
+    }
+
     function autoTranslateHorizCut() {
         let timeLapse = horizCutTranslationClock.getDelta();
-        //Take one y position (that of the first one) to assure sync
-        let elementInfo = elementInfos[0];
-        let horizCutY = elementInfo.theProfile.horizCut.position.y + systemConfigurations.autoTranslationDirection * (timeLapse) * systemConfigurations.autoTranslateSpeed * 0.0025;
-        if (horizCutY > 0.5) {
-            horizCutY = 0.5;
-            systemConfigurations.autoTranslationDirection = -systemConfigurations.autoTranslationDirection;
-        } else if (horizCutY < -0.5) {
-            horizCutY = -0.5;
-            systemConfigurations.autoTranslationDirection = -systemConfigurations.autoTranslationDirection;
+        if (systemConfigurations.cylinderView) {
+            const horizCutY = getCutPosition(elementInfos[0].theProfile.horizCut, "y", timeLapse);
+            console.log(horizCutY);
+            elementInfos.forEach((elementInfo, idx) => {
+                elementInfo.theProfile.horizCut.position.y = horizCutY;
+                handleHorizCutChange(elementInfo, idx, circleTextureHandlers);
+            });
+        } else {
+            handleXYZCutsChange(timeLapse);
         }
-        elementInfos.forEach((elementInfo, idx) => {
-            elementInfo.theProfile.horizCut.position.y = horizCutY;
-            handleHorizCutChange(elementInfo, idx, circleTextureHandlers);
-        });
+
         if (systemConfigurations.autoRotate) {
             requestAnimationFrame(autoTranslateHorizCut);
         }
+    }
+
+    function handleXYZCutsChange(timeLapse) {
+        //Translate the three others
+        const cutX = getCutPosition(elementInfos[0].the3Cuts.xCut, "x", timeLapse);
+        elementInfos.forEach((elementInfo, idx) => {
+            elementInfos[idx].the3Cuts.xCut.position.x = cutX;
+            handleXCutChange(elementInfo, idx, circleTextureHandlers);
+        });
+        const cutY = getCutPosition(elementInfos[0].the3Cuts.yCut, "y", timeLapse);
+        elementInfos.forEach((elementInfo, idx) => {
+            elementInfos[idx].the3Cuts.yCut.position.y = cutY;
+            handleYCutChange(elementInfo, idx, circleTextureHandlers);
+        });
+        const cutZ = getCutPosition(elementInfos[0].the3Cuts.zCut, "z", timeLapse);
+        elementInfos.forEach((elementInfo, idx) => {
+            elementInfos[idx].the3Cuts.zCut.position.z = cutZ;
+            handleZCutChange(elementInfo, idx, circleTextureHandlers);
+        });
     }
 
     function handleCutAngleChange(orbitControls, squareTextureHandlers, idx, elementInfo) {
@@ -255,6 +309,8 @@ async function handleProfileChange(profileName) {
         elementInfos.forEach((elementInfo) => {
             elementInfo.theProfile.updateTopCapTexture(profileName);
         });
+        //Update the three cuts
+        handleXYZCutsChange(0);
     }
 
     function init() {
@@ -318,20 +374,20 @@ async function handleProfileChange(profileName) {
                 timePassed[idx] = 0;
             });
             orbitControls.addEventListener("change", function () {
+                if (systemConfigurations.cylinderView) {
+                    const cutAngle = orbitControls.getAzimuthalAngle();
+                    let texture = undefined;
+                    elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
+                    //This line avoid it to rotate
+                    elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
 
-                const cutAngle = orbitControls.getAzimuthalAngle();
-                let texture = undefined;
-                elementInfo.theProfile.handleVertiCutAngle(cutAngle, texture);
-                //This line avoid it to rotate
-                elementInfo.theProfile.rotation.y = orbitControls.getAzimuthalAngle();
-
-                //Everytime we change we check for the delta
-                timePassed[idx] += clocks[idx].getDelta();
-                if (timePassed[idx] > 2.0) {
-                    handleCutAngleChange(orbitControls, squareTextureHandlers, idx, elementInfo);
-                    timePassed[idx] = 0;
+                    //Everytime we change we check for the delta
+                    timePassed[idx] += clocks[idx].getDelta();
+                    if (timePassed[idx] > 2.0) {
+                        handleCutAngleChange(orbitControls, squareTextureHandlers, idx, elementInfo);
+                        timePassed[idx] = 0;
+                    }
                 }
-
             });
             orbitControls.addEventListener("end", function () {
                 handleCutAngleChange(orbitControls, squareTextureHandlers, idx, elementInfo);
@@ -353,12 +409,14 @@ async function handleProfileChange(profileName) {
                 elementInfo.dragControls.deactivate();
                 elementInfo.dragControls.dispose();
             }
-            let horizCutPlaneX, horizCutPlaneY, horizCutPlaneZ;
-            const draggableObjects = [elementInfo.theProfile.horizCut];
+            let dragX, dragY, dragZ;
+            const draggableObjects = [elementInfo.theProfile.horizCut, elementInfo.the3Cuts.xCut, elementInfo.the3Cuts.yCut, elementInfo.the3Cuts.zCut];
             const dragControls = new THREE.DragControls(draggableObjects, elementInfo.camera, domElement);
             //Remove the previous controls on domElement
             dragControls.addEventListener('hoveron', function (event) {
-                elementInfos[idx].theProfile.setHighlightRingVisibility(true);
+                if (event.object.name === elementInfo.theProfile.horizCut.name) {
+                    elementInfos[idx].theProfile.setHighlightRingVisibility(true);
+                }
             });
             dragControls.addEventListener('hoveroff', function (event) {
                 elementInfos[idx].theProfile.setHighlightRingVisibility(false);
@@ -370,29 +428,66 @@ async function handleProfileChange(profileName) {
                 });
                 vr.orbitControls.enabled = false;
                 //Get the old position
-                horizCutPlaneX = event.object.position.x;
-                horizCutPlaneY = event.object.position.y;
-                horizCutPlaneZ = event.object.position.z;
-                event.object.material.emissive.set(0x000000);
+                dragX = event.object.position.x;
+                dragY = event.object.position.y;
+                dragZ = event.object.position.z;
             });
             dragControls.addEventListener("drag", function (event) {
-                event.object.position.x = horizCutPlaneX;
-                event.object.position.z = horizCutPlaneZ;
+                //Check boundary
+                if (event.object.position.x > 0.5) {
+                    event.object.position.x = 0.5;
+                }
+                if (event.object.position.x < -0.5) {
+                    event.object.position.x = -0.5;
+                }
                 if (event.object.position.y > 0.5) {
                     event.object.position.y = 0.5;
                 }
                 if (event.object.position.y < -0.5) {
                     event.object.position.y = -0.5;
                 }
-                horizCutPlaneY = event.object.position.y;
-                const horizCutCanvasY = Math.round(profileToCanvasScale(horizCutPlaneY));
-                elementInfos.forEach((elementInfo, idx) => {
-                    // elementInfo.horizCutPlane.position.x = horizCutPlaneX;
-                    // elementInfo.horizCutPlane.position.y = horizCutPlaneY;
-                    // elementInfo.horizCutPlane.position.z = horizCutPlaneZ;
-                    const texture = circleTextureHandlers[idx].getTextureWithLocation(horizCutCanvasY, systemConfigurations.profiles[profileName].locationNameMapping);
-                    elementInfo.theProfile.handleHorizCutPosition(horizCutPlaneY, texture);
-                });
+                if (event.object.position.z > 0.5) {
+                    event.object.position.z = 0.5;
+                }
+                if (event.object.position.z < -0.5) {
+                    event.object.position.z = -0.5;
+                }
+
+                //horizCut and yCut
+                if (event.object.name === elementInfo.theProfile.horizCut.name || event.object.name === elementInfo.the3Cuts.yCut.name) {
+                    event.object.position.x = dragX;
+                    event.object.position.z = dragZ;
+                    dragY = event.object.position.y;
+                    const horizCutCanvasY = Math.round(profileToYCutCanvasScale(dragY));
+                    elementInfos.forEach((elementInfo, idx) => {
+                        const horizTexture = circleTextureHandlers[idx].getTextureWithLocation(horizCutCanvasY, systemConfigurations.profiles[profileName].locationNameMapping);
+                        const yCutTexture = circleTextureHandlers[idx].getYTexture(horizCutCanvasY, systemConfigurations.profiles[profileName].locationNameMapping, systemConfigurations.profiles[profileName].stepDistance);
+                        elementInfo.theProfile.handleHorizCutPosition(dragY, horizTexture);
+                        elementInfo.the3Cuts.handleYCutPosition(dragY, yCutTexture);
+                    });
+                }
+                //xCut
+                if (event.object.name === elementInfo.the3Cuts.xCut.name) {
+                    event.object.position.y = dragY;
+                    event.object.position.z = dragZ;
+                    dragX = event.object.position.x;
+                    const cutCanvasX = Math.round(profileToXCutCanvasScale(dragX));
+                    elementInfos.forEach((elementInfo, idx) => {
+                        const texture = circleTextureHandlers[idx].getXTexture(cutCanvasX);
+                        elementInfo.the3Cuts.handleXCutPosition(dragX, texture);
+                    });
+                }
+                //zCut
+                if (event.object.name === elementInfo.the3Cuts.zCut.name) {
+                    event.object.position.x = dragX;
+                    event.object.position.y = dragY;
+                    dragZ = event.object.position.z;
+                    const cutCanvasZ = Math.round(profileToZCutCanvasScale(dragZ));
+                    elementInfos.forEach((elementInfo, idx) => {
+                        const texture = circleTextureHandlers[idx].getZTexture(cutCanvasZ);
+                        elementInfo.the3Cuts.handleZCutPosition(dragZ, texture);
+                    });
+                }
             });
             dragControls.addEventListener("dragend", function (event) {
                 elementInfos.forEach(elementInfo => {

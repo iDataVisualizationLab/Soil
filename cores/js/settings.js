@@ -2,9 +2,14 @@ let depthNames;
 let locationNameMapping;
 
 const systemConfigurations = {
+    cylinderView: false,
     quantiles: false,
     autoRotate: false,
-    autoTranslationDirection: 1,
+    autoTranslationDirection: {
+        x: 1,
+        y: 1,
+        z: 1
+    },
     autoRotateSpeed: 20,
     autoTranslateSpeed: 20,
     helpEnabled: false,

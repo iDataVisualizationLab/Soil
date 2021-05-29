@@ -36,10 +36,9 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
     // Filter out the data which is not in the circle
     const volume = createVolumeFromInterpolatedData(interpolatedData);
 
-    //3D
+    // 3D
     const VolumeRenderShader1 = THREE.VolumeRenderShader1;
     const WEBGL = THREE.WEBGL;
-
 
     if (WEBGL.isWebGL2Available() === false) {
         container.appendChild("This needs WebGL2");
@@ -55,9 +54,46 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         locationFace,
         depthFace,
         locationHelper = new THREE.Object3D(),
+        mesh,
         self = this;
 
     init();
+
+    function addElement2Scene(interpolatedData, color) {
+        const volume = createVolumeFromInterpolatedData(interpolatedData);
+        const texture = createTextureFromData(volume);
+        let cmContinuousCanvas = createElementColorMap(color);
+        let cmQuantileCanvas = createElementColorMap(color);
+
+        cmtextures = {
+            continuous: new THREE.CanvasTexture(cmContinuousCanvas),
+            quantiles: new THREE.CanvasTexture(cmQuantileCanvas),
+            gray: new THREE.TextureLoader().load('textures/cm_gray.png', render)
+        };
+        // Material
+        const shader = VolumeRenderShader1;
+        const uniforms = THREE.UniformsUtils.clone(shader.uniforms);
+        uniforms["u_data"].value = texture;
+        uniforms["u_size"].value.set(volume.xLength, volume.yLength, volume.zLength);
+        uniforms["u_clim"].value.set(volconfig.clim1, volconfig.clim2);
+        uniforms["u_renderstyle"].value = volconfig.renderstyle == 'mip' ? 0 : 1; // 0: MIP, 1: ISO
+        uniforms["u_renderthreshold"].value = volconfig.isothreshold; // For ISO renderstyle
+        uniforms["u_cmdata"].value = cmtextures[volconfig.colormap];
+
+        material = new THREE.ShaderMaterial({
+            uniforms: uniforms,
+            vertexShader: shader.vertexShader,
+            fragmentShader: shader.fragmentShader,
+            side: THREE.BackSide, // The volume shader uses the backface as its "reference point"
+        });
+
+        // THREE.Mesh
+        const geometry = new THREE.BoxGeometry(volume.xLength, volume.yLength, volume.zLength);
+
+        geometry.translate(volume.xLength / 2, volume.yLength / 2, volume.zLength / 2);
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+    }
 
     function init() {
 
@@ -92,7 +128,6 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         };
 
         const texture = createTextureFromData(volume);
-        // const cmCanvas = createContinuousColorMapCanvas(colorScale);
         let cmContinuousCanvas = createContinuousColorMapCanvas(colorScale);
         let cmQuantileCanvas = createColorMapCanvas(colorScale);
 
@@ -126,12 +161,12 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         const geometry = new THREE.BoxGeometry(volume.xLength, volume.yLength, volume.zLength);
 
         geometry.translate(volume.xLength / 2, volume.yLength / 2, volume.zLength / 2);
-        const mesh = new THREE.Mesh(geometry, material);
+        mesh = new THREE.Mesh(geometry, material);
         scene.add(mesh);
         //</editor-fold>
 
         //<editor-fold desc="For the location helper">
-        //TODO: If feeling confusing about translation/rotation, then just add all parts
+        // TODO: If feeling confusing about translation/rotation, then just add all parts
         // into the locationFace before rotating, locating them.
         //Add the top face
         const dummyCanvas = document.createElement('canvas');
@@ -273,6 +308,10 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         render();
     }
 
+    function setMainMeshVisibility(isVisible) {
+        mesh.visible = isVisible;
+    }
+
     //Exposing handlers
     this.handleDataChange = handleDataChange;
     this.changeRenderStyle = changeRenderStyle;
@@ -280,6 +319,8 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
     this.changeDepthFace = changeDepthFace;
     this.setLocationHelperVisiblity = setLocationHelperVisiblity;
     this.changeColorType = changeColorType;
+    this.addElement2Scene = addElement2Scene;
+    this.setMainMeshVisibility = setMainMeshVisibility;
     return this;
 }
 
@@ -295,6 +336,23 @@ function createColorMapCanvas(colorScale, height = 1) {
         ctx.fillStyle = colorScale(val - step);//The -step here is because our rect start at 0 while the color scale has the value at the upper bound (threshold)
         ctx.fillRect(widthScale(val - step), 0, width / colorScale.domain().length, height);
     });
+    return canvas;
+}
+
+function createElementColorMap(color) {
+    const width = 256;
+    const height = 1;
+    const canvas = document.createElement("canvas");
+    const colorScale = d3.interpolateRgb("white", color);
+    const ctx = canvas.getContext('2d');
+    ctx.canvas.width = width;
+    ctx.canvas.height = height;
+    const widthScale = new d3.scaleLinear().domain([0, width]).range([0, 1]);
+    for (let i = 0; i < width; i++) {
+        ctx.fillStyle = colorScale(widthScale(i));
+        ctx.fillRect(i, 0, 1, height);
+    }
+
     return canvas;
 }
 

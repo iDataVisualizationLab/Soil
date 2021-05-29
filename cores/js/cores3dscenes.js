@@ -37,11 +37,19 @@ let ThreeDScences = function (renderer, profileName) {
         //     sceneInfo.scene.remove(sceneInfo.horizCutPlane);
         // }
         let horizCutY = -0.5;
-        const theProfile = createProfileObject(horizCutY, profileName);
+
+        const ret = createProfileObject(horizCutY, profileName);
+        const theProfile = ret.theObject;
+        const the3Cuts = ret.the3Cuts;
+
+
         // const horizCutPlane = createHorizontalCutPlane(horizCutY);
         scene.add(theProfile);
+        //Add the three cuts to scene
+        scene.add(the3Cuts);
         // scene.add(horizCutPlane);
         sceneInfo.theProfile = theProfile;
+        sceneInfo.the3Cuts = the3Cuts;
         // sceneInfo.horizCutPlane = horizCutPlane;
 
         return sceneInfo;

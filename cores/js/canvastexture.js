@@ -50,6 +50,14 @@ class TextureHandler {
         return canvas;
     }
 
+    createTextureFromCanvas(canvas) {
+        //Make texture
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.center.x = 0.5;
+        texture.center.y = 0.5;
+        return texture;
+    }
+
     createTexture(data) {
         const canvas = this.createCanvas(data);
         const texture = new THREE.CanvasTexture(canvas);
@@ -78,12 +86,23 @@ class TextureHandler {
         });
     }
 
+    addCurrentDepth2Canvas(canvas, strokeColor, fontSize, volumeLocation) {
+        const volume2DepthScaler = d3.scaleLinear().domain([0, 49]).range([100, 0]);
+        const depthStepToCanvasSize = d3.scaleLinear().domain([0, 10]).range([0, canvas.height]);
+        const text = `Depth: ${Math.round(volume2DepthScaler(volumeLocation))} cm`;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = strokeColor;
+        ctx.font = `${fontSize}px serif`;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(text, canvas.width, depthStepToCanvasSize(10));
+    }
+
     createTextureWithLocations(data, locationMapping) {
         const canvas = this.createCanvas(data);
+        this.addStepDistance2Canvas(canvas, 'black', 18);
         this.addLocations2Canvas(canvas, locationMapping);
-        const texture = new THREE.CanvasTexture(canvas);
-        texture.center.x = 0.5;
-        texture.center.y = 0.5;
+        const texture = this.createTextureFromCanvas(canvas);
         return texture;
     }
 
@@ -96,18 +115,17 @@ class TextureHandler {
         return texture;
     }
 
-    addDistances2Canvas(canvas) {
-        const ctx = canvas.getContext('2d');
+    addStepDistance2Canvas(canvas, strokeColor, fontSize) {
         const scaler = d3.scaleLinear().domain([0, 10]).range([0, canvas.height]);
-        const fontSize = 18;
-        const strokeColor = 'black';
-        ctx.strokeStyle = strokeColor;
-        ctx.lineWidth = 1.0;
+        const ctx = canvas.getContext('2d');
         //Add the horizontal distance ratio
         const x1 = scaler(0.5);
         const x2 = scaler(2.5);
         const y1 = scaler(1);
         const y2 = y1;
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.0;
+
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
@@ -122,7 +140,14 @@ class TextureHandler {
         ctx.textAlign = 'center';
         // ctx.textBaseline = 'center';
         ctx.fillText(`${this.stepDistance} m`, (x1 + x2) / 2, y1 - 5);
+    }
 
+    addDistances2Canvas(canvas) {
+        const ctx = canvas.getContext('2d');
+        const scaler = d3.scaleLinear().domain([0, 10]).range([0, canvas.height]);
+        const fontSize = 18;
+        const strokeColor = 'black';
+        this.addStepDistance2Canvas(canvas, strokeColor, fontSize);
         //Adding the depth labels
         ctx.lineWidth = 0.2;
         for (let i = 1; i < 10; i++) {
@@ -151,7 +176,9 @@ class TextureHandler {
         ctx.beginPath();
         ctx.arc(size / 2, size / 2, size / 2, 0, 2 * Math.PI);
         ctx.stroke();
+
         this.addLocations2Canvas(canvas, locationMapping);
+
         const texture = new THREE.CanvasTexture(canvas);
         texture.center.x = 0.5;
         texture.center.y = 0.5;
@@ -263,13 +290,13 @@ class VerticalCanvasTextureHandler extends TextureHandler {
 }
 
 class HorizontalCanvasTextureHandler extends TextureHandler {
-    constructor(interpolator, element, colorScale) {
-        super(interpolator, element, colorScale);
+    constructor(interpolator, element, colorScale, stepDistance) {
+        super(interpolator, element, colorScale, stepDistance);
     }
 
     getData(yValue) {
         const data = {
-            x: this.elementalIPD.x.filter((x, i) => Math.round(this.elementalIPD.y[i]) === yValue), //TODO: may need to do the rounding first when generating data to avoid repeating it here
+            x: this.elementalIPD.x.filter((x, i) => Math.round(this.elementalIPD.y[i]) === yValue),
             y: this.elementalIPD.z.filter((z, i) => Math.round(this.elementalIPD.y[i]) === yValue),
             t: this.elementalIPD.t.filter((t, i) => Math.round(this.elementalIPD.y[i]) === yValue)
         }
@@ -284,5 +311,53 @@ class HorizontalCanvasTextureHandler extends TextureHandler {
         return this.createTextureWithLocations(this.getData(yValue), locationMapping);
     }
 
+    getXData(xValue) {
+        const data = {
+            x: this.elementalIPD.z.filter((z, i) => Math.round(this.elementalIPD.x[i]) === xValue),
+            y: this.elementalIPD.y.filter((y, i) => Math.round(this.elementalIPD.x[i]) === xValue),
+            t: this.elementalIPD.t.filter((t, i) => Math.round(this.elementalIPD.x[i]) === xValue)
+        }
+        return data;
+    }
+
+    getXTexture(xValue) {
+        let canvas = this.createCanvas(this.getXData(xValue));
+        this.addDistances2Canvas(canvas);
+
+        return this.createTextureFromCanvas(canvas);
+    }
+
+    getYData(yValue) {
+        const data = {
+            x: this.elementalIPD.x.filter((x, i) => Math.round(this.elementalIPD.y[i]) === yValue),
+            y: this.elementalIPD.z.filter((z, i) => Math.round(this.elementalIPD.y[i]) === yValue),
+            t: this.elementalIPD.t.filter((t, i) => Math.round(this.elementalIPD.y[i]) === yValue)
+        }
+        return data;
+    }
+
+    getYTexture(yValue, locationMapping) {
+        const canvas = this.createCanvas(this.getYData(yValue));
+        this.addStepDistance2Canvas(canvas, 'black', 18);
+        this.addLocations2Canvas(canvas, locationMapping);
+        this.addCurrentDepth2Canvas(canvas, 'black', 18, yValue);
+        const texture = this.createTextureFromCanvas(canvas);
+        return texture;
+    }
+
+    getZData(zValue) {
+        const data = {
+            x: this.elementalIPD.x.filter((x, i) => Math.round(this.elementalIPD.z[i]) === zValue),
+            y: this.elementalIPD.y.filter((y, i) => Math.round(this.elementalIPD.z[i]) === zValue),
+            t: this.elementalIPD.t.filter((t, i) => Math.round(this.elementalIPD.z[i]) === zValue)
+        }
+        return data;
+    }
+
+    getZTexture(zValue) {
+        let canvas = this.createCanvas(this.getZData(zValue));
+        this.addDistances2Canvas(canvas);
+        return this.createTextureFromCanvas(canvas);
+    }
 }
 
