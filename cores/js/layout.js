@@ -85,19 +85,85 @@ function setupLayout() {
         .style("position", "absolute")
         .style("left", "10px")
         .style("bottom", "5px");
+    const viewOptionsGroupName = "viewOptions";
+    const viewOptions = {
+        "cylinder": {
+            label: "Cylinder",
+            color: 'black',
+            selection: true,
+            options: [{
+                id: 'outerVisibility',
+                label: 'Outer cylinder'
+            }, {
+                id: 'horizCutVisibility',
+                label: 'Horizontal cut'
+            }, {
+                id: 'vertiCutVisibility',
+                label: 'Vertical cut'
+            }]
+        },
+        "xyz": {
+            label: 'XYZ Cuts',
+            color: 'black',
+            selection: false,
+            options: [{
+                id: 'xCutVisibility',
+                label: 'X-cut'
+            }, {
+                id: 'yCutVisibility',
+                label: 'Y-cut'
+            }, {
+                id: 'zCutVisibility',
+                label: 'Z-cut'
+            }]
+        }
+    }
+    createViewGroups('viewOptions', viewOptions, viewOptionsGroupName, (event) => {
+        //Change the system config about the views
+        const groupId = event.target.groupId;
+        systemConfigurations.cylinderView = (groupId === "cylinder" && event.target.checked);
+    }, (event) => {
+        const targetValue = event.target.value;
+        switch (targetValue) {
+            case "outerVisibility":
+                systemConfigurations.isOuterVisible = event.target.checked;
+                handleOuterVisibility(systemConfigurations.isOuterVisible);
+                break;
+            case "horizCutVisibility":
+                systemConfigurations.isHorizCutVisible = event.target.checked;
+                handleHorizCutVisibility(systemConfigurations.isHorizCutVisible);
+                break;
+            case "vertiCutVisibility":
+                systemConfigurations.isVertiCutVisible = event.target.checked;
+                handleVertiCutVisibility(systemConfigurations.isVertiCutVisible);
+                break;
+            case "xCutVisibility":
+                systemConfigurations.isXCutVisible = event.target.checked;
+                handleXCutVisibility(systemConfigurations.isXCutVisible);
+                break;
+            case "yCutVisibility":
+                systemConfigurations.isYCutVisible = event.target.checked;
+                handleYCutVisibility(systemConfigurations.isYCutVisible);
+                break;
+            case "zCutVisibility":
+                systemConfigurations.isZCutVisible = event.target.checked;
+                handleZCutVisibility(systemConfigurations.isZCutVisible);
+                break;
+        }
+    });
+    // createCheckBox('viewOptions', 'Outer visibility', 'outerVisibility', true, (event) => {
+    //     systemConfigurations.isOuterVisible = event.target.checked;
+    //     handleOuterVisibility(systemConfigurations.isOuterVisible);
+    // });
+    // createCheckBox('viewOptions', 'Horizontal cut visibility', 'horizCutVisibility', true, (event) => {
+    //     systemConfigurations.isHorizCutVisible = event.target.checked;
+    //     handleHorizCutVisibility(systemConfigurations.isHorizCutVisible);
+    // });
+    // createCheckBox('viewOptions', 'Vertical cut visibility', 'vertiCutVisibility', true, (event) => {
+    //     systemConfigurations.isVertiCutVisible = event.target.checked;
+    //     handleVertiCutVisibility(systemConfigurations.isVertiCutVisible);
+    // });
 
-    createCheckBox('viewOptions', 'Outer visibility', 'outerVisibility', true, (event) => {
-        systemConfigurations.isOuterVisible = event.target.checked;
-        handleOuterVisibility(systemConfigurations.isOuterVisible);
-    });
-    createCheckBox('viewOptions', 'Horizontal cut visibility', 'horizCutVisibility', true, (event) => {
-        systemConfigurations.isHorizCutVisible = event.target.checked;
-        handleHorizCutVisibility(systemConfigurations.isHorizCutVisible);
-    });
-    createCheckBox('viewOptions', 'Vertical cut visibility', 'vertiCutVisibility', true, (event) => {
-        systemConfigurations.isVertiCutVisible = event.target.checked;
-        handleVertiCutVisibility(systemConfigurations.isVertiCutVisible);
-    });
     createCheckBox('viewOptions', 'Auto rotate', 'autoRotate', false, (event) => {
         systemConfigurations.autoRotate = event.target.checked;
         handleAutoRotationChange(systemConfigurations.autoRotate);
@@ -225,6 +291,7 @@ function setupLayout() {
         });
         theProfileHandler.handleCutChange(elementInfos, 0, squareTextureHandlers, circleTextureHandlers);
         theProfileHandler.handleCutChange(elementInfos, 1, squareTextureHandlers, circleTextureHandlers);
+        theProfileHandler.handleXYZCutsChange(0);
         //Change the legend
         selectedElements.forEach((elm, idx) => {
             theProfileHandler.handleLegendChange(elm, idx);

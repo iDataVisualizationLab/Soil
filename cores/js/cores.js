@@ -414,8 +414,10 @@ async function handleProfileChange(profileName) {
             const dragControls = new THREE.DragControls(draggableObjects, elementInfo.camera, domElement);
             //Remove the previous controls on domElement
             dragControls.addEventListener('hoveron', function (event) {
-                if (event.object.name === elementInfo.theProfile.horizCut.name) {
-                    elementInfos[idx].theProfile.setHighlightRingVisibility(true);
+                if (systemConfigurations.cylinderView) {
+                    if (event.object.name === elementInfo.theProfile.horizCut.name) {
+                        elementInfos[idx].theProfile.setHighlightRingVisibility(true);
+                    }
                 }
             });
             dragControls.addEventListener('hoveroff', function (event) {
@@ -512,6 +514,7 @@ async function handleProfileChange(profileName) {
     this.handleCutChange = handleCutChange;
     this.handleLegendChange = handleLegendChange;
     this.autoTranslateHorizCut = autoTranslateHorizCut;
+    this.handleXYZCutsChange = handleXYZCutsChange;
     return this;
 }
 
@@ -528,6 +531,21 @@ function handleVertiCutVisibility(isVisible) {
 function handleHorizCutVisibility(isVisible) {
     elementInfos[0].theProfile.setHorizCutVisibility(isVisible);
     elementInfos[1].theProfile.setHorizCutVisibility(isVisible);
+}
+
+function handleXCutVisibility(isVisible) {
+    elementInfos[0].the3Cuts.setXCutVisibility(isVisible);
+    elementInfos[1].the3Cuts.setXCutVisibility(isVisible);
+}
+
+function handleYCutVisibility(isVisible) {
+    elementInfos[0].the3Cuts.setYCutVisibility(isVisible);
+    elementInfos[1].the3Cuts.setYCutVisibility(isVisible);
+}
+
+function handleZCutVisibility(isVisible) {
+    elementInfos[0].the3Cuts.setZCutVisibility(isVisible);
+    elementInfos[1].the3Cuts.setZCutVisibility(isVisible);
 }
 
 function removeAxes(name) {

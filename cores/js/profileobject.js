@@ -347,11 +347,22 @@ function createProfileObject(horizCutY, profileName) {
 
     function setHorizCutVisibility(isVisible) {
         horizCut.visible = isVisible;
-
     }
 
     function setVertiCutVisibility(isVisible) {
         vertiCut.visible = isVisible;
+    }
+
+    function setXCutVisibility(isVisible) {
+        xCut.visible = isVisible;
+    }
+
+    function setYCutVisibility(isVisible) {
+        yCut.visible = isVisible;
+    }
+
+    function setZCutVisibility(isVisible) {
+        zCut.visible = isVisible;
     }
 
     function handleXCutPosition(theCutX, texture) {
@@ -384,6 +395,11 @@ function createProfileObject(horizCutY, profileName) {
     theObject.setOuterVisibility = setOuterVisibility;
     theObject.setHorizCutVisibility = setHorizCutVisibility;
     theObject.setVertiCutVisibility = setVertiCutVisibility;
+    if (!systemConfigurations.cylinderView) {
+        setOuterVisibility(false);
+        setHorizCutVisibility(false);
+        setVertiCutVisibility(false);
+    }
     // expose this object to setup draggable
     theObject.horizCut = horizCut;
     theObject.setHighlightRingVisibility = setHighlightRingVisibility;
@@ -394,6 +410,14 @@ function createProfileObject(horizCutY, profileName) {
     the3Cuts.xCut = xCut;
     the3Cuts.yCut = yCut;
     the3Cuts.zCut = zCut;
+    the3Cuts.setXCutVisibility = setXCutVisibility;
+    the3Cuts.setYCutVisibility = setYCutVisibility;
+    the3Cuts.setZCutVisibility = setZCutVisibility;
+    if (systemConfigurations.cylinderView) {
+        setXCutVisibility(false);
+        setYCutVisibility(false);
+        setZCutVisibility(false);
+    }
 
     return {theObject: theObject, the3Cuts: the3Cuts};
 }

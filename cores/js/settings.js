@@ -2,7 +2,7 @@ let depthNames;
 let locationNameMapping;
 
 const systemConfigurations = {
-    cylinderView: false,
+    cylinderView: true,
     quantiles: false,
     autoRotate: false,
     autoTranslationDirection: {
@@ -16,6 +16,9 @@ const systemConfigurations = {
     isOuterVisible: true,
     isHorizCutVisible: true,
     isVertiCutVisible: true,
+    isXCutVisible: false,
+    isYCutVisible: false,
+    isZCutVisible: false,
     depthNames: {
         "0-10 cm": 9,
         "10-20 cm": 8,
@@ -51,9 +54,7 @@ const systemConfigurations = {
                 distance: 50000,
                 stepDistance: 200,
             },
-            cachedInterpolators:{
-
-            },
+            cachedInterpolators: {},
         },
         "R": {
             locationNameMapping: {
@@ -77,9 +78,7 @@ const systemConfigurations = {
                 distance: 50000,
                 stepDistance: 100,
             },
-            cachedInterpolators:{
-
-            },
+            cachedInterpolators: {},
         },
         "S": {
             locationNameMapping: {
@@ -103,9 +102,7 @@ const systemConfigurations = {
                 distance: 25000,
                 stepDistance: 100,
             },
-            cachedInterpolators:{
-
-            },
+            cachedInterpolators: {},
         }
     }
 }
