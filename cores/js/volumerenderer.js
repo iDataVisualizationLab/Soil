@@ -282,6 +282,12 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
 
     function changeRenderStyle(value) {
         volconfig.renderstyle = value;
+        if (value === 'mip') {
+            renderer.setClearColor(0x4A8FC2);
+
+        } else {
+            renderer.setClearColor(0xffffff);
+        }
         updateUniforms();
     }
 
@@ -321,6 +327,7 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
     this.changeColorType = changeColorType;
     this.addElement2Scene = addElement2Scene;
     this.setMainMeshVisibility = setMainMeshVisibility;
+
     return this;
 }
 
