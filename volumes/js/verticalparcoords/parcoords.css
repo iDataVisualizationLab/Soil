@@ -1,0 +1,33 @@
+svg {
+    font-size: 12px;
+}
+
+.foreground path {
+    fill: none;
+    stroke: steelblue;
+    stroke-opacity: .9;
+    stroke-width: 2px;
+}
+
+.foreground path.fade {
+    stroke: #000;
+    stroke-opacity: 0.02;
+}
+
+.brush .selection {
+    fill-opacity: .3;
+    stroke: #fff;
+    shape-rendering: crispEdges;
+}
+
+.axis line, .axis path {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    fill: black;
+    text-shadow: 0 1px 0 #fff;
+    cursor: move;
+}

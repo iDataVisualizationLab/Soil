@@ -1,0 +1,114 @@
+#gui {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: max-content;
+    /*height: 255px; !* 32 * 7 - 1*!*/
+}
+
+.dg.a {
+    overflow-x: visible;
+}
+
+/*Input tyep checkbox for the control*/
+#gui input[type='checkbox'] {
+    visibility: visible;
+}
+
+/*Input type checkbox*/
+input[type="checkbox"] {
+    visibility: hidden;
+}
+
+label {
+    cursor: pointer;
+    font: 12px/1em sans-serif;
+    vertical-align: middle;
+}
+
+input[type="checkbox"] + label:before {
+    border: 1px solid #333;
+    content: "\00a0";
+    display: inline-block;
+    font: 12px/1em sans-serif;
+    height: 11px;
+    margin: 0 .1em 0 0;
+    padding: 0;
+    vertical-align: middle;
+    width: 11px;
+}
+
+input[type="checkbox"]:checked + label:before {
+    background: #fff;
+    color: #333;
+    content: "\2713";
+    text-align: center;
+}
+
+input[type="checkbox"]:checked + label:after {
+    font-weight: bold;
+}
+
+input[type="checkbox"]:focus + label::before {
+    outline: rgb(59, 153, 252) auto 5px;
+}
+
+/*Input type radio*/
+input[type="radio"] {
+    visibility: hidden;
+}
+
+label {
+    cursor: pointer;
+    font: 12px/1em sans-serif;
+    vertical-align: middle;
+}
+
+input[type="radio"] + label:before {
+    border: 1px solid #333;
+    border-radius: 0.5em;
+    content: "\00a0";
+    display: inline-block;
+    font: 12px/1em sans-serif;
+    height: 11px;
+    margin: 0 .1em 0 0;
+    padding: 0;
+    vertical-align: middle;
+    width: 11px;
+}
+
+input[type="radio"]:checked + label:before {
+    background: #fff;
+    border-radius: 0.5em;
+    color: #333;
+    content: "\2713";
+    text-align: center;
+}
+
+input[type="radio"]:checked + label:after {
+    font-weight: bold;
+}
+
+input[type="radio"]:focus + label::before {
+    outline: rgb(59, 153, 252) auto 5px;
+}
+
+/*For the links*/
+a{
+    color: black;
+}
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+a:active {
+    text-decoration: none;
+}
