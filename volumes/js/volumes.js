@@ -6,7 +6,7 @@ const elementInfos = [];
 let circleTextureHandlers, squareTextureHandlers;
 const selectedElements = ["Ca Concentration", "Rb Concentration"];
 let selectedVolumeRenderedElement = "Ca Concentration";
-let vrs={};
+let vrs = {};
 let pc;
 let allDimensions;
 let theProfileHandler;
@@ -55,6 +55,8 @@ async function handleProfileChange(profileNames) {
             });
         }
     }
+
+
     //Create the element scalers for all the profiles (each element uses the same scaler throughout all profiles)
     const elementScalers = {};
     elements.forEach(elm => {
@@ -64,7 +66,18 @@ async function handleProfileChange(profileNames) {
     //Create the interpolators
     for (let i = 0; i < profileNames.length; i++) {
         const profileName = profileNames[i];
-        const csvContent = await profileDescriptions[profileName].getCsvContent();
+        let csvContent = await profileDescriptions[profileName].getCsvContent();
+        //For each profile if there is an element which is not detected
+        // add it with 0 for each location and each site
+        const profileElements =  await allProfilesElements[profileName];
+        elements.forEach(elm=>{
+            if(profileElements.indexOf(elm)<0){
+                csvContent.forEach(obj=>{
+                    obj[elm] = 0;
+                    return obj;
+                });
+            }
+        });
         const ip = new Interpolator(csvContent, elements, systemConfigurations.depthNames, systemConfigurations.profiles[profileName].locationNameMapping, 50, 50, elementScalers);
         allProfilesIPs[profileName] = ip;
     }
@@ -128,6 +141,18 @@ async function handleProfileChange(profileNames) {
         profileData.forEach(record => {
             pcData.push({'profile': profileName, ...record});
         });
+        //For each profile if there is an element which is not detected
+        // add it with 0 for each location and each site
+        const profileElements =  await allProfilesElements[profileName];
+        elements.forEach(elm=>{
+            if(profileElements.indexOf(elm)<0){
+                pcData.forEach(obj=>{
+                    if(obj['profile'] === profileName){
+                        obj[elm.split(' ')[0]] = 0;
+                    }
+                });
+            }
+        });
     }
 
     pc = createCoresParcoords(pcData, elementScalers, undefined, colorScale);
@@ -149,16 +174,17 @@ async function handleProfileChange(profileNames) {
         let vr = vrs[profileName];
         const ip = allProfilesIPs[profileName];
         if (!vr) {
-            vr = createVolumeRenderer(
-                document.getElementById('volumeRenderer'+profileName),
+            vr = new createVolumeRenderer(
+                document.getElementById('volumeRenderer' + profileName),
                 ip.getInterpolatedData(selectedVolumeRenderedElement),
                 layoutObject.volumeRenderer.width,
                 layoutObject.volumeRenderer.height,
                 50,
                 50,
                 colorScale,
-                document.getElementById('volumeRenderer'+profileNames[0])
+                document.getElementById('volumeRenderer' + profileNames[0])
             );
+            vrs[profileName] = vr;
         } else {
             vr.handleDataChange(ip.getInterpolatedData(selectedVolumeRenderedElement));
         }

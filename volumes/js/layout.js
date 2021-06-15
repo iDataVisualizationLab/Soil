@@ -48,6 +48,47 @@ function setupLayout() {
         .on("mouseout", () => {
             hideTip();
         });
+
+    //The GUI
+    //Setup the gui
+    gui = new dat.GUI({autoPlace: true});
+    gui.close();//closed by default
+    gui.domElement.id = 'gui';
+
+    gui.add(systemConfigurations, "quantiles")
+        .name('Qualitative view')
+        .onChange(function (value) {
+            handleQualitativeViewChange(value);
+        });
+
+    gui.add(systemConfigurations, "autoRotateSpeed", 1, 50).name("Rotation speed")
+        .onChange(function (value) {
+            systemConfigurations.autoRotateSpeed = value;
+            elementInfos.forEach(elementInfo => {
+                elementInfo.orbitControls.autoRotateSpeed = value;
+            });
+            vr.orbitControls.autoRotateSpeed = value;
+        });
+    gui.add(systemConfigurations, "autoTranslateSpeed", 1, 50).name("Translation speed");
+
+    gui.add(systemConfigurations, "helpEnabled").name("Help enabled");
+
+    function handleQualitativeViewChange(value) {
+        //Change VR color scheme
+        profileCodes.forEach(profileName=>{
+            const vr = vrs[profileName];
+            vr.changeColorType(value ? 'quantiles' : 'continuous');
+        });
+
+        // //Change the legend
+        // selectedElements.forEach((elm, idx) => {
+        //     theProfileHandler.handleLegendChange(elm, idx);
+        // });
+        //Change the parallel coordinate color scale
+        pc.changeColorScale(value ? quantileColorScale : continuousColorScale);
+    }
+
+
     const layoutObject = {
         volumeRenderer: {
             width: vrWidth,
