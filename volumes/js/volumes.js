@@ -88,7 +88,6 @@ async function handleProfileChange(profileNames) {
 
     //</editor-fold>
 
-
     //<editor-fold desc="Menu">
     let soilPackages = new SoilPackages(elements.map(d => d.split(' ')[0]));
     //Clean the menu
@@ -155,7 +154,7 @@ async function handleProfileChange(profileNames) {
         });
     }
 
-    pc = createCoresParcoords(pcData, elementScalers, undefined, colorScale);
+    pc = createCoresParcoords(pcData, elementScalers, allProfilesIPs, colorScale);
     //save all dimensions for future use
     allDimensions = {...pc.dimensions()};
     //Remove the others package by default
@@ -198,36 +197,6 @@ async function handleProfileChange(profileNames) {
     //</editor-fold>
 
     return this;
-}
-
-function handleOuterVisibility(isVisible) {
-    elementInfos[0].theProfile.setOuterVisibility(isVisible);
-    elementInfos[1].theProfile.setOuterVisibility(isVisible);
-}
-
-function handleVertiCutVisibility(isVisible) {
-    elementInfos[0].theProfile.setVertiCutVisibility(isVisible);
-    elementInfos[1].theProfile.setVertiCutVisibility(isVisible);
-}
-
-function handleHorizCutVisibility(isVisible) {
-    elementInfos[0].theProfile.setHorizCutVisibility(isVisible);
-    elementInfos[1].theProfile.setHorizCutVisibility(isVisible);
-}
-
-function handleXCutVisibility(isVisible) {
-    elementInfos[0].the3Cuts.setXCutVisibility(isVisible);
-    elementInfos[1].the3Cuts.setXCutVisibility(isVisible);
-}
-
-function handleYCutVisibility(isVisible) {
-    elementInfos[0].the3Cuts.setYCutVisibility(isVisible);
-    elementInfos[1].the3Cuts.setYCutVisibility(isVisible);
-}
-
-function handleZCutVisibility(isVisible) {
-    elementInfos[0].the3Cuts.setZCutVisibility(isVisible);
-    elementInfos[1].the3Cuts.setZCutVisibility(isVisible);
 }
 
 function removeAxes(name) {

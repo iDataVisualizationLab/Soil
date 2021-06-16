@@ -236,13 +236,14 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         orbitControls.addEventListener('change', () => {
             //Do not rotate the depth plane
             depthFace.rotation.x = orbitControls.getAzimuthalAngle();
-            render();
+            // render();
         });
         orbitControls.target.set(volume.xLength / 2, volume.yLength / 2, volume.zLength / 2);
         //Expose it
         self.orbitControls = orbitControls;
 
         //
+        orbitControls.rotateSpeed = 0.3;
         orbitControls.update();
         //</editor-fold>
 
@@ -263,11 +264,13 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         material.uniforms["u_renderstyle"].value = volconfig.renderstyle == 'mip' ? 0 : 1; // 0: MIP, 1: ISO
         material.uniforms["u_renderthreshold"].value = volconfig.isothreshold; // For ISO renderstyle
         material.uniforms["u_cmdata"].value = cmtextures[volconfig.colormap];
-        render();
+        // render();
     }
 
     function render() {
+        orbitControls.update();
         renderer.render(scene, camera);
+        requestAnimationFrame(render);
     }
 
     function handleDataChange(interpolatedData, valueRange) {
@@ -277,7 +280,7 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
         // //TODO: These two lines are for the smooth rendering
         // volconfig.isothreshold = volume.isothreshold;
         // material.uniforms["u_renderthreshold"].value = volconfig.isothreshold; // For ISO renderstyle
-        render();
+        // render();
     }
 
     function changeRenderStyle(value) {
@@ -305,13 +308,13 @@ function createVolumeRenderer(container, interpolatedData, width, height, horizo
     function setLocationHelperVisiblity(isVisible) {
         volconfig.locationHelperVisibility = isVisible;
         locationHelper.visible = isVisible;
-        render();
+        // render();
     }
 
     function changeColorType(colorMapType) {
         volconfig.colormap = colorMapType;
         updateUniforms();
-        render();
+        // render();
     }
 
     function setMainMeshVisibility(isVisible) {
