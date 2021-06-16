@@ -91,7 +91,7 @@ function createCoresParcoords(data, elementScalers, ips, colorScale) {
             if (brushedDims.length > 0) {
                 const interpolatedData = {};
                 interpolatedData[vrDim] = vrData;
-                brushedDims = brushedDims.filter(d => (d !== 'Site' && d !== 'Depth'));
+                brushedDims = brushedDims.filter(d => (d !== 'Site' && d !== 'Depth' && d !== 'profile'));
                 brushedDims.forEach(dim => {
                     const elm = dim + ' Concentration';
                     if (dim !== vrDim) {
@@ -141,6 +141,8 @@ function createCoresParcoords(data, elementScalers, ips, colorScale) {
 
                 //Handle the data change for the volume render
                 brushChange();
+                //Handle legend change
+                theProfileHandler.handleLegendChange(selectedVolumeRenderedElement);
             }
             hideLoader();
         }, 0);

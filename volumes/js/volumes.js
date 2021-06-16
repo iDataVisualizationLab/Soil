@@ -196,6 +196,36 @@ async function handleProfileChange(profileNames) {
 
     //</editor-fold>
 
+    //Handlers
+    function handleLegendChange(elm) {
+        if (systemConfigurations.quantiles) {
+            legend({
+                svgId: `colorLegend`,
+                color: quantileColorScale,
+                title: `${elm} Concentration: Quantiles`,
+                tickSize: 0,
+                tickFormat: ",.1f",
+                ticks: colorQuantiles.length,
+                width: 400
+            });
+        } else {
+            const elmScaler = elementScalers[elm];
+            const range = colorScale.range();
+            const domain = colorScale.domain().map(d => elmScaler.invert(d));
+            legend({
+                svgId: `colorLegend`,
+                color: d3.scaleLinear(domain, range),
+                title: `${elm} Concentration: Parts Per Million (PPM)`,
+                tickSize: 0,
+                tickFormat: ",.0f",
+                ticks: colorQuantiles.length,
+                width: 400
+            });
+        }
+    }
+    handleLegendChange(selectedVolumeRenderedElement);
+    this.handleLegendChange = handleLegendChange;
+
     return this;
 }
 

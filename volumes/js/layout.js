@@ -115,7 +115,7 @@ function setupLayout() {
     });
 
     //Create a place for view options
-    d3.select('body').append('div') //Div for the view options
+    volumeRendererDivs.filter((d, i) => i === 0).append('div') //Div for the view options
         .attr("id", 'volumeRenderViewOptions')
         .style('position', 'absolute')
         .style('left', margin + 'px')
@@ -155,6 +155,15 @@ function setupLayout() {
         }
     }
 
+    //Add legend
+    volumeRendererDivs.filter((d, i) => i === 0).append('div') //Div for the view options
+        .attr("id", 'colorLegendDiv')
+        .style('position', 'absolute')
+        .style('right', 10 + 'px')
+        .style('top', 0 + 'px').append('svg')//for the legend
+        .attr("id", "colorLegend");
+
+    // .attr("class", "elementText");
 
     function handleQualitativeViewChange(value) {
         //Change VR color scheme
@@ -163,14 +172,12 @@ function setupLayout() {
             vr.changeColorType(value ? 'quantiles' : 'continuous');
         });
 
-        // //Change the legend
-        // selectedElements.forEach((elm, idx) => {
-        //     theProfileHandler.handleLegendChange(elm, idx);
-        // });
+        //Change the legend
+        theProfileHandler.handleLegendChange(selectedVolumeRenderedElement);
+
         //Change the parallel coordinate color scale
         pc.changeColorScale(value ? quantileColorScale : continuousColorScale);
     }
-
 
     const layoutObject = {
         volumeRenderer: {
