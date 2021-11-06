@@ -28,7 +28,6 @@ function createForce() {
 
 function getNodes() {
     nodes_data = getAllElements(data);
-    debugger
     return nodes_data;
 }
 
