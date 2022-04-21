@@ -33,7 +33,7 @@ async function handleProfileChange(profileName) {
     const elements = await profileDescriptions[profileName].getElements();
     const csvContent = await profileDescriptions[profileName].getCsvContent();
     const elementScalers = await profileDescriptions[profileName].getElementScalers();
-    const ip = new Interpolator(csvContent, elements, systemConfigurations.depthNames, systemConfigurations.profiles[profileName].locationNameMapping, 50, 50, elementScalers);
+    const ip = new Interpolator(csvContent, elements, systemConfigurations.depthNames, systemConfigurations.profiles[profileName].locationNameMapping, 50, 50, elementScalers, profileName);
     //If the selected elements is not in one of the element list, then set to Ca
     selectedElements.forEach((elm, i) => {
         if (elements.indexOf(elm) === -1) {

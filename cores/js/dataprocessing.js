@@ -156,7 +156,7 @@ class ProfileDescription {
 }
 
 class Interpolator {
-    constructor(csvContent, elements, depthNames, locationNameMapping, depthSteps, horizontalSteps, elementScalers) {
+    constructor(csvContent, elements, depthNames, locationNameMapping, depthSteps, horizontalSteps, elementScalers, profileName) {
         this.elementScalers = elementScalers;
         this.csvContent = csvContent;
         this.elements = elements;
@@ -167,6 +167,7 @@ class Interpolator {
         this.interpolatedData = {};
         this.interpolatedElementalDepthData = null;
         this.horizontalRectSize = 200 / this.horizontalSteps;
+        this.profileName = profileName;
     }
 
     /**
@@ -207,8 +208,7 @@ class Interpolator {
             t.push(row[element]);
         });
         //The model
-        let model = "spherical";
-        let sigma2 = 0, alpha = 100;
+        let { model, sigma2, alpha } = this.getModelParameters(element, this.profileName);
         let variogram = kriging.train(t, x, z, model, sigma2, alpha);
         //Now interpolate data (elementPlaneStepSize) at a point
         let interpolatedData = {};
@@ -268,8 +268,7 @@ class Interpolator {
                 }
                 //Create the model
                 //The model
-                let model = "spherical";
-                let sigma2 = 0, alpha = 100;
+                let { model, sigma2, alpha } = this.getModelParameters(element, this.profileName);
                 let variogram = kriging.train(t, x, y, model, sigma2, alpha);
                 //Now interpolate data (elementPlaneStepSize) at a point
                 for (let xValIdx = 0; xValIdx < this.horizontalSteps; xValIdx++) {
@@ -289,4 +288,16 @@ class Interpolator {
         return this.interpolatedData[element];
     }
 
+
+    getModelParameters(element, profileName) {
+        let model = "spherical";
+        let sigma2 = 0, alpha = 100;
+        
+        if (element === "Rb Concentration" && profileName === "S") {
+            model = "spherical";
+            sigma2 = 30;
+            alpha = 100;
+        }
+        return { model, sigma2, alpha };
+    }
 }
