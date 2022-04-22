@@ -205,8 +205,9 @@ class Interpolator {
             let locName = row["Location"];
             x.push((this.locationNameMapping[locName][0] + 0.5) * (this.horizontalSteps / 5));
             z.push((this.locationNameMapping[locName][1] + 0.5) * (this.horizontalSteps / 5));
-            t.push(row[element]);
+            t.push(this.elementScalers[element](row[element]));
         });
+        // convert data to 0, 1
         //The model
         let { model, sigma2, alpha } = this.getModelParameters(element, this.profileName);
         let variogram = kriging.train(t, x, z, model, sigma2, alpha);
@@ -242,7 +243,7 @@ class Interpolator {
             this.interpolatedData[element].y = [];
             this.interpolatedData[element].z = [];
             const interpolatedElementalDepthData = this.getInterpolatedElementalDepthData();//will provide x, z, for some y
-
+            
             //Now interpolate each z
             for (let zValIdx = 0; zValIdx < this.horizontalSteps; zValIdx++) {
                 //Get the known data for this zValIdx
@@ -277,7 +278,7 @@ class Interpolator {
                         this.interpolatedData[element].y.push(yValIdx);
                         this.interpolatedData[element].z.push(zValIdx);
                         let predictedVal = kriging.predict(xValIdx, yValIdx, variogram);
-                        predictedVal = this.elementScalers[element](predictedVal)
+                        // predictedVal = this.elementScalers[element](predictedVal)
                         if (predictedVal < 0) predictedVal = 0;
                         if (predictedVal > 1) predictedVal = 1;
                         this.interpolatedData[element].t.push(predictedVal);
@@ -291,13 +292,7 @@ class Interpolator {
 
     getModelParameters(element, profileName) {
         let model = "spherical";
-        let sigma2 = 0, alpha = 100;
-        
-        if (element === "Rb Concentration" && profileName === "S") {
-            model = "spherical";
-            sigma2 = 30;
-            alpha = 100;
-        }
+        let sigma2 = 0, alpha = 1;
         return { model, sigma2, alpha };
     }
 }
