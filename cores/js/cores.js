@@ -42,7 +42,7 @@ async function handleProfileChange(profileName) {
     });
     //The selector
     const elmSelectOptions = elements.map(d => {
-        return {text: d, value: d}
+        return { text: d, value: d }
     }).sort((a, b) => a.text.localeCompare(b.text));
 
     populateSelectors(elmSelectOptions, selectedElements, handleSelectionChange);
@@ -117,7 +117,7 @@ async function handleProfileChange(profileName) {
     profileDescriptions[profileName].getParCoordsData().then(data => {
         pc = createCoresParcoords(data, elementScalers, ip, colorScale);
         //save all dimensions for future use
-        allDimensions = {...pc.dimensions()};
+        allDimensions = { ...pc.dimensions() };
         //Remove the others package by default
         let dims = pc.dimensions();
         soilPackages.others.elements.forEach(elm => {
@@ -186,14 +186,19 @@ async function handleProfileChange(profileName) {
         //Update the selected element
         selectedElements[optionIdx] = elm;
         //Update the texture
-        circleTextureHandlers[optionIdx] = new HorizontalCanvasTextureHandler(ip, elm, colorScale);
+        circleTextureHandlers[optionIdx] = new HorizontalCanvasTextureHandler(ip, elm, colorScale, systemConfigurations.profiles[profileName].locationInfo.stepDistance);
         squareTextureHandlers[optionIdx] = new VerticalCanvasTextureHandler(ip, elm, colorScale, systemConfigurations.profiles[profileName].locationInfo.stepDistance);
+
+
         //handle the cutChange
         handleCutChange(elementInfos, optionIdx, squareTextureHandlers, circleTextureHandlers);
+        //handle the XYZ cutChange
+        handleXYZCutsChange(0);
+
         handleLegendChange(elm, optionIdx);
         //Handle also the xyz change
-        debugger
-        handleXYZCutsChange(0);
+
+
     }
 
     function handleCutChange(elementInfos, idx, squareTextureHandlers, circleTextureHandlers) {
@@ -319,7 +324,7 @@ async function handleProfileChange(profileName) {
 
     function init() {
         //Start of the creation code
-        renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setClearColor(0xffffff);
