@@ -180,6 +180,7 @@ async function handleProfileChange(profileName) {
     }
 
     function handleSelectionChange(event) {
+
         let optionIdx = ["option1", "option2"].indexOf(event.target.name);
         let elm = event.target.value;
         //Update the selected element
@@ -190,6 +191,9 @@ async function handleProfileChange(profileName) {
         //handle the cutChange
         handleCutChange(elementInfos, optionIdx, squareTextureHandlers, circleTextureHandlers);
         handleLegendChange(elm, optionIdx);
+        //Handle also the xyz change
+        debugger
+        handleXYZCutsChange(0);
     }
 
     function handleCutChange(elementInfos, idx, squareTextureHandlers, circleTextureHandlers) {
